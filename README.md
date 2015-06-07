@@ -1,6 +1,6 @@
 # Ember i18n Editor [![Build Status](https://travis-ci.org/jcbvm/ember-i18n-editor.svg?branch=master)](https://travis-ci.org/jcbvm/require-i18next)
 
-This GUI application makes it able to edit tranlation files for [Ember-I18n](https://github.com/jamesarosen/ember-i18n), but it can also be used for other purposes. The application saves the translations in JSON or ES6 format (the latter will save the JSON wrapped in a ES6 module).
+This GUI application makes it able to edit tranlation files for [Ember-I18n](https://github.com/jamesarosen/ember-i18n), but it can also be used for other purposes. The application saves the translations in `JSON` or `ES6` format (the latter will save the JSON wrapped in a ES6 module).
 
 ## NOTE
 
@@ -8,9 +8,10 @@ When you want to use this application for Ember-I18n, version 4.0 of Ember-I18n 
 
 ## Installation
 
-This package comes with a .exe file and a .jar file. The application requires java to be intalled on your system.
+This package comes with a `.exe` file and a `.jar` file. 
+The application requires java 8 to be intalled on your system.
 
-<b>NOTE:</b> Currently the .exe file is not signed yet, so it will show you a warning message about unknown publiser.
+<b>NOTE:</b> Currently the `.exe` file is not signed yet, so it will show you a warning message about unknown publiser.
 
 ## Usage
 
