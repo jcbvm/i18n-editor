@@ -53,6 +53,7 @@
 			<plugin>
 				<groupId>com.akathist.maven.plugins.launch4j</groupId>
 				<artifactId>launch4j-maven-plugin</artifactId>
+				<version>1.7.7</version>
 				<executions>
 					<execution>
 						<id>l4j-clui</id>
@@ -62,8 +63,8 @@
 						</goals>
 						<configuration>
 							<headerType>gui</headerType>
-							<outfile>${project.build.directory}\${project.build.finalName}.exe</outfile>
-							<jar>${project.build.directory}\${project.build.finalName}-jar-with-dependencies.jar</jar>
+							<outfile>${project.build.directory}/${project.artifactId}-${project.version}.exe</outfile>
+							<jar>${project.build.directory}/${project.artifactId}-${project.version}-jar-with-dependencies.jar</jar>
 							<errTitle>i18n Editor</errTitle>
 							<classPath>
 								<mainClass>com.jvms.i18neditor.Main</mainClass>
@@ -71,7 +72,7 @@
 							<jre>
 								<minVersion>1.8.0</minVersion>
 							</jre>
-							<icon>${project.build.outputDirectory}\icon.ico</icon>
+							<icon>${project.build.outputDirectory}/icon.ico</icon>
 						</configuration>
 					</execution>
 				</executions>
