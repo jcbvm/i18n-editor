@@ -42,7 +42,7 @@ public class Editor extends JFrame {
 	private static final long serialVersionUID = 1113029729495390082L;
 	
 	public static final String NAME = "i18n Editor";
-	public static final String VERSION = "0.0.1";
+	public static final String VERSION = "0.1.0-beta.1";
 	private static final int WINDOW_WIDTH = 1024;
 	private static final int WINDOW_HEIGHT = 768;
 	
