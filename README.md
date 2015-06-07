@@ -8,10 +8,10 @@ When you want to use this application for Ember-I18n, version 4.0 of Ember-I18n 
 
 ## Installation
 
-This package comes with a `.exe` file and a `.jar` file. 
+This package comes with a `.exe` file and a `.jar` file.<br>
 The application requires java 8 to be intalled on your system.
 
-<b>NOTE:</b> Currently the `.exe` file is not signed yet, so it will show you a warning message about unknown publiser.
+<i>Currently the `.exe` file is not signed yet, so it will show you a warning message about unknown publiser.</i>
 
 ## Usage
 
