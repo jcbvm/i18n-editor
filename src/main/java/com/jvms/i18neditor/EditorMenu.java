@@ -138,7 +138,15 @@ public class EditorMenu extends JMenuBar {
 	private class AboutMenuItemListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			JOptionPane.showMessageDialog(editor, "<html><body style=\"text-align:center;width:200px;\"><strong>" + Editor.NAME + "</strong><br><br>(c) Copyright 2015<br>Jacob van Mourik<br>MIT Licensed<br><br></body></html>", "About", JOptionPane.PLAIN_MESSAGE);
+			JOptionPane.showMessageDialog(editor, 
+					"<html><body style=\"text-align:center;width:250px;\">"
+						+ "<hr><br>"
+						+ "<span style=\"font-weight:bold;font-size:1.2em;\">" + Editor.NAME + "</span><br>"
+						+ "(version " + Editor.VERSION + ")<br><br>"
+						+ "<hr><br>"
+						+ "(c) Copyright 2015<br>Jacob van Mourik<br>MIT Licensed<br><br>"
+					+ "</body></html>", 
+					"About", JOptionPane.PLAIN_MESSAGE);
 		}
 	}
 	
