@@ -1,6 +1,6 @@
 # Ember i18n Editor [![Build Status](https://travis-ci.org/jcbvm/ember-i18n-editor.svg?branch=master)](https://travis-ci.org/jcbvm/require-i18next)
 
-This GUI application makes it able to edit tranlation files for [Ember-I18n](https://github.com/jamesarosen/ember-i18n), but it can also be used for other purposes. The application saves the translations in `JSON` or `ES6` format (the latter will save the JSON wrapped in an ES6 module).
+This application lets you manage multiple translations files for [Ember-I18n](https://github.com/jamesarosen/ember-i18n), but can also nicely be used without it. The application saves the translations files in `JSON` or `ES6` format (the latter will save the JSON wrapped in an ES6 module).
 
 ## NOTE
 
