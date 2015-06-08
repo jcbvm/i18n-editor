@@ -48,16 +48,16 @@ public class Resource {
 	}
 	
 	public void addTranslation(String key, String value) {
-		addTranslation(key, value, true);
-	}
-	
-	public void addTranslation(String key, String value, boolean overwrite) {
 		String existing = translations.get(key);
-		if (!overwrite && existing != null) return;
 		if (existing != null && existing.equals(value)) return;
+		if (existing == null && value.isEmpty()) return;
 		removeParents(key);
 		removeChildren(key);
-		translations.put(key, value);
+		if (value.isEmpty()) {
+			translations.remove(key);
+		} else {
+			translations.put(key, value);
+		}
 		notifyListeners(key);
 	}
 	

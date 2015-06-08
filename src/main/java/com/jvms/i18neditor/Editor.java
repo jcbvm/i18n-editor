@@ -112,7 +112,6 @@ public class Editor extends JFrame {
 	
 	public void addTranslationKey(String key) {
 		if (resources.isEmpty()) return;
-		resources.forEach(resource -> resource.addTranslation(key, "", false));
 		translationTree.addNodeByKey(key);
 	}
 	

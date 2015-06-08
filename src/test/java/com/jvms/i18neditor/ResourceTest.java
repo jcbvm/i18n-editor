@@ -27,20 +27,17 @@ public class ResourceTest {
 	public void addTranslationTest() {
 		SortedMap<String,String> translations;
 		
-		resource.addTranslation("b", "b", false);
 		resource.addTranslation("a.a", "b");
-		resource.addTranslation("a.b", "b", false);
 		
 		translations = resource.getTranslations();
-		assertEquals(translations.size(), 3);
-		assertEquals(translations.get("b"), "b");
+		assertEquals(translations.size(), 2);
 		assertEquals(translations.get("a.a"), "b");
 		assertEquals(translations.get("a.b"), "ab");
 		
 		resource.addTranslation("a.a.a", "b");
 		
 		translations = resource.getTranslations();
-		assertEquals(translations.size(), 3);
+		assertEquals(translations.size(), 2);
 		assertEquals(translations.get("a.a.a"), "b");
 		assertEquals(translations.get("a.a"), null);
 		assertEquals(translations.get("a.b"), "ab");
@@ -48,7 +45,7 @@ public class ResourceTest {
 		resource.addTranslation("a", "b");
 		
 		translations = resource.getTranslations();
-		assertEquals(translations.size(), 2);
+		assertEquals(translations.size(), 1);
 		assertEquals(translations.get("a"), "b");
 		assertEquals(translations.get("a.a.a"), null);
 		assertEquals(translations.get("a.a"), null);
