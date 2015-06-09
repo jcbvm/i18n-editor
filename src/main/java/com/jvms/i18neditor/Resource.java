@@ -47,7 +47,7 @@ public class Resource {
 		return ImmutableSortedMap.copyOf(translations);
 	}
 	
-	public void addTranslation(String key, String value) {
+	public void storeTranslation(String key, String value) {
 		String existing = translations.get(key);
 		if (existing != null && existing.equals(value)) return;
 		if (existing == null && value.isEmpty()) return;

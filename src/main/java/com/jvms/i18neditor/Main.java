@@ -4,6 +4,8 @@ import java.awt.EventQueue;
 
 import javax.swing.UIManager;
 
+import com.jvms.i18neditor.util.SettingsBundle;
+
 public class Main {
 	
 	public static void main(String[] args) {
@@ -23,7 +25,12 @@ public class Main {
 	
 	private static void setupEditor() {
 		Editor editor = new Editor();
+    	String dir = SettingsBundle.get("resourcesDir");
+    	if (dir == null) {
+    		editor.showImportDialog();
+    	} else {
+    		editor.importResources(dir);
+    	}
     	editor.setVisible(true);
-    	editor.showImportDialog();
 	}
 }

@@ -38,6 +38,7 @@ import com.jvms.i18neditor.swing.JScrollablePanel;
 import com.jvms.i18neditor.util.MessageBundle;
 import com.jvms.i18neditor.util.Resources;
 import com.jvms.i18neditor.util.TranslationKeys;
+import com.jvms.i18neditor.util.SettingsBundle;
 
 public class Editor extends JFrame {
 	private static final long serialVersionUID = 1113029729495390082L;
@@ -82,6 +83,7 @@ public class Editor extends JFrame {
 				}
 			});
 			resourcesDir = Paths.get(dir);
+			SettingsBundle.store("resourcesDir", dir);
 			Map<String,String> keys = Maps.newTreeMap();
 			resources.forEach(resource -> keys.putAll(resource.getTranslations()));
 			List<String> keyList = Lists.newArrayList(keys.keySet());
@@ -146,7 +148,7 @@ public class Editor extends JFrame {
 	}
 	
 	public void showImportDialog() {
-		JFileChooser fc = new JFileChooser();
+		JFileChooser fc = new JFileChooser(resourcesDir.toString());
 		fc.setDialogTitle(MessageBundle.get("dialogs.import.title"));
 		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		int result = fc.showOpenDialog(this);
@@ -358,7 +360,7 @@ public class Editor extends JFrame {
 			ResourceField field = (ResourceField) e.getSource();
 			String key = translationTree.getSelectedNode().getKey();
 			String value = field.getText().trim();
-			field.getResource().addTranslation(key, value);
+			field.getResource().storeTranslation(key, value);
 		}
 	}
 	

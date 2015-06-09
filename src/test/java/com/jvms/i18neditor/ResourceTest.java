@@ -27,14 +27,14 @@ public class ResourceTest {
 	public void addTranslationTest() {
 		SortedMap<String,String> translations;
 		
-		resource.addTranslation("a.a", "b");
+		resource.storeTranslation("a.a", "b");
 		
 		translations = resource.getTranslations();
 		assertEquals(translations.size(), 2);
 		assertEquals(translations.get("a.a"), "b");
 		assertEquals(translations.get("a.b"), "ab");
 		
-		resource.addTranslation("a.a.a", "b");
+		resource.storeTranslation("a.a.a", "b");
 		
 		translations = resource.getTranslations();
 		assertEquals(translations.size(), 2);
@@ -42,7 +42,7 @@ public class ResourceTest {
 		assertEquals(translations.get("a.a"), null);
 		assertEquals(translations.get("a.b"), "ab");
 		
-		resource.addTranslation("a", "b");
+		resource.storeTranslation("a", "b");
 		
 		translations = resource.getTranslations();
 		assertEquals(translations.size(), 1);
@@ -56,7 +56,7 @@ public class ResourceTest {
 	public void removeTranslationTest() {
 		SortedMap<String,String> translations;
 		
-		resource.addTranslation("b", "b");
+		resource.storeTranslation("b", "b");
 		resource.removeTranslation("a");
 		
 		translations = resource.getTranslations();
@@ -70,8 +70,8 @@ public class ResourceTest {
 	public void renameTranslationToUniqueKeyTest() {
 		SortedMap<String,String> translations;
 		
-		resource.addTranslation("b.a", "ba");
-		resource.addTranslation("b.b", "bb");
+		resource.storeTranslation("b.a", "ba");
+		resource.storeTranslation("b.b", "bb");
 		resource.renameTranslation("b", "c");
 		
 		translations = resource.getTranslations();
@@ -88,10 +88,10 @@ public class ResourceTest {
 	public void renameTranslationToExistingKeyTest() {
 		SortedMap<String,String> translations;
 		
-		resource.addTranslation("a.c", "ac");
-		resource.addTranslation("b.a", "ba");
-		resource.addTranslation("b.b.a", "bba");
-		resource.addTranslation("b.b.b", "bbb");
+		resource.storeTranslation("a.c", "ac");
+		resource.storeTranslation("b.a", "ba");
+		resource.storeTranslation("b.b.a", "bba");
+		resource.storeTranslation("b.b.b", "bbb");
 		resource.renameTranslation("b", "a");
 		
 		translations = resource.getTranslations();
