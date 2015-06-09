@@ -3,7 +3,6 @@ package com.jvms.i18neditor;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 
 import javax.swing.JMenu;
@@ -13,11 +12,13 @@ import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
 import com.jvms.i18neditor.Resource.ResourceType;
+import com.jvms.i18neditor.util.MessageBundle;
 
 public class EditorMenu extends JMenuBar {
 	private static final long serialVersionUID = -101788804096708514L;
 	
 	private final Editor editor;
+	
 	private JMenuItem saveMenuItem;
 	private JMenuItem reloadMenuItem;
 	private JMenu translationsMenu;
@@ -48,34 +49,36 @@ public class EditorMenu extends JMenuBar {
 	private void setup() {
 		int menuShotcutKeyMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 		
-     	JMenu fileMenu = new JMenu("File");
-        fileMenu.setMnemonic(KeyEvent.VK_F);
-        
-        JMenuItem openMenuItem = new JMenuItem("Open Resources...", KeyEvent.VK_O);
+     	JMenu fileMenu = new JMenu(MessageBundle.get("menu.file.title"));
+     	fileMenu.setMnemonic(MessageBundle.getMnemonic("menu.file.vk"));
+     	
+        JMenuItem openMenuItem = new JMenuItem(MessageBundle.get("menu.file.open.title"), MessageBundle.getMnemonic("menu.file.open.vk"));
      	openMenuItem.setAccelerator(KeyStroke.getKeyStroke('O', menuShotcutKeyMask));
         openMenuItem.addActionListener(new OpenMenuItemListener());
         
-        addMenu = new JMenu("Add Resource");
-     	addMenu.setMnemonic(KeyEvent.VK_A);
+        addMenu = new JMenu(MessageBundle.get("menu.file.resource.title"));
+     	addMenu.setMnemonic(MessageBundle.getMnemonic("menu.file.resource.vk"));
      	addMenu.setEnabled(false);
-        JMenuItem addJsonResourceMenuItem = new JMenuItem("JSON Format...", KeyEvent.VK_J);
+     	
+        JMenuItem addJsonResourceMenuItem = new JMenuItem(MessageBundle.get("menu.file.resource.json.title"), MessageBundle.getMnemonic("menu.file.resource.json.vk"));
         addJsonResourceMenuItem.addActionListener(new AddResourceMenuItemListener(ResourceType.JSON));
-        JMenuItem addEs6ResourceMenuItem = new JMenuItem("ES6 Format...", KeyEvent.VK_E);
+        JMenuItem addEs6ResourceMenuItem = new JMenuItem(MessageBundle.get("menu.file.resource.es6.title"), MessageBundle.getMnemonic("menu.file.resource.es6.vk"));
         addEs6ResourceMenuItem.addActionListener(new AddResourceMenuItemListener(ResourceType.ES6));
+        
         addMenu.add(addJsonResourceMenuItem);
         addMenu.add(addEs6ResourceMenuItem);
         
-        saveMenuItem = new JMenuItem("Save", KeyEvent.VK_S);
+        saveMenuItem = new JMenuItem(MessageBundle.get("menu.file.save.title"), MessageBundle.getMnemonic("menu.file.save.vk"));
         saveMenuItem.setEnabled(false);
         saveMenuItem.setAccelerator(KeyStroke.getKeyStroke('S', menuShotcutKeyMask));
         saveMenuItem.addActionListener(new SaveMenuItemListener());
         
-        reloadMenuItem = new JMenuItem("Reload", KeyEvent.VK_F5);
+        reloadMenuItem = new JMenuItem(MessageBundle.get("menu.file.reload.title"), MessageBundle.getMnemonic("menu.file.reload.vk"));
         reloadMenuItem.setEnabled(false);
         reloadMenuItem.setAccelerator(KeyStroke.getKeyStroke("F5"));
         reloadMenuItem.addActionListener(new ReloadMenuItemListener());
         
-        JMenuItem exitMenuItem = new JMenuItem("Exit", KeyEvent.VK_X);
+        JMenuItem exitMenuItem = new JMenuItem(MessageBundle.get("menu.file.exit.title"), MessageBundle.getMnemonic("menu.file.exit.vk"));
         exitMenuItem.addActionListener(new ExitMenuItemListener());
         
         fileMenu.add(openMenuItem);
@@ -86,20 +89,20 @@ public class EditorMenu extends JMenuBar {
         fileMenu.addSeparator();
         fileMenu.add(exitMenuItem);
         
-     	translationsMenu = new JMenu("Translations");
+     	translationsMenu = new JMenu(MessageBundle.get("menu.translations.title"));
+     	translationsMenu.setMnemonic(MessageBundle.getMnemonic("menu.translations.vk"));
      	translationsMenu.setEnabled(false);
-     	translationsMenu.setMnemonic(KeyEvent.VK_R);
      	
-        JMenuItem addTranslationMenuItem = new JMenuItem("Add Translation...", KeyEvent.VK_T);
+        JMenuItem addTranslationMenuItem = new JMenuItem(MessageBundle.get("menu.translations.add.title"), MessageBundle.getMnemonic("menu.translations.add.vk"));
         addTranslationMenuItem.setAccelerator(KeyStroke.getKeyStroke('T', menuShotcutKeyMask));
         addTranslationMenuItem.addActionListener(new AddTranslationMenuItemListener());
         
         translationsMenu.add(addTranslationMenuItem);
      	
-     	JMenu helpMenu = new JMenu("Help");
-     	helpMenu.setMnemonic(KeyEvent.VK_H);
+     	JMenu helpMenu = new JMenu(MessageBundle.get("menu.help.title"));
+     	helpMenu.setMnemonic(MessageBundle.getMnemonic("menu.help.vk"));
      	
-     	JMenuItem aboutMenuItem = new JMenuItem("About " + Editor.NAME, KeyEvent.VK_A);
+     	JMenuItem aboutMenuItem = new JMenuItem(MessageBundle.get("menu.help.about.title", Editor.TITLE), MessageBundle.getMnemonic("menu.help.about.vk"));
      	aboutMenuItem.addActionListener(new AboutMenuItemListener());
      	helpMenu.add(aboutMenuItem);
      	
@@ -138,15 +141,17 @@ public class EditorMenu extends JMenuBar {
 	private class AboutMenuItemListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			JOptionPane.showMessageDialog(editor, 
-					"<html><body style=\"text-align:center;width:250px;\">"
-						+ "<hr><br>"
-						+ "<span style=\"font-weight:bold;font-size:1.2em;\">" + Editor.NAME + "</span><br>"
-						+ "(version " + Editor.VERSION + ")<br><br>"
-						+ "<hr><br>"
-						+ "(c) Copyright 2015<br>Jacob van Mourik<br>MIT Licensed<br><br>"
-					+ "</body></html>", 
-					"About", JOptionPane.PLAIN_MESSAGE);
+			String content = 
+					"<html>" +
+						"<body style=\"text-align:center;width:200px;\"><br>" +
+							"<span style=\"font-weight:bold;font-size:1.2em;\">" + Editor.TITLE + "</span><br>" +
+							"v" + Editor.VERSION + "<br><br>" +
+							"(c) Copyright 2015<br>" +
+							"Jacob van Mourik<br>" +
+							"MIT Licensed<br><br>" +
+						"</body>" +
+					"</html>";
+			JOptionPane.showMessageDialog(editor, content, MessageBundle.get("dialogs.about.title", Editor.TITLE), JOptionPane.PLAIN_MESSAGE);
 		}
 	}
 	

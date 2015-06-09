@@ -13,6 +13,7 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
 import com.google.common.collect.Lists;
+import com.jvms.i18neditor.util.MessageBundle;
 import com.jvms.i18neditor.util.TranslationKeys;
 
 public class TranslationTree extends JTree {

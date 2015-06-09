@@ -72,7 +72,7 @@
 							<jre>
 								<minVersion>1.8.0</minVersion>
 							</jre>
-							<icon>${project.build.outputDirectory}/icon.ico</icon>
+							<icon>${project.build.outputDirectory}/images/icon.ico</icon>
 						</configuration>
 					</execution>
 				</executions>

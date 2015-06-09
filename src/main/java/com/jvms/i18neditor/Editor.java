@@ -35,13 +35,14 @@ import com.jvms.i18neditor.Resource.ResourceType;
 import com.jvms.i18neditor.event.ResourceEvent;
 import com.jvms.i18neditor.event.ResourceListener;
 import com.jvms.i18neditor.swing.JScrollablePanel;
+import com.jvms.i18neditor.util.MessageBundle;
 import com.jvms.i18neditor.util.Resources;
 import com.jvms.i18neditor.util.TranslationKeys;
 
 public class Editor extends JFrame {
 	private static final long serialVersionUID = 1113029729495390082L;
 	
-	public static final String NAME = "i18n Editor";
+	public static final String TITLE = "i18n Editor";
 	public static final String VERSION = "0.1.0-beta.1";
 	private static final int WINDOW_WIDTH = 1024;
 	private static final int WINDOW_HEIGHT = 768;
@@ -77,18 +78,18 @@ public class Editor extends JFrame {
 					setupResource(resource);
 				} catch (Exception e) {
 					e.printStackTrace();
-					showError(String.format("An error occured while opening the resource '%s'.", path.toString()));
+					showError(MessageBundle.get("resources.open.error.single", path.toString()));
 				}
 			});
 			resourcesDir = Paths.get(dir);
 			Map<String,String> keys = Maps.newTreeMap();
 			resources.forEach(resource -> keys.putAll(resource.getTranslations()));
 			List<String> keyList = Lists.newArrayList(keys.keySet());
-			translationTree.setModel(new TranslationTreeModel(keyList));
+			translationTree.setModel(new TranslationTreeModel(MessageBundle.get("translations.model.name"), keyList));
 			update();
 		} catch (IOException e) {
 			e.printStackTrace();
-			showError("An error occured while opening resources.");
+			showError(MessageBundle.get("resource.open.error.multiple"));
 		}
 	}
 	
@@ -100,7 +101,7 @@ public class Editor extends JFrame {
 			} catch (Exception e) {
 				error = true;
 				e.printStackTrace();
-				showError(String.format("An error occured while writing the resource '%s'.", resource.getPath().toString()));
+				showError(MessageBundle.get("resources.write.error.single", resource.getPath().toString()));
 			}
 		}
 		setDirty(error);
@@ -141,12 +142,12 @@ public class Editor extends JFrame {
 	}
 	
 	public void showError(String message) {
-		JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(this, message, MessageBundle.get("dialogs.error.title"), JOptionPane.ERROR_MESSAGE);
 	}
 	
 	public void showImportDialog() {
 		JFileChooser fc = new JFileChooser();
-		fc.setDialogTitle("Select Resources Directory");
+		fc.setDialogTitle(MessageBundle.get("dialogs.import.title"));
 		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		int result = fc.showOpenDialog(this);
 		if (result == JFileChooser.APPROVE_OPTION) {
@@ -157,12 +158,15 @@ public class Editor extends JFrame {
 	public void showAddResourceDialog(ResourceType type) {
 		String locale = "";
 		while (locale != null && locale.isEmpty()) {
-			locale = (String) JOptionPane.showInputDialog(this, "Enter locale (i.e. en_US):", "Add " + type.toString() + " Resource", JOptionPane.QUESTION_MESSAGE);
+			locale = (String) JOptionPane.showInputDialog(this, 
+					MessageBundle.get("dialogs.resource.add.text"), 
+					MessageBundle.get("dialogs.resource.add.title", type.toString()), 
+					JOptionPane.QUESTION_MESSAGE);
 			if (locale != null) {
 				locale = locale.trim();
 				Path path = Paths.get(resourcesDir.toString() + "/" + locale);
 				if (locale.isEmpty() || Files.isDirectory(path)) {
-					showError("The locale you entered is invalid or does already exist.");
+					showError(MessageBundle.get("dialogs.resource.add.error.invalid"));
 				} else {
 					try {
 						Resource resource = Resources.create(type, path);
@@ -170,7 +174,7 @@ public class Editor extends JFrame {
 						update();
 					} catch (IOException e) {
 						e.printStackTrace();
-						showError("An error occured while creating the new language.");
+						showError(MessageBundle.get("dialogs.resource.add.error.create"));
 					}
 				}
 			}
@@ -181,11 +185,14 @@ public class Editor extends JFrame {
 		String name = TranslationKeys.lastPart(key);
 		String newName = "";
 		while (newName != null && newName.isEmpty()) {
-			newName = (String) JOptionPane.showInputDialog(this, "Enter new name:", "Rename Translation", JOptionPane.QUESTION_MESSAGE, null, null, name);
+			newName = (String) JOptionPane.showInputDialog(this, 
+					MessageBundle.get("dialogs.translation.rename.text"), 
+					MessageBundle.get("dialogs.translation.rename.title"), 
+					JOptionPane.QUESTION_MESSAGE, null, null, name);
 			if (newName != null) {
 				newName = newName.trim();
 				if (newName.isEmpty() || newName.contains(".")) {
-					showError("The name you entered is invalid.");
+					showError(MessageBundle.get("dialogs.translation.rename.error"));
 				} else {
 					renameTranslationKey(key, newName);
 				}
@@ -201,11 +208,14 @@ public class Editor extends JFrame {
 			key = node.getKey();
 		}
 		while (newKey != null && newKey.isEmpty()) {
-			newKey = (String) JOptionPane.showInputDialog(this, "Enter translation key:", "Add Translation", JOptionPane.QUESTION_MESSAGE, null, null, key);
+			newKey = (String) JOptionPane.showInputDialog(this, 
+					MessageBundle.get("dialogs.translation.add.text"), 
+					MessageBundle.get("dialogs.translation.add.title"), 
+					JOptionPane.QUESTION_MESSAGE, null, null, key);
 			if (newKey != null) {
 				newKey = newKey.trim();
 				if (newKey.isEmpty()) {
-					showError("The translation key you entered is invalid.");
+					showError(MessageBundle.get("dialogs.translation.add.error"));
 				} else {
 					addTranslationKey(newKey);
 				}
@@ -215,7 +225,10 @@ public class Editor extends JFrame {
 	
 	public boolean closeCurrentSession() {
 		if (isDirty()) {
-			int result = JOptionPane.showConfirmDialog(this, "You have unsaved changes, do you want to save them?", "Save Translations", JOptionPane.YES_NO_CANCEL_OPTION);
+			int result = JOptionPane.showConfirmDialog(this, 
+					MessageBundle.get("dialogs.save.text"), 
+					MessageBundle.get("dialogs.save.title"), 
+					JOptionPane.YES_NO_CANCEL_OPTION);
 			if (result == JOptionPane.YES_OPTION) {
 				saveResources();
 			}
@@ -262,17 +275,17 @@ public class Editor extends JFrame {
 		contentPane.add(editorMenu, BorderLayout.NORTH);
 		contentPane.add(contentPanel);
 		
-		setTitle(NAME);
+		setTitle(TITLE);
 		setIconImages(Lists.newArrayList(
-			new ImageIcon(getClass().getClassLoader().getResource("icon-512.png")).getImage(),
-			new ImageIcon(getClass().getClassLoader().getResource("icon-256.png")).getImage(),
-			new ImageIcon(getClass().getClassLoader().getResource("icon-128.png")).getImage(),
-			new ImageIcon(getClass().getClassLoader().getResource("icon-64.png")).getImage(),
-			new ImageIcon(getClass().getClassLoader().getResource("icon-48.png")).getImage(),
-			new ImageIcon(getClass().getClassLoader().getResource("icon-32.png")).getImage(),
-			new ImageIcon(getClass().getClassLoader().getResource("icon-24.png")).getImage(),
-			new ImageIcon(getClass().getClassLoader().getResource("icon-20.png")).getImage(),
-			new ImageIcon(getClass().getClassLoader().getResource("icon-16.png")).getImage()
+			new ImageIcon(getClass().getClassLoader().getResource("images/icon-512.png")).getImage(),
+			new ImageIcon(getClass().getClassLoader().getResource("images/icon-256.png")).getImage(),
+			new ImageIcon(getClass().getClassLoader().getResource("images/icon-128.png")).getImage(),
+			new ImageIcon(getClass().getClassLoader().getResource("images/icon-64.png")).getImage(),
+			new ImageIcon(getClass().getClassLoader().getResource("images/icon-48.png")).getImage(),
+			new ImageIcon(getClass().getClassLoader().getResource("images/icon-32.png")).getImage(),
+			new ImageIcon(getClass().getClassLoader().getResource("images/icon-24.png")).getImage(),
+			new ImageIcon(getClass().getClassLoader().getResource("images/icon-20.png")).getImage(),
+			new ImageIcon(getClass().getClassLoader().getResource("images/icon-16.png")).getImage()
 		));
 		setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);

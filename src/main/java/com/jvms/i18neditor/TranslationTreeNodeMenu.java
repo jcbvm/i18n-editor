@@ -7,6 +7,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
 
+import com.jvms.i18neditor.util.MessageBundle;
+
 public class TranslationTreeNodeMenu extends JPopupMenu {
 	private static final long serialVersionUID = -4407236120087907574L;
 	
@@ -21,19 +23,19 @@ public class TranslationTreeNodeMenu extends JPopupMenu {
 	}
 	
 	private void setup() {
-		JMenuItem addMenuItem = new JMenuItem("Add Translation...");
+		JMenuItem addMenuItem = new JMenuItem(MessageBundle.get("menu.translations.add.title"));
 		addMenuItem.addActionListener(new AddMenuItemListener());
 		add(addMenuItem);
 		
 		if (!node.isRoot()) {
 			addSeparator();
 			
-			JMenuItem renameMenuItem = new JMenuItem("Rename...");
+			JMenuItem renameMenuItem = new JMenuItem(MessageBundle.get("menu.translations.rename.title"));
 			renameMenuItem.setAccelerator(KeyStroke.getKeyStroke("F2"));
 			renameMenuItem.addActionListener(new RenameMenuItemListener());
 			add(renameMenuItem);
 			
-			JMenuItem deleteMenuItem = new JMenuItem("Delete");
+			JMenuItem deleteMenuItem = new JMenuItem(MessageBundle.get("menu.translations.delete.title"));
 			deleteMenuItem.setAccelerator(KeyStroke.getKeyStroke("DELETE"));
 			deleteMenuItem.addActionListener(new DeleteMenuItemListener());
 			add(deleteMenuItem);

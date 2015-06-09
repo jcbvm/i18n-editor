@@ -9,13 +9,13 @@ import com.jvms.i18neditor.util.TranslationKeys;
 
 public class TranslationTreeModel extends DefaultTreeModel {
 	private static final long serialVersionUID = 3261808274177599488L;
-
+	
 	public TranslationTreeModel() {
 		super(null);
 	}
 	
-	public TranslationTreeModel(List<String> keys) {
-		super(new TranslationTreeNode("Translations", keys));
+	public TranslationTreeModel(String rootName, List<String> keys) {
+		super(new TranslationTreeNode(rootName, keys));
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -1,6 +1,7 @@
 package com.jvms.i18neditor;
 
 import java.awt.Color;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
@@ -50,7 +51,7 @@ public class ResourceField extends JTextArea implements Comparable<ResourceField
 		// Add undo support
 		getDocument().addUndoableEditListener(new EditListener());
 		getActionMap().put("undo", new UndoAction());
-		getInputMap().put(KeyStroke.getKeyStroke("ctrl Z"), "undo");
+		getInputMap().put(KeyStroke.getKeyStroke('Z', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()), "undo");
 	}
 	
 	@SuppressWarnings("serial")
