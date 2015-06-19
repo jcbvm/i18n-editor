@@ -1,6 +1,7 @@
 package com.jvms.i18neditor;
 
 import java.awt.EventQueue;
+import java.util.List;
 
 import javax.swing.UIManager;
 
@@ -26,11 +27,12 @@ public class Main {
 	private static void setupEditor() {
 		Editor editor = new Editor();
 		editor.setVisible(true);
-    	String dir = SettingsBundle.get("resourcesDir");
-    	if (dir == null) {
+		List<String> dirs = SettingsBundle.getAsList("history");
+    	if (dirs.isEmpty()) {
     		editor.showImportDialog();
     	} else {
-    		editor.importResources(dir);
+    		String lastDir = dirs.get(dirs.size()-1);
+    		editor.importResources(lastDir);
     	}
 	}
 }

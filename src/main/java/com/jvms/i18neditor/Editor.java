@@ -72,6 +72,7 @@ public class Editor extends JFrame {
 		if (resourcesDir != null) {
 			reset();
 		}
+		resourcesDir = Paths.get(dir);
 		try {
 			Files.walk(Paths.get(dir),1).filter(path -> Resources.isResource(path)).forEach(path -> {
 				try {
@@ -82,12 +83,21 @@ public class Editor extends JFrame {
 					showError(MessageBundle.get("resources.open.error.single", path.toString()));
 				}
 			});
-			resourcesDir = Paths.get(dir);
-			SettingsBundle.store("resourcesDir", dir);
+			
+			List<String> recentDirs = SettingsBundle.getAsList("history");
+			recentDirs.remove(dir);
+			recentDirs.add(dir);
+			if (recentDirs.size() > 5) {
+				recentDirs.remove(0);
+			}
+			SettingsBundle.store("history", recentDirs);
+			editorMenu.setRecentItems(Lists.reverse(recentDirs));
+			
 			Map<String,String> keys = Maps.newTreeMap();
 			resources.forEach(resource -> keys.putAll(resource.getTranslations()));
 			List<String> keyList = Lists.newArrayList(keys.keySet());
 			translationTree.setModel(new TranslationTreeModel(MessageBundle.get("translations.model.name"), keyList));
+			
 			update();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -251,6 +261,35 @@ public class Editor extends JFrame {
 		update();
 	}
 	
+	public void update() {
+		setTitle(getTitle().split("-")[0].trim() + (resourcesDir == null ? "" : " - " + resourcesDir.toString()));
+		
+		TranslationTreeNode selectedNode = translationTree.getSelectedNode();
+		
+		resourcesPanel.removeAll();
+		resourceFields.sort((f1, f2) -> f1.compareTo(f2));
+		resourceFields.forEach(f -> {
+			f.setEditable(selectedNode != null && selectedNode.isEditable());
+			resourcesPanel.add(new JLabel(f.getResource().getLocale().getDisplayName()));
+			resourcesPanel.add(Box.createVerticalStrut(5));
+			resourcesPanel.add(f);
+			resourcesPanel.add(Box.createVerticalStrut(5));
+		});
+		if (!resourceFields.isEmpty()) {
+			resourcesPanel.remove(resourcesPanel.getComponentCount()-1);
+		}
+		
+		contentPanel.setVisible(resourcesDir != null);
+		editorMenu.setReloadEnabled(resourcesDir != null);
+		editorMenu.setEditEnabled(resourcesDir != null);
+		editorMenu.setAddTranslationEnabled(!resources.isEmpty());
+		translationTree.setEditable(!resources.isEmpty());
+		translationField.setEditable(!resources.isEmpty());
+		
+		validate();
+		repaint();
+	}
+	
 	private void setupResource(Resource resource) {
 		resource.addListener(new ResourceChangeListener());
 		ResourceField field = new ResourceField(resource);
@@ -261,6 +300,7 @@ public class Editor extends JFrame {
 	
 	private void setup() {
 		editorMenu = new EditorMenu(this);
+		editorMenu.setRecentItems(SettingsBundle.getAsList("recentResourcesDirs"));
 		
 		translationsPanel = new JPanel(new BorderLayout());
         translationTree = new TranslationTree(this);
@@ -298,35 +338,6 @@ public class Editor extends JFrame {
 		pack();
 		setLocationRelativeTo(null);
 		addWindowListener(new EditorWindowListener());
-	}
-	
-	private void update() {
-		setTitle(getTitle().split("-")[0].trim() + (resourcesDir == null ? "" : " - " + resourcesDir.toString()));
-		
-		TranslationTreeNode selectedNode = translationTree.getSelectedNode();
-		
-		resourcesPanel.removeAll();
-		resourceFields.sort((f1, f2) -> f1.compareTo(f2));
-		resourceFields.forEach(f -> {
-			f.setEditable(selectedNode != null && selectedNode.isEditable());
-			resourcesPanel.add(new JLabel(f.getResource().getLocale().getDisplayName()));
-			resourcesPanel.add(Box.createVerticalStrut(5));
-			resourcesPanel.add(f);
-			resourcesPanel.add(Box.createVerticalStrut(5));
-		});
-		if (!resourceFields.isEmpty()) {
-			resourcesPanel.remove(resourcesPanel.getComponentCount()-1);
-		}
-		
-		contentPanel.setVisible(resourcesDir != null);
-		editorMenu.setReloadEnabled(resourcesDir != null);
-		editorMenu.setEditEnabled(resourcesDir != null);
-		editorMenu.setAddTranslationEnabled(!resources.isEmpty());
-		translationTree.setEditable(!resources.isEmpty());
-		translationField.setEditable(!resources.isEmpty());
-		
-		validate();
-		repaint();
 	}
 	
 	private class TranslationTreeNodeSelectionListener implements TreeSelectionListener {

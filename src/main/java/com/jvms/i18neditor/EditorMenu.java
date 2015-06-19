@@ -4,6 +4,7 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
+import java.util.List;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -23,6 +24,7 @@ public class EditorMenu extends JMenuBar {
 	private JMenuItem reloadMenuItem;
 	private JMenuItem addTranslationMenuItem;
 	private JMenu editMenu;
+	private JMenu openRecentMenuItem;
 	
 	public EditorMenu(Editor editor) {
 		super();
@@ -46,6 +48,20 @@ public class EditorMenu extends JMenuBar {
 		addTranslationMenuItem.setEnabled(enabled);
 	}
 	
+	public void setRecentItems(List<String> items) {
+		openRecentMenuItem.removeAll();
+     	if (items.isEmpty()) {
+     		openRecentMenuItem.setEnabled(false);
+     	} else {
+     		openRecentMenuItem.setEnabled(true);
+     		for (String item : items) {
+     			JMenuItem menuItem = new JMenuItem(item);
+     			menuItem.addActionListener(new OpenRecentMenuItemListener());
+     			openRecentMenuItem.add(menuItem);
+     		}
+     	}
+	}
+	
 	private void setup() {
 		int menuShotcutKeyMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 		
@@ -55,6 +71,9 @@ public class EditorMenu extends JMenuBar {
         JMenuItem openMenuItem = new JMenuItem(MessageBundle.get("menu.file.open.title"), MessageBundle.getMnemonic("menu.file.open.vk"));
      	openMenuItem.setAccelerator(KeyStroke.getKeyStroke('O', menuShotcutKeyMask));
         openMenuItem.addActionListener(new OpenMenuItemListener());
+        
+        openRecentMenuItem = new JMenu(MessageBundle.get("menu.file.recent.title"));
+        openRecentMenuItem.setMnemonic(MessageBundle.getMnemonic("menu.file.recent.vk"));
         
         saveMenuItem = new JMenuItem(MessageBundle.get("menu.file.save.title"), MessageBundle.getMnemonic("menu.file.save.vk"));
         saveMenuItem.setEnabled(false);
@@ -70,6 +89,7 @@ public class EditorMenu extends JMenuBar {
         exitMenuItem.addActionListener(new ExitMenuItemListener());
         
         fileMenu.add(openMenuItem);
+        fileMenu.add(openRecentMenuItem);
         fileMenu.addSeparator();
         fileMenu.add(saveMenuItem);
         fileMenu.add(reloadMenuItem);
@@ -166,6 +186,14 @@ public class EditorMenu extends JMenuBar {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			editor.showImportDialog();
+		}
+	}
+	
+	private class OpenRecentMenuItemListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			JMenuItem target = (JMenuItem) e.getSource();
+			editor.importResources(target.getText());
 		}
 	}
 	
