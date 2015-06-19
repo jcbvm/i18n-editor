@@ -25,12 +25,12 @@ public class Main {
 	
 	private static void setupEditor() {
 		Editor editor = new Editor();
+		editor.setVisible(true);
     	String dir = SettingsBundle.get("resourcesDir");
     	if (dir == null) {
     		editor.showImportDialog();
     	} else {
     		editor.importResources(dir);
     	}
-    	editor.setVisible(true);
 	}
 }

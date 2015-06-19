@@ -23,19 +23,19 @@ public class TranslationTreeNodeMenu extends JPopupMenu {
 	}
 	
 	private void setup() {
-		JMenuItem addMenuItem = new JMenuItem(MessageBundle.get("menu.translations.add.title"));
+		JMenuItem addMenuItem = new JMenuItem(MessageBundle.get("menu.translation.add.title"));
 		addMenuItem.addActionListener(new AddMenuItemListener());
 		add(addMenuItem);
 		
 		if (!node.isRoot()) {
 			addSeparator();
 			
-			JMenuItem renameMenuItem = new JMenuItem(MessageBundle.get("menu.translations.rename.title"));
+			JMenuItem renameMenuItem = new JMenuItem(MessageBundle.get("menu.translation.rename.title"));
 			renameMenuItem.setAccelerator(KeyStroke.getKeyStroke("F2"));
 			renameMenuItem.addActionListener(new RenameMenuItemListener());
 			add(renameMenuItem);
 			
-			JMenuItem deleteMenuItem = new JMenuItem(MessageBundle.get("menu.translations.delete.title"));
+			JMenuItem deleteMenuItem = new JMenuItem(MessageBundle.get("menu.translation.delete.title"));
 			deleteMenuItem.setAccelerator(KeyStroke.getKeyStroke("DELETE"));
 			deleteMenuItem.addActionListener(new DeleteMenuItemListener());
 			add(deleteMenuItem);
@@ -52,7 +52,7 @@ public class TranslationTreeNodeMenu extends JPopupMenu {
 	private class RenameMenuItemListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			editor.showRenameDialog(node.getKey());
+			editor.showRenameTranslationDialog(node.getKey());
 		}
 	}
 	

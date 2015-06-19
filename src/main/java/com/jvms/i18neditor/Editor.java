@@ -44,7 +44,7 @@ public class Editor extends JFrame {
 	private static final long serialVersionUID = 1113029729495390082L;
 	
 	public static final String TITLE = "i18n Editor";
-	public static final String VERSION = "0.1.0-beta.1";
+	public static final String VERSION = "0.1.0-beta.2";
 	private static final int WINDOW_WIDTH = 1024;
 	private static final int WINDOW_HEIGHT = 768;
 	
@@ -148,7 +148,11 @@ public class Editor extends JFrame {
 	}
 	
 	public void showImportDialog() {
-		JFileChooser fc = new JFileChooser(resourcesDir.toString());
+		String path = null;
+		if (resourcesDir != null) {
+			path = resourcesDir.toString();
+		}
+		JFileChooser fc = new JFileChooser(path);
 		fc.setDialogTitle(MessageBundle.get("dialogs.import.title"));
 		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		int result = fc.showOpenDialog(this);
@@ -157,18 +161,18 @@ public class Editor extends JFrame {
 		}
 	}
 	
-	public void showAddResourceDialog(ResourceType type) {
+	public void showAddLocaleDialog(ResourceType type) {
 		String locale = "";
 		while (locale != null && locale.isEmpty()) {
 			locale = (String) JOptionPane.showInputDialog(this, 
-					MessageBundle.get("dialogs.resource.add.text"), 
-					MessageBundle.get("dialogs.resource.add.title", type.toString()), 
+					MessageBundle.get("dialogs.locale.add.text"), 
+					MessageBundle.get("dialogs.locale.add.title", type.toString()), 
 					JOptionPane.QUESTION_MESSAGE);
 			if (locale != null) {
 				locale = locale.trim();
 				Path path = Paths.get(resourcesDir.toString() + "/" + locale);
 				if (locale.isEmpty() || Files.isDirectory(path)) {
-					showError(MessageBundle.get("dialogs.resource.add.error.invalid"));
+					showError(MessageBundle.get("dialogs.locale.add.error.invalid"));
 				} else {
 					try {
 						Resource resource = Resources.create(type, path);
@@ -176,14 +180,14 @@ public class Editor extends JFrame {
 						update();
 					} catch (IOException e) {
 						e.printStackTrace();
-						showError(MessageBundle.get("dialogs.resource.add.error.create"));
+						showError(MessageBundle.get("dialogs.locale.add.error.create"));
 					}
 				}
 			}
 		}
 	}
 	
-	public void showRenameDialog(String key) {
+	public void showRenameTranslationDialog(String key) {
 		String name = TranslationKeys.lastPart(key);
 		String newName = "";
 		while (newName != null && newName.isEmpty()) {
@@ -316,8 +320,8 @@ public class Editor extends JFrame {
 		
 		contentPanel.setVisible(resourcesDir != null);
 		editorMenu.setReloadEnabled(resourcesDir != null);
-		editorMenu.setAddingEnabled(resourcesDir != null);
-		editorMenu.setTranslationsMenuEnabled(!resources.isEmpty());
+		editorMenu.setEditEnabled(resourcesDir != null);
+		editorMenu.setAddTranslationEnabled(!resources.isEmpty());
 		translationTree.setEditable(!resources.isEmpty());
 		translationField.setEditable(!resources.isEmpty());
 		

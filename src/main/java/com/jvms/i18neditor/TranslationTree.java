@@ -136,7 +136,7 @@ public class TranslationTree extends JTree {
 				if (e.getKeyCode() == KeyEvent.VK_DELETE) {
 					editor.removeTranslationKey(key);
 				} else if (e.getKeyCode() == KeyEvent.VK_F2) {
-					editor.showRenameDialog(key);
+					editor.showRenameTranslationDialog(key);
 				}
 			}
 		}

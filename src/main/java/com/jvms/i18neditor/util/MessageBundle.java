@@ -8,7 +8,7 @@ public final class MessageBundle {
 	private final static ResourceBundle RESOURCES;
 	
 	static {
-		RESOURCES = ResourceBundle.getBundle("bundles/messages", Locale.getDefault());
+		RESOURCES = ResourceBundle.getBundle("bundles/messages", new Locale("nl"));//Locale.getDefault());
 	}
 	
 	public static String get(String key, Object... args) {

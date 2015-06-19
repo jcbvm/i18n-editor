@@ -21,8 +21,8 @@ public class EditorMenu extends JMenuBar {
 	
 	private JMenuItem saveMenuItem;
 	private JMenuItem reloadMenuItem;
-	private JMenu translationsMenu;
-	private JMenu addMenu;
+	private JMenuItem addTranslationMenuItem;
+	private JMenu editMenu;
 	
 	public EditorMenu(Editor editor) {
 		super();
@@ -38,12 +38,12 @@ public class EditorMenu extends JMenuBar {
 		reloadMenuItem.setEnabled(enabled);
 	}
 	
-	public void setAddingEnabled(boolean enabled) {
-		addMenu.setEnabled(enabled);
+	public void setEditEnabled(boolean enabled) {
+		editMenu.setEnabled(enabled);
 	}
 	
-	public void setTranslationsMenuEnabled(boolean enabled) {
-		translationsMenu.setEnabled(enabled);
+	public void setAddTranslationEnabled(boolean enabled) {
+		addTranslationMenuItem.setEnabled(enabled);
 	}
 	
 	private void setup() {
@@ -55,18 +55,6 @@ public class EditorMenu extends JMenuBar {
         JMenuItem openMenuItem = new JMenuItem(MessageBundle.get("menu.file.open.title"), MessageBundle.getMnemonic("menu.file.open.vk"));
      	openMenuItem.setAccelerator(KeyStroke.getKeyStroke('O', menuShotcutKeyMask));
         openMenuItem.addActionListener(new OpenMenuItemListener());
-        
-        addMenu = new JMenu(MessageBundle.get("menu.file.resource.title"));
-     	addMenu.setMnemonic(MessageBundle.getMnemonic("menu.file.resource.vk"));
-     	addMenu.setEnabled(false);
-     	
-        JMenuItem addJsonResourceMenuItem = new JMenuItem(MessageBundle.get("menu.file.resource.json.title"), MessageBundle.getMnemonic("menu.file.resource.json.vk"));
-        addJsonResourceMenuItem.addActionListener(new AddResourceMenuItemListener(ResourceType.JSON));
-        JMenuItem addEs6ResourceMenuItem = new JMenuItem(MessageBundle.get("menu.file.resource.es6.title"), MessageBundle.getMnemonic("menu.file.resource.es6.vk"));
-        addEs6ResourceMenuItem.addActionListener(new AddResourceMenuItemListener(ResourceType.ES6));
-        
-        addMenu.add(addJsonResourceMenuItem);
-        addMenu.add(addEs6ResourceMenuItem);
         
         saveMenuItem = new JMenuItem(MessageBundle.get("menu.file.save.title"), MessageBundle.getMnemonic("menu.file.save.vk"));
         saveMenuItem.setEnabled(false);
@@ -82,22 +70,34 @@ public class EditorMenu extends JMenuBar {
         exitMenuItem.addActionListener(new ExitMenuItemListener());
         
         fileMenu.add(openMenuItem);
-        fileMenu.add(addMenu);
         fileMenu.addSeparator();
         fileMenu.add(saveMenuItem);
         fileMenu.add(reloadMenuItem);
         fileMenu.addSeparator();
         fileMenu.add(exitMenuItem);
         
-     	translationsMenu = new JMenu(MessageBundle.get("menu.translations.title"));
-     	translationsMenu.setMnemonic(MessageBundle.getMnemonic("menu.translations.vk"));
-     	translationsMenu.setEnabled(false);
+     	editMenu = new JMenu(MessageBundle.get("menu.edit.title"));
+     	editMenu.setMnemonic(MessageBundle.getMnemonic("menu.edit.vk"));
+     	editMenu.setEnabled(false);
      	
-        JMenuItem addTranslationMenuItem = new JMenuItem(MessageBundle.get("menu.translations.add.title"), MessageBundle.getMnemonic("menu.translations.add.vk"));
+     	JMenu addLocaleMenuItem = new JMenu(MessageBundle.get("menu.edit.add.locale.title"));
+      	addLocaleMenuItem.setMnemonic(MessageBundle.getMnemonic("menu.edit.add.locale.vk"));
+      	
+      	JMenuItem addJsonResourceMenuItem = new JMenuItem(MessageBundle.get("menu.edit.add.locale.json.title"), MessageBundle.getMnemonic("menu.edit.add.locale.json.vk"));
+        addJsonResourceMenuItem.addActionListener(new AddResourceMenuItemListener(ResourceType.JSON));
+        JMenuItem addEs6ResourceMenuItem = new JMenuItem(MessageBundle.get("menu.edit.add.locale.es6.title"), MessageBundle.getMnemonic("menu.edit.add.locale.es6.vk"));
+        addEs6ResourceMenuItem.addActionListener(new AddResourceMenuItemListener(ResourceType.ES6));
+         
+      	addLocaleMenuItem.add(addJsonResourceMenuItem);
+        addLocaleMenuItem.add(addEs6ResourceMenuItem);
+     	
+        addTranslationMenuItem = new JMenuItem(MessageBundle.get("menu.edit.add.translation.title"), MessageBundle.getMnemonic("menu.edit.add.translation.vk"));
         addTranslationMenuItem.setAccelerator(KeyStroke.getKeyStroke('T', menuShotcutKeyMask));
         addTranslationMenuItem.addActionListener(new AddTranslationMenuItemListener());
+        addTranslationMenuItem.setEnabled(false);
         
-        translationsMenu.add(addTranslationMenuItem);
+        editMenu.add(addLocaleMenuItem);
+        editMenu.add(addTranslationMenuItem);
      	
      	JMenu helpMenu = new JMenu(MessageBundle.get("menu.help.title"));
      	helpMenu.setMnemonic(MessageBundle.getMnemonic("menu.help.vk"));
@@ -107,7 +107,7 @@ public class EditorMenu extends JMenuBar {
      	helpMenu.add(aboutMenuItem);
      	
      	add(fileMenu);
-     	add(translationsMenu);
+     	add(editMenu);
      	add(helpMenu);
 	}
 	
@@ -127,7 +127,7 @@ public class EditorMenu extends JMenuBar {
 		
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			editor.showAddResourceDialog(type);
+			editor.showAddLocaleDialog(type);
 		}
 	}
 	

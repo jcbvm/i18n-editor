@@ -20,7 +20,7 @@ public class TranslationTreeMenu extends JPopupMenu {
 	}
 	
 	private void setup() {
-		JMenuItem addMenuItem = new JMenuItem(MessageBundle.get("menu.translations.add.title"));
+		JMenuItem addMenuItem = new JMenuItem(MessageBundle.get("menu.translation.add.title"));
 		addMenuItem.addActionListener(new AddMenuItemListener());
 		add(addMenuItem);
 	}
