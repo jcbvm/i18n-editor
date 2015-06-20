@@ -1,5 +1,6 @@
 package com.jvms.i18neditor;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -24,6 +25,7 @@ public class TranslationTreeNodeMenu extends JPopupMenu {
 	
 	private void setup() {
 		JMenuItem addMenuItem = new JMenuItem(MessageBundle.get("menu.translation.add.title"));
+		addMenuItem.setAccelerator(KeyStroke.getKeyStroke('T', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 		addMenuItem.addActionListener(new AddMenuItemListener());
 		add(addMenuItem);
 		
