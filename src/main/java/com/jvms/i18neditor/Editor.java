@@ -150,7 +150,7 @@ public class Editor extends JFrame {
 		if (dirty) {
 			setTitle("*" + getTitle());
 		}
-		editorMenu.setSaveEnabled(dirty);
+		editorMenu.setSaveable(dirty);
 	}
 	
 	public void showError(String message) {
@@ -280,9 +280,8 @@ public class Editor extends JFrame {
 		}
 		
 		contentPanel.setVisible(resourcesDir != null);
-		editorMenu.setReloadEnabled(resourcesDir != null);
-		editorMenu.setEditEnabled(resourcesDir != null);
-		editorMenu.setAddTranslationEnabled(!resources.isEmpty());
+		editorMenu.setEnabled(resourcesDir != null);
+		editorMenu.setEditable(!resources.isEmpty());
 		translationTree.setEditable(!resources.isEmpty());
 		translationField.setEditable(!resources.isEmpty());
 		

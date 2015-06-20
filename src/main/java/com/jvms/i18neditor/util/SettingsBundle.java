@@ -14,6 +14,7 @@ import com.google.common.collect.Lists;
 
 public final class SettingsBundle {
 	private final static Path FILE_PATH;
+	private final static String LIST_SEPARATOR = ",";
 	
 	static {
 		FILE_PATH = Paths.get(System.getProperty("user.home"), ".i18n-editor");
@@ -35,7 +36,7 @@ public final class SettingsBundle {
 	}
 	
 	public static void store(String key, List<String> values) {
-		store(key, values.stream().collect(Collectors.joining(",")));
+		store(key, values.stream().collect(Collectors.joining(LIST_SEPARATOR)));
 	}
 	
 	public static String get(String key) {
@@ -56,6 +57,8 @@ public final class SettingsBundle {
 	
 	public static List<String> getAsList(String key) {
 		String value = get(key);
-		return value == null ? Lists.newLinkedList() : Lists.newArrayList(Arrays.asList(value.split(",")));
+		return value == null 
+				? Lists.newLinkedList() 
+				: Lists.newLinkedList(Arrays.asList(value.split(LIST_SEPARATOR)));
 	}
 }

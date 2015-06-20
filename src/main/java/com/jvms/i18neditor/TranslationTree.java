@@ -19,7 +19,6 @@ public class TranslationTree extends JTree {
 	private static final long serialVersionUID = -2888673305196385241L;
 	
 	private final Editor editor;
-	private boolean editable;
 	
 	public TranslationTree(Editor editor) {
 		super(new TranslationTreeModel());
@@ -34,11 +33,6 @@ public class TranslationTree extends JTree {
 		if (root != null) {
 			setSelectedNode((TranslationTreeNode) root);
 		}
-	}
-	
-	@Override
-	public boolean isEditable() {
-		return editable;
 	}
 	
 	@Override
