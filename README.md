@@ -10,7 +10,8 @@ When you want to use this application for Ember-I18n, version 4.0 or greater is 
 
 ## Installation
 
-This package comes with a `.exe` file and a `.jar` file.<br>
+Go to the `releases` page and download the latest `i18n-editor.zip` file.<br>
+This zip file comes with a `.exe` file for windows systems and a `.jar` file for other systems.<br>
 The application requires java 8 to be intalled on your system.
 
 ## Usage
