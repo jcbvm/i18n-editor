@@ -8,11 +8,15 @@ This application lets you manage multiple translations files for [Ember-I18n](ht
 
 When you want to use this application for Ember-I18n, version 4.0 or greater is required.
 
-## Installation
+## Requirements
 
-Go to the `releases` page and download the latest `i18n-editor.zip` file.<br>
-This zip file comes with a `.exe` file for windows systems and a `.jar` file for other systems.<br>
-The application requires java 8 to be intalled on your system.
+ - The application requires java 8 to be installe on your system.<br>
+   http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html
+
+## Download
+
+You can download the latest release by going to [this page](https://github.com/jcbvm/ember-i18n-editor/releases/latest) and download the `i18n-editor.zip` file.<br>
+This zip file includes a `.exe` file for windows systems and a `.jar` file for other systems.<br>
 
 ## Usage
 
