@@ -4,10 +4,6 @@ This application lets you manage multiple translations files for [Ember-I18n](ht
 
 <img src="https://raw.github.com/jcbvm/ember-i18n-editor/master/screenshot.jpg?1" width="600">
 
-## NOTE
-
-When you want to use this application for Ember-I18n, version 4.0 or greater is required.
-
 ## Requirements
 
 The application requires java 8 to be installed on your system.<br>
