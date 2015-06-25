@@ -13,8 +13,6 @@ When you want to use this application for Ember-I18n, version 4.0 or greater is 
 This package comes with a `.exe` file and a `.jar` file.<br>
 The application requires java 8 to be intalled on your system.
 
-<i>Currently the `.exe` file is not signed yet, so it will show you a warning message about unknown publiser.</i>
-
 ## Usage
 
 When you open the program for the first time, it will ask you to choose a folder, this can be any folder you want to put your translation files in (normally when using Ember-I18n this will be your `app/locales/` directory). 
