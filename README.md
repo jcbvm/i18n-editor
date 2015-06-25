@@ -10,8 +10,8 @@ When you want to use this application for Ember-I18n, version 4.0 or greater is 
 
 ## Requirements
 
- - The application requires java 8 to be installe on your system.<br>
-   http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html
+The application requires java 8 to be installed on your system.<br>
+http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html
 
 ## Download
 
