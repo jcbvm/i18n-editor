@@ -40,6 +40,19 @@ public class TranslationTree extends JTree {
 		this.editable = editable;
 	}
 	
+	public void collapseAll() {
+		// collapse all but root node
+		for (int i = getRowCount()-1; i > 0; i--) {
+		    collapseRow(i);
+		}
+	}
+	
+	public void expandAll() {
+		for (int i = 0; i < getRowCount(); i++) {
+	        expandRow(i);
+		}
+	}
+	
 	@SuppressWarnings("unchecked")
 	public void addNodeByKey(String key) {
 		TranslationTreeModel model = (TranslationTreeModel) getModel();
@@ -143,7 +156,7 @@ public class TranslationTree extends JTree {
 	    	TreePath path = getPathForLocation(e.getX(), e.getY());
 	    	if (path == null) {
 	    		setSelectionPath(null);
-	    		TranslationTreeMenu menu = new TranslationTreeMenu(editor);
+	    		TranslationTreeMenu menu = new TranslationTreeMenu(editor, TranslationTree.this);
 	    		menu.show(e.getComponent(), e.getX(), e.getY());
 	    	} else {
 	    		setSelectionPath(path);
