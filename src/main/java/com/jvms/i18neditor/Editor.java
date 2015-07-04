@@ -3,6 +3,7 @@ package com.jvms.i18neditor;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -32,21 +33,19 @@ import javax.swing.event.TreeSelectionListener;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jvms.i18neditor.Resource.ResourceType;
-import com.jvms.i18neditor.event.ResourceEvent;
-import com.jvms.i18neditor.event.ResourceListener;
 import com.jvms.i18neditor.swing.JScrollablePanel;
 import com.jvms.i18neditor.util.MessageBundle;
 import com.jvms.i18neditor.util.Resources;
-import com.jvms.i18neditor.util.TranslationKeys;
 import com.jvms.i18neditor.util.SettingsBundle;
+import com.jvms.i18neditor.util.TranslationKeys;
 
 public class Editor extends JFrame {
 	private static final long serialVersionUID = 1113029729495390082L;
 	
 	public static final String TITLE = "i18n Editor";
 	public static final String VERSION = "0.1.0";
-	private static final int WINDOW_WIDTH = 1024;
-	private static final int WINDOW_HEIGHT = 768;
+	public static final int DEFAULT_WIDTH = 1024;
+	public static final int DEFAULT_HEIGHT = 768;
 	
 	private List<Resource> resources;
 	private Path resourcesDir;
@@ -68,7 +67,9 @@ public class Editor extends JFrame {
 	}
 	
 	public void importResources(String dir) {
-		if (!closeCurrentSession()) return;
+		if (!closeCurrentSession()) {
+			return;
+		}
 		if (resourcesDir != null) {
 			reset();
 		}
@@ -123,6 +124,22 @@ public class Editor extends JFrame {
 		importResources(resourcesDir.toString());
 	}
 	
+	public void removeSelectedTranslation() {
+		TranslationTreeNode node = translationTree.getSelectedNode();
+		if (node != null && !node.isRoot()) {
+			TranslationTreeNode parent = (TranslationTreeNode) node.getParent();
+			removeTranslationKey(node.getKey());
+			translationTree.setSelectedNode(parent);
+		}
+	}
+	
+	public void renameSelectedTranslation() {
+		TranslationTreeNode node = translationTree.getSelectedNode();
+		if (node != null && !node.isRoot()) {
+			showRenameTranslationDialog(node.getKey());
+		}
+	}
+	
 	public void addTranslationKey(String key) {
 		if (resources.isEmpty()) return;
 		translationTree.addNodeByKey(key);
@@ -146,15 +163,24 @@ public class Editor extends JFrame {
 	
 	public void setDirty(boolean dirty) {
 		this.dirty = dirty;
-		setTitle(getTitle().replaceFirst("\\*", ""));
-		if (dirty) {
-			setTitle("*" + getTitle());
-		}
+		updateTitle();
 		editorMenu.setSaveable(dirty);
 	}
 	
 	public void showError(String message) {
-		JOptionPane.showMessageDialog(this, message, MessageBundle.get("dialogs.error.title"), JOptionPane.ERROR_MESSAGE);
+		showMessageDialog(MessageBundle.get("dialogs.error.title"), message, JOptionPane.ERROR_MESSAGE);
+	}
+	
+	public void showWarning(String title, String message) {
+		showMessageDialog(title, message, JOptionPane.WARNING_MESSAGE);
+	}
+	
+	public void showMessage(String title, String message) {
+		showMessageDialog(title, message, JOptionPane.PLAIN_MESSAGE);
+	}
+	
+	public void showMessageDialog(String title, String message, int type) {
+		JOptionPane.showMessageDialog(this, message, title, type);
 	}
 	
 	public void showImportDialog() {
@@ -180,7 +206,7 @@ public class Editor extends JFrame {
 					JOptionPane.QUESTION_MESSAGE);
 			if (locale != null) {
 				locale = locale.trim();
-				Path path = Paths.get(resourcesDir.toString() + "/" + locale);
+				Path path = Paths.get(resourcesDir.toString(), locale);
 				if (locale.isEmpty() || Files.isDirectory(path)) {
 					showError(MessageBundle.get("dialogs.locale.add.error.invalid"));
 				} else {
@@ -239,6 +265,35 @@ public class Editor extends JFrame {
 		}
 	}
 	
+	public void showFindTranslationDialog() {
+		String key = (String) JOptionPane.showInputDialog(this, 
+				MessageBundle.get("dialogs.translation.find.text"), 
+				MessageBundle.get("dialogs.translation.find.title"), 
+				JOptionPane.QUESTION_MESSAGE);
+		if (key != null) {
+			TranslationTreeNode node = translationTree.getNodeByKey(key.trim());
+			if (node == null) {
+				showWarning(MessageBundle.get("dialogs.translation.find.title"), 
+						MessageBundle.get("dialogs.translation.find.error"));
+			} else {
+				translationTree.setSelectedNode(node);
+			}
+		}
+	}
+	
+	public void showAboutDialog() {
+		showMessage(MessageBundle.get("dialogs.about.title", TITLE), 
+				"<html>" +
+						"<body style=\"text-align:center;width:200px;\"><br>" +
+							"<span style=\"font-weight:bold;font-size:1.2em;\">" + TITLE + "</span><br>" +
+							"v" + VERSION + "<br><br>" +
+							"(c) Copyright 2015<br>" +
+							"Jacob van Mourik<br>" +
+							"MIT Licensed<br><br>" +
+						"</body>" +
+				"</html>");
+	}
+	
 	public boolean closeCurrentSession() {
 		if (isDirty()) {
 			int result = JOptionPane.showConfirmDialog(this, 
@@ -262,8 +317,6 @@ public class Editor extends JFrame {
 	}
 	
 	public void update() {
-		setTitle(getTitle().split("-")[0].trim() + (resourcesDir == null ? "" : " - " + resourcesDir.toString()));
-		
 		TranslationTreeNode selectedNode = translationTree.getSelectedNode();
 		
 		resourcesPanel.removeAll();
@@ -285,12 +338,19 @@ public class Editor extends JFrame {
 		translationTree.setEditable(!resources.isEmpty());
 		translationField.setEditable(!resources.isEmpty());
 		
+		updateTitle();
 		validate();
 		repaint();
 	}
 	
+	private void updateTitle() {
+		String dirtyPart = dirty ? "*" : "";
+		String filePart = resourcesDir == null ? "" : resourcesDir.toString() + " - ";
+		setTitle(dirtyPart + filePart + TITLE);
+	}
+	
 	private void setupResource(Resource resource) {
-		resource.addListener(new ResourceChangeListener());
+		resource.addListener(e -> setDirty(true));
 		ResourceField field = new ResourceField(resource);
 		field.addKeyListener(new ResourceFieldKeyListener());
 		resources.add(resource);
@@ -298,9 +358,6 @@ public class Editor extends JFrame {
 	}
 	
 	private void setup() {
-		editorMenu = new EditorMenu(this);
-		editorMenu.setRecentItems(SettingsBundle.getAsList("recentResourcesDirs"));
-		
 		translationsPanel = new JPanel(new BorderLayout());
         translationTree = new TranslationTree(this);
         translationTree.addTreeSelectionListener(new TranslationTreeNodeSelectionListener());
@@ -313,58 +370,61 @@ public class Editor extends JFrame {
         resourcesPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
         
 		contentPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, translationsPanel, new JScrollPane(resourcesPanel));
-     	contentPanel.setDividerLocation(WINDOW_WIDTH/4);
+     	contentPanel.setDividerLocation(DEFAULT_WIDTH / 4);
      	contentPanel.setVisible(false);
 		
+     	editorMenu = new EditorMenu(this, translationTree);
+     	editorMenu.setRecentItems(SettingsBundle.getAsList("recentResourcesDirs"));
+     	
 		Container contentPane = getContentPane();
 		contentPane.add(editorMenu, BorderLayout.NORTH);
 		contentPane.add(contentPanel);
 		
 		setTitle(TITLE);
-		setIconImages(Lists.newArrayList(
-			new ImageIcon(getClass().getClassLoader().getResource("images/icon-512.png")).getImage(),
-			new ImageIcon(getClass().getClassLoader().getResource("images/icon-256.png")).getImage(),
-			new ImageIcon(getClass().getClassLoader().getResource("images/icon-128.png")).getImage(),
-			new ImageIcon(getClass().getClassLoader().getResource("images/icon-64.png")).getImage(),
-			new ImageIcon(getClass().getClassLoader().getResource("images/icon-48.png")).getImage(),
-			new ImageIcon(getClass().getClassLoader().getResource("images/icon-32.png")).getImage(),
-			new ImageIcon(getClass().getClassLoader().getResource("images/icon-24.png")).getImage(),
-			new ImageIcon(getClass().getClassLoader().getResource("images/icon-20.png")).getImage(),
-			new ImageIcon(getClass().getClassLoader().getResource("images/icon-16.png")).getImage()
-		));
-		setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
+		setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		addWindowListener(new EditorWindowListener());
+		setIconImages(Lists.newArrayList(
+				getResourceImage("images/icon-512.png"),
+				getResourceImage("images/icon-256.png"),
+				getResourceImage("images/icon-128.png"),
+				getResourceImage("images/icon-64.png"),
+				getResourceImage("images/icon-48.png"),
+				getResourceImage("images/icon-32.png"),
+				getResourceImage("images/icon-24.png"),
+				getResourceImage("images/icon-20.png"),
+				getResourceImage("images/icon-16.png")));
+		
 		pack();
 		setLocationRelativeTo(null);
-		addWindowListener(new EditorWindowListener());
+	}
+	
+	private Image getResourceImage(String path) {
+		return new ImageIcon(getClass().getClassLoader().getResource(path)).getImage();
 	}
 	
 	private class TranslationTreeNodeSelectionListener implements TreeSelectionListener {
 		@Override
 		public void valueChanged(TreeSelectionEvent e) {
-			TranslationTreeNode node = (TranslationTreeNode) e.getPath().getLastPathComponent();
+			TranslationTreeNode node = translationTree.getSelectedNode();
 			
-			// Store scroll position
-			JScrollPane scrollPane = (JScrollPane) resourcesPanel.getParent().getParent();
-			int scrollValue = scrollPane.getVerticalScrollBar().getValue();
+			if (node != null) {
+				// Store scroll position
+				JScrollPane scrollPane = (JScrollPane) resourcesPanel.getParent().getParent();
+				int scrollValue = scrollPane.getVerticalScrollBar().getValue();
+				
+				// Update UI values
+				String key = node.getKey();
+				translationField.setText(key);
+				resourceFields.forEach(f -> {
+					f.updateValue(key);
+					f.setEditable(node.isEditable());
+				});
+				
+				// Restore scroll position
+				SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(scrollValue));
+			}
 			
-			// Update UI values
-			String key = node.getKey();
-			translationField.setText(key);
-			resourceFields.forEach(f -> {
-				f.updateValue(key);
-				f.setEditable(node.isEditable());
-			});
-			
-			// Restore scroll position
-			SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(scrollValue));
-		}
-	}
-	
-	private class ResourceChangeListener implements ResourceListener {
-		@Override
-		public void resourceChanged(ResourceEvent e) {
-			setDirty(true);
 		}
 	}
 	

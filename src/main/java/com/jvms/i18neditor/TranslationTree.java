@@ -1,10 +1,7 @@
 package com.jvms.i18neditor;
 
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JTree;
@@ -41,8 +38,8 @@ public class TranslationTree extends JTree {
 	}
 	
 	public void collapseAll() {
-		// collapse all but root node
-		for (int i = getRowCount()-1; i > 0; i--) {
+		// Collapse all but root node
+		for (int i = getRowCount(); i > 0; i--) {
 		    collapseRow(i);
 		}
 	}
@@ -53,21 +50,17 @@ public class TranslationTree extends JTree {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void addNodeByKey(String key) {
 		TranslationTreeModel model = (TranslationTreeModel) getModel();
 		TranslationTreeNode node = model.getNodeByKey(key);
 		if (node == null) {
 			TranslationTreeNode parent = (TranslationTreeNode) model.getClosestParentNodeByKey(key);
-			
 			String newKey = TranslationKeys.childKey(key, parent.getKey());
 			String restKey = TranslationKeys.create(TranslationKeys.subParts(newKey, 1));
 			String name = TranslationKeys.firstPart(newKey);
 			List<String> keys = restKey.isEmpty() ? Lists.newArrayList() : Lists.newArrayList(restKey);
-			
 			node = new TranslationTreeNode(name, keys);
-			int index = getNodeIndex(node, Collections.list(parent.children()));
-			model.insertNodeInto(node, parent, index);
+			model.insertNodeInto(node, parent, getNodeIndex(node, parent.getChildren()));
 			setSelectedNode((TranslationTreeNode) node.getFirstLeaf());
 		} else {
 			setSelectedNode(node);
@@ -82,22 +75,25 @@ public class TranslationTree extends JTree {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
+	public TranslationTreeNode getNodeByKey(String key) {
+		TranslationTreeModel model = (TranslationTreeModel) getModel();
+		return model.getNodeByKey(key);
+	}
+	
 	public void renameNodeByKey(String key, String newName) {
 		TranslationTreeModel model = (TranslationTreeModel) getModel();
-		TranslationTreeNode oldNode = model.getNodeByKey(key);
-		TranslationTreeNode parent = (TranslationTreeNode) model.getClosestParentNodeByKey(key);
-		Collections.list(parent.children()).forEach(c -> {
+		TranslationTreeNode node = model.getNodeByKey(key);
+		TranslationTreeNode parent = (TranslationTreeNode) node.getParent();
+		parent.getChildren().forEach(c -> {
 			TranslationTreeNode n = (TranslationTreeNode) c;
 			if (n.getName().equals(newName)) {
 				model.removeNodeFromParent(n);
 			}
 		});
-		model.removeNodeFromParent(oldNode);
-		oldNode.setName(newName);
-		int index = getNodeIndex(oldNode, Collections.list(parent.children()));
-		model.insertNodeInto(oldNode, parent, index);
-		setSelectedNode(oldNode);
+		node.setName(newName);
+		// Prevent calling insertNodeInto here, because it will affect collapsing state of tree
+		parent.insert(node, getNodeIndex(node, parent.getChildren()));
+		model.nodeChanged(node);
 	}
 	
 	public TranslationTreeNode getSelectedNode() {
@@ -129,24 +125,10 @@ public class TranslationTree extends JTree {
         renderer.setLeafIcon(null);
         renderer.setClosedIcon(null);
         renderer.setOpenIcon(null);
-        addKeyListener(new TranslationTreeKeyListener());
         addMouseListener(new TranslationTreeMouseListener());
         setEditable(false);
-	}
-	
-	private class TranslationTreeKeyListener extends KeyAdapter {
-		@Override
-		public void keyReleased(KeyEvent e) {
-			TranslationTreeNode node = getSelectedNode();
-			if (node != null && !node.isRoot()) {
-				String key = node.getKey();
-				if (e.getKeyCode() == KeyEvent.VK_DELETE) {
-					editor.removeTranslationKey(key);
-				} else if (e.getKeyCode() == KeyEvent.VK_F2) {
-					editor.showRenameTranslationDialog(key);
-				}
-			}
-		}
+        // Remove F2 keystroke binding
+        getActionMap().getParent().remove("startEditing");
 	}
 	
 	private class TranslationTreeMouseListener extends MouseAdapter {

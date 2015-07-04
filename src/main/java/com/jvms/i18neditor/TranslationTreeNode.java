@@ -1,6 +1,7 @@
 package com.jvms.i18neditor;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,6 +43,11 @@ public class TranslationTreeNode extends DefaultMutableTreeNode {
 				.map(p -> p.toString())
 				.collect(Collectors.toList());
 		return TranslationKeys.create(parts);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<TranslationTreeNode> getChildren() {
+		return Collections.list(children());
 	}
 	
 	@Override

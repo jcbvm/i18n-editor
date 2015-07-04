@@ -58,32 +58,31 @@ public class Resource {
 		} else {
 			translations.put(key, value);
 		}
-		notifyListeners(key);
+		notifyListeners();
 	}
 	
 	public void removeTranslation(String key) {
 		removeChildren(key);
-		if (translations.containsKey(key)) {
-			translations.remove(key);
-			notifyListeners(key);
-		}
+		translations.remove(key);
+		notifyListeners();
 	}
 	
 	public void renameTranslation(String key, String newName) {
 		String newKey = TranslationKeys.create(TranslationKeys.withoutLastPart(key), newName);
-		removeTranslation(newKey);
+		removeChildren(newKey);
+		translations.remove(newKey);
 		Lists.newArrayList(translations.keySet()).forEach(k -> {
 			if (TranslationKeys.isChildKeyOf(k, key)) {
 				String nk = TranslationKeys.create(newKey, TranslationKeys.childKey(k, key));
 				translations.put(nk, translations.get(k));
-				notifyListeners(nk);
 			}
 		});
 		if (translations.containsKey(key)) {
 			translations.put(newKey, translations.get(key));
-			notifyListeners(newKey);
 		}
-		removeTranslation(key);
+		removeChildren(key);
+		translations.remove(key);
+		notifyListeners();
 	}
 	
 	public void addListener(ResourceListener listener) {
@@ -98,7 +97,6 @@ public class Resource {
 		Lists.newArrayList(translations.keySet()).forEach(k -> {
 			if (TranslationKeys.isChildKeyOf(k, key)) {
 				translations.remove(k);
-				notifyListeners(k);
 			}
 		});
 	}
@@ -107,13 +105,12 @@ public class Resource {
 		Lists.newArrayList(translations.keySet()).forEach(k -> {
 			if (TranslationKeys.isChildKeyOf(key, k)) {
 				translations.remove(k);
-				notifyListeners(k);
 			}
 		});
 	}
 	
-	private void notifyListeners(String key) {
-		listeners.forEach(l -> l.resourceChanged(new ResourceEvent(this, key)));
+	private void notifyListeners() {
+		listeners.forEach(l -> l.resourceChanged(new ResourceEvent(this)));
 	}
 	
 	public enum ResourceType {
