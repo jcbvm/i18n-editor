@@ -8,8 +8,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 
 import com.jvms.i18neditor.Resource.ResourceType;
 import com.jvms.i18neditor.util.MessageBundle;
@@ -152,15 +150,10 @@ public class EditorMenu extends JMenuBar {
      	add(viewMenu);
      	add(helpMenu);
      	
-     	tree.addTreeSelectionListener(new TranslationTreeNodeSelectionListener());
-	}
-	
-	private class TranslationTreeNodeSelectionListener implements TreeSelectionListener {
-		@Override
-		public void valueChanged(TreeSelectionEvent e) {
-			TranslationTreeNode node = tree.getSelectedNode();
+     	tree.addTreeSelectionListener(e -> {
+     		TranslationTreeNode node = tree.getSelectedNode();
 			renameTranslationMenuItem.setEnabled(node != null && !node.isRoot());
 			removeTranslationMenuItem.setEnabled(node != null && !node.isRoot());
-		}
+     	});
 	}
 }
