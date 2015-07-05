@@ -34,14 +34,15 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jvms.i18neditor.Resource.ResourceType;
 import com.jvms.i18neditor.swing.JScrollablePanel;
+import com.jvms.i18neditor.util.ExtendedProperties;
 import com.jvms.i18neditor.util.MessageBundle;
 import com.jvms.i18neditor.util.Resources;
-import com.jvms.i18neditor.util.SettingsBundle;
 import com.jvms.i18neditor.util.TranslationKeys;
 
 public class Editor extends JFrame {
 	private static final long serialVersionUID = 1113029729495390082L;
 	
+	public static final Path SETTINGS_PATH = Paths.get(System.getProperty("user.home"), ".i18n-editor");
 	public static final String TITLE = "i18n Editor";
 	public static final String VERSION = "0.1.0";
 	public static final int DEFAULT_WIDTH = 1024;
@@ -58,9 +59,11 @@ public class Editor extends JFrame {
 	private TranslationField translationField;
 	private JPanel resourcesPanel;
 	private List<ResourceField> resourceFields;
+	private ExtendedProperties settings;
 	
-	public Editor() {
+	public Editor(ExtendedProperties settings) {
 		super();
+		this.settings = settings;
 		resources = Lists.newLinkedList();
 		resourceFields = Lists.newLinkedList();
 		setup();
@@ -85,13 +88,12 @@ public class Editor extends JFrame {
 				}
 			});
 			
-			List<String> recentDirs = SettingsBundle.getAsList("history");
+			List<String> recentDirs = settings.getListProperty("history");
 			recentDirs.remove(dir);
 			recentDirs.add(dir);
 			if (recentDirs.size() > 5) {
 				recentDirs.remove(0);
 			}
-			SettingsBundle.store("history", recentDirs);
 			editorMenu.setRecentItems(Lists.reverse(recentDirs));
 			
 			Map<String,String> keys = Maps.newTreeMap();
@@ -358,6 +360,24 @@ public class Editor extends JFrame {
 	}
 	
 	private void setup() {
+		setTitle(TITLE);
+		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		
+		setPreferredSize(new Dimension(
+				settings.getIntegerProperty("window_width", 1024), 
+				settings.getIntegerProperty("window_height", 768)));
+		
+		setIconImages(Lists.newArrayList(
+				getResourceImage("images/icon-512.png"),
+				getResourceImage("images/icon-256.png"),
+				getResourceImage("images/icon-128.png"),
+				getResourceImage("images/icon-64.png"),
+				getResourceImage("images/icon-48.png"),
+				getResourceImage("images/icon-32.png"),
+				getResourceImage("images/icon-24.png"),
+				getResourceImage("images/icon-20.png"),
+				getResourceImage("images/icon-16.png")));
+		
 		translationsPanel = new JPanel(new BorderLayout());
         translationTree = new TranslationTree(this);
         translationTree.addTreeSelectionListener(new TranslationTreeNodeSelectionListener());
@@ -370,37 +390,38 @@ public class Editor extends JFrame {
         resourcesPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
         
 		contentPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, translationsPanel, new JScrollPane(resourcesPanel));
-     	contentPanel.setDividerLocation(DEFAULT_WIDTH / 4);
+     	contentPanel.setDividerLocation(settings.getIntegerProperty("divider_pos", 250));
      	contentPanel.setVisible(false);
 		
      	editorMenu = new EditorMenu(this, translationTree);
-     	editorMenu.setRecentItems(SettingsBundle.getAsList("recentResourcesDirs"));
      	
 		Container contentPane = getContentPane();
 		contentPane.add(editorMenu, BorderLayout.NORTH);
 		contentPane.add(contentPanel);
 		
-		setTitle(TITLE);
-		setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
-		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-		addWindowListener(new EditorWindowListener());
-		setIconImages(Lists.newArrayList(
-				getResourceImage("images/icon-512.png"),
-				getResourceImage("images/icon-256.png"),
-				getResourceImage("images/icon-128.png"),
-				getResourceImage("images/icon-64.png"),
-				getResourceImage("images/icon-48.png"),
-				getResourceImage("images/icon-32.png"),
-				getResourceImage("images/icon-24.png"),
-				getResourceImage("images/icon-20.png"),
-				getResourceImage("images/icon-16.png")));
-		
 		pack();
-		setLocationRelativeTo(null);
+		
+		if (settings.containsKey("window_pos_x") && settings.containsKey("window_pos_y")) {
+			setLocation(settings.getIntegerProperty("window_pos_x"), 
+						settings.getIntegerProperty("window_pos_y"));
+		} else {
+			setLocationRelativeTo(null);
+		}
+		
+		addWindowListener(new EditorWindowListener());
 	}
 	
 	private Image getResourceImage(String path) {
 		return new ImageIcon(getClass().getClassLoader().getResource(path)).getImage();
+	}
+	
+	private void storeWindowState() {
+		settings.setProperty("window_width", getWidth());
+		settings.setProperty("window_height", getHeight());
+		settings.setProperty("window_pos_x", getX());
+		settings.setProperty("window_pos_y", getY());
+		settings.setProperty("divider_pos", contentPanel.getDividerLocation());
+		settings.store(SETTINGS_PATH);
 	}
 	
 	private class TranslationTreeNodeSelectionListener implements TreeSelectionListener {
@@ -424,7 +445,6 @@ public class Editor extends JFrame {
 				// Restore scroll position
 				SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(scrollValue));
 			}
-			
 		}
 	}
 	
@@ -442,6 +462,7 @@ public class Editor extends JFrame {
 		@Override
 		public void windowClosing(WindowEvent e) {
 			if (closeCurrentSession()) {
+				storeWindowState();
 				System.exit(0);
 			}
   		}

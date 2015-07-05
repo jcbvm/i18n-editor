@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.swing.UIManager;
 
-import com.jvms.i18neditor.util.SettingsBundle;
+import com.jvms.i18neditor.util.ExtendedProperties;
 
 public class Main {
 	
@@ -25,9 +25,11 @@ public class Main {
 	}
 	
 	private static void setupEditor() {
-		Editor editor = new Editor();
+		ExtendedProperties settings = new ExtendedProperties();
+		settings.load(Editor.SETTINGS_PATH);
+		Editor editor = new Editor(settings);
 		editor.setVisible(true);
-		List<String> dirs = SettingsBundle.getAsList("history");
+		List<String> dirs = settings.getListProperty("history");
     	if (dirs.isEmpty()) {
     		editor.showImportDialog();
     	} else {
