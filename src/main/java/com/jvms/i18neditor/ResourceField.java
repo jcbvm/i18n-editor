@@ -9,11 +9,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.border.Border;
-import javax.swing.event.UndoableEditEvent;
-import javax.swing.event.UndoableEditListener;
 import javax.swing.undo.UndoManager;
-
-import com.jvms.i18neditor.swing.EmptyAction;
 
 public class ResourceField extends JTextArea implements Comparable<ResourceField> {
 	private static final long serialVersionUID = 2034814490878477055L;
@@ -45,11 +41,8 @@ public class ResourceField extends JTextArea implements Comparable<ResourceField
 		setWrapStyleWord(true);
 		setRows(10);
 		
-		// Remove multiline support
-		getActionMap().put(getInputMap().get(KeyStroke.getKeyStroke("ENTER")), new EmptyAction());
-		
 		// Add undo support
-		getDocument().addUndoableEditListener(new EditListener());
+		getDocument().addUndoableEditListener(e -> undoManager.addEdit(e.getEdit()));
 		getActionMap().put("undo", new UndoAction());
 		getInputMap().put(KeyStroke.getKeyStroke('Z', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()), "undo");
 	}
@@ -61,13 +54,6 @@ public class ResourceField extends JTextArea implements Comparable<ResourceField
 			if (undoManager.canUndo()) {
 				undoManager.undo();
 			}
-		}
-	}
-	
-	private class EditListener implements UndoableEditListener {
-		@Override
-		public void undoableEditHappened(UndoableEditEvent e) {
-			undoManager.addEdit(e.getEdit());
 		}
 	}
 	
