@@ -24,8 +24,9 @@ import com.jvms.i18neditor.Resource;
 import com.jvms.i18neditor.Resource.ResourceType;
 
 public final class Resources {
+	public final static String RESOURCE_FILENAME = "translations";
 	public final static String LOCALE_REGEX = "[a-z]{2}(_[a-z]{2})?";
-	public final static Charset DEFAULT_ENCODING = Charset.forName("UTF-8"); 
+	public final static Charset DEFAULT_ENCODING = Charset.forName("UTF-8");
 	
 	public static boolean isResource(Path path) {
 		return isJsonResource(path) || isEs6Resource(path);
@@ -34,13 +35,13 @@ public final class Resources {
 	public static boolean isJsonResource(Path path) {
 		return Files.isDirectory(path) 
 				&& Pattern.matches("^(?i:" + LOCALE_REGEX + ")$", path.getFileName().toString())
-				&& Files.isRegularFile(Paths.get(path.toString(), "translations.json"));
+				&& Files.isRegularFile(Paths.get(path.toString(), RESOURCE_FILENAME + ".json"));
 	}
 	
 	public static boolean isEs6Resource(Path path) {
 		return Files.isDirectory(path) 
 				&& Pattern.matches("^(?i:" + LOCALE_REGEX + ")$", path.getFileName().toString())
-				&& Files.isRegularFile(Paths.get(path.toString(), "translations.js"));
+				&& Files.isRegularFile(Paths.get(path.toString(), RESOURCE_FILENAME + ".js"));
 	}
 	
 	public static Resource read(Path path) throws IOException {
@@ -49,10 +50,10 @@ public final class Resources {
 		Path filePath;
 		if (isEs6Resource(path)) {
 			type = ResourceType.ES6;
-			filePath = Paths.get(path.toString(), "translations.js");
+			filePath = Paths.get(path.toString(), RESOURCE_FILENAME + ".js");
 		} else {
 			type = ResourceType.JSON;
-			filePath = Paths.get(path.toString(), "translations.json");
+			filePath = Paths.get(path.toString(), RESOURCE_FILENAME + ".json");
 		}
 		String content = Files.lines(filePath, DEFAULT_ENCODING).collect(Collectors.joining());
 		if (type == ResourceType.ES6) {
@@ -75,7 +76,7 @@ public final class Resources {
 	}
 	
 	public static Resource create(ResourceType type, Path path) throws IOException {
-		Path filePath = Paths.get(path.toString(), "translations.json");
+		Path filePath = Paths.get(path.toString(), RESOURCE_FILENAME + ".json");
 		Locale locale = parseLocale(path.getFileName().toString());
 		Resource resource = new Resource(ResourceType.JSON, filePath, locale);
 		write(resource);
