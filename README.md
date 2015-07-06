@@ -2,7 +2,7 @@
 
 This application lets you manage multiple translations files for [Ember-I18n](https://github.com/jamesarosen/ember-i18n) (version 4.0.0 or greater), but can also be used without it. The application saves the translations files in `JSON` or `ES6` format (the latter will save the JSON wrapped in an ES6 module which can be used for Ember-I18n).
 
-<img src="https://raw.github.com/jcbvm/ember-i18n-editor/master/screenshot.jpg?1" width="600">
+<img src="https://raw.github.com/jcbvm/ember-i18n-editor/master/screenshot.jpg?2" width="600">
 
 ## Requirements
 
