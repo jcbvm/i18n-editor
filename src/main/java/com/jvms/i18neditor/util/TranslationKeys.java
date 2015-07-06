@@ -16,6 +16,10 @@ public final class TranslationKeys {
 		return parts.stream().filter(p -> p != null && !p.isEmpty()).collect(Collectors.joining("."));
 	}
 	
+	public static boolean isValid(String key) {
+		return !key.isEmpty() && !key.startsWith(".") && !key.endsWith(".") && !key.contains(" ");
+	}
+	
 	public static int size(String key) {
 		return parts(key).length;
 	}

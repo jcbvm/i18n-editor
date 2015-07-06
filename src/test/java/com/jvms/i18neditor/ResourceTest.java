@@ -82,6 +82,18 @@ public class ResourceTest {
 		assertEquals(translations.get("b.b"), null);
 		assertEquals(translations.get("c.a"), "ba");
 		assertEquals(translations.get("c.b"), "bb");
+		
+		resource.renameTranslation("c.a", "d");
+		
+		translations = resource.getTranslations();
+		assertEquals(translations.size(), 4);
+		assertEquals(translations.get("d"), "ba");
+		assertEquals(translations.get("a.a"), "aa");
+		assertEquals(translations.get("a.b"), "ab");
+		assertEquals(translations.get("b.a"), null);
+		assertEquals(translations.get("b.b"), null);
+		assertEquals(translations.get("c.a"), null);
+		assertEquals(translations.get("c.b"), "bb");
 	}
 	
 	@Test
@@ -103,5 +115,14 @@ public class ResourceTest {
 		assertEquals(translations.get("b.a"), null);
 		assertEquals(translations.get("b.b.a"), null);
 		assertEquals(translations.get("b.b.b"), null);
+		
+		resource.renameTranslation("a.b", "a");
+		
+		translations = resource.getTranslations();
+		assertEquals(translations.size(), 2);
+		assertEquals(translations.get("a.a"), "bba");
+		assertEquals(translations.get("a.b"), "bbb");
+		assertEquals(translations.get("a.b.a"), null);
+		assertEquals(translations.get("a.b.b"), null);
 	}
 }

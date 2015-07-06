@@ -50,7 +50,7 @@ public class TranslationTree extends JTree {
 		}
 	}
 	
-	public void addNodeByKey(String key) {
+	public TranslationTreeNode addNodeByKey(String key) {
 		TranslationTreeModel model = (TranslationTreeModel) getModel();
 		TranslationTreeNode node = model.getNodeByKey(key);
 		if (node == null) {
@@ -65,6 +65,7 @@ public class TranslationTree extends JTree {
 		} else {
 			setSelectedNode(node);
 		}
+		return node;
 	}
 	
 	public void removeNodeByKey(String key) {
@@ -80,20 +81,16 @@ public class TranslationTree extends JTree {
 		return model.getNodeByKey(key);
 	}
 	
-	public void renameNodeByKey(String key, String newName) {
+	public void renameNodeByKey(String key, String newKey) {
 		TranslationTreeModel model = (TranslationTreeModel) getModel();
-		TranslationTreeNode node = model.getNodeByKey(key);
-		TranslationTreeNode parent = (TranslationTreeNode) node.getParent();
-		parent.getChildren().forEach(c -> {
-			TranslationTreeNode n = (TranslationTreeNode) c;
-			if (n.getName().equals(newName)) {
-				model.removeNodeFromParent(n);
-			}
-		});
-		node.setName(newName);
-		// Prevent calling insertNodeInto here, because it will affect collapsing state of tree
-		parent.insert(node, getNodeIndex(node, parent.getChildren()));
-		model.nodeChanged(node);
+		TranslationTreeNode oldNode = model.getNodeByKey(key);
+		TranslationTreeNode newNode = model.getNodeByKey(newKey);
+		model.removeNodeFromParent(oldNode);
+		if (newNode != null) {
+			model.removeNodeFromParent(newNode);
+		}
+		TranslationTreeNode parent = addNodeByKey(newKey);
+		Lists.reverse(oldNode.getChildren()).forEach(c -> model.insertNodeInto(c, parent, 0));
 	}
 	
 	public TranslationTreeNode getSelectedNode() {

@@ -3,6 +3,7 @@ package com.jvms.i18neditor;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.SortedMap;
 
 import com.google.common.collect.ImmutableSortedMap;
@@ -67,21 +68,22 @@ public class Resource {
 		notifyListeners();
 	}
 	
-	public void renameTranslation(String key, String newName) {
-		String newKey = TranslationKeys.create(TranslationKeys.withoutLastPart(key), newName);
-		removeChildren(newKey);
-		translations.remove(newKey);
-		Lists.newArrayList(translations.keySet()).forEach(k -> {
+	public void renameTranslation(String key, String newKey) {
+		Map<String,String> newTranslations = Maps.newTreeMap();
+		translations.keySet().forEach(k -> {
 			if (TranslationKeys.isChildKeyOf(k, key)) {
 				String nk = TranslationKeys.create(newKey, TranslationKeys.childKey(k, key));
-				translations.put(nk, translations.get(k));
+				newTranslations.put(nk, translations.get(k));
 			}
 		});
 		if (translations.containsKey(key)) {
-			translations.put(newKey, translations.get(key));
+			newTranslations.put(newKey, translations.get(key));
 		}
+		removeChildren(newKey);
+		translations.remove(newKey);
 		removeChildren(key);
 		translations.remove(key);
+		translations.putAll(newTranslations);
 		notifyListeners();
 	}
 	
@@ -94,7 +96,7 @@ public class Resource {
 	}
 	
 	private void removeChildren(String key) {
-		Lists.newArrayList(translations.keySet()).forEach(k -> {
+		Lists.newLinkedList(translations.keySet()).forEach(k -> {
 			if (TranslationKeys.isChildKeyOf(k, key)) {
 				translations.remove(k);
 			}
@@ -102,7 +104,7 @@ public class Resource {
 	}
 	
 	private void removeParents(String key) {
-		Lists.newArrayList(translations.keySet()).forEach(k -> {
+		Lists.newLinkedList(translations.keySet()).forEach(k -> {
 			if (TranslationKeys.isChildKeyOf(key, k)) {
 				translations.remove(k);
 			}

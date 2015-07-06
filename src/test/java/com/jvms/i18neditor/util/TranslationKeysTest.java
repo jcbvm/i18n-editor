@@ -115,4 +115,19 @@ public class TranslationKeysTest {
 		List<String> expected = Lists.newArrayList("d", "d.e");
 		assertEquals(TranslationKeys.extractChildKeys(keys, "b.c"), expected);
 	}
+	
+	@Test
+	public void isValidTest() {
+		assertTrue(TranslationKeys.isValid("a"));
+		assertTrue(TranslationKeys.isValid("a.b"));
+		assertTrue(TranslationKeys.isValid("a.b.c"));
+		assertFalse(TranslationKeys.isValid("."));
+		assertFalse(TranslationKeys.isValid(".a"));
+		assertFalse(TranslationKeys.isValid(".a.b"));
+		assertFalse(TranslationKeys.isValid("a."));
+		assertFalse(TranslationKeys.isValid("a.b."));
+		assertFalse(TranslationKeys.isValid(" "));
+		assertFalse(TranslationKeys.isValid("a .b"));
+		assertFalse(TranslationKeys.isValid("a. b"));
+	}
 }

@@ -94,6 +94,7 @@ public class Editor extends JFrame {
 			if (recentDirs.size() > 5) {
 				recentDirs.remove(0);
 			}
+			settings.setProperty("history", recentDirs);
 			editorMenu.setRecentItems(Lists.reverse(recentDirs));
 			
 			Map<String,String> keys = Maps.newTreeMap();
@@ -153,10 +154,10 @@ public class Editor extends JFrame {
 		translationTree.removeNodeByKey(key);
 	}
 	
-	public void renameTranslationKey(String key, String newName) {
+	public void renameTranslationKey(String key, String newKey) {
 		if (resources.isEmpty()) return;
-		resources.forEach(resource -> resource.renameTranslation(key, newName));
-		translationTree.renameNodeByKey(key, newName);
+		resources.forEach(resource -> resource.renameTranslation(key, newKey));
+		translationTree.renameNodeByKey(key, newKey);
 	}
 	
 	public boolean isDirty() {
@@ -226,19 +227,18 @@ public class Editor extends JFrame {
 	}
 	
 	public void showRenameTranslationDialog(String key) {
-		String name = TranslationKeys.lastPart(key);
-		String newName = "";
-		while (newName != null && newName.isEmpty()) {
-			newName = (String) JOptionPane.showInputDialog(this, 
+		String newKey = "";
+		while (newKey != null && newKey.isEmpty()) {
+			newKey = (String) JOptionPane.showInputDialog(this, 
 					MessageBundle.get("dialogs.translation.rename.text"), 
 					MessageBundle.get("dialogs.translation.rename.title"), 
-					JOptionPane.QUESTION_MESSAGE, null, null, name);
-			if (newName != null) {
-				newName = newName.trim();
-				if (newName.isEmpty() || newName.contains(".")) {
+					JOptionPane.QUESTION_MESSAGE, null, null, key);
+			if (newKey != null) {
+				newKey = newKey.trim();
+				if (!TranslationKeys.isValid(newKey)) {
 					showError(MessageBundle.get("dialogs.translation.rename.error"));
 				} else {
-					renameTranslationKey(key, newName);
+					renameTranslationKey(key, newKey);
 				}
 			}
 		}
@@ -258,7 +258,7 @@ public class Editor extends JFrame {
 					JOptionPane.QUESTION_MESSAGE, null, null, key);
 			if (newKey != null) {
 				newKey = newKey.trim();
-				if (newKey.isEmpty()) {
+				if (!TranslationKeys.isValid(newKey)) {
 					showError(MessageBundle.get("dialogs.translation.add.error"));
 				} else {
 					addTranslationKey(newKey);

@@ -6,6 +6,8 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.JTextField;
 
+import com.jvms.i18neditor.util.TranslationKeys;
+
 public class TranslationField extends JTextField {
 	private static final long serialVersionUID = -3951187528785224704L;
 	
@@ -27,7 +29,10 @@ public class TranslationField extends JTextField {
 		@Override
 		public void keyReleased(KeyEvent e) {
 			if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-				editor.addTranslationKey(getText().trim());
+				String key = getText().trim();
+				if (TranslationKeys.isValid(key)) {
+					editor.addTranslationKey(key);
+				}
 			}
 		}
 	}
