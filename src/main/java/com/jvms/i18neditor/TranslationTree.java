@@ -90,9 +90,11 @@ public class TranslationTree extends JTree {
 		// Store expansion state of old tree
 		List<TranslationTreeNode> expandedNodes = Lists.newLinkedList();
 		Enumeration<TreePath> expandedChilds = getExpandedDescendants(new TreePath(oldNode.getPath()));
-		while (expandedChilds.hasMoreElements()) {
-			TreePath path = expandedChilds.nextElement();
-			expandedNodes.add((TranslationTreeNode) path.getLastPathComponent());
+		if (expandedChilds != null) {
+			while (expandedChilds.hasMoreElements()) {
+				TreePath path = expandedChilds.nextElement();
+				expandedNodes.add((TranslationTreeNode) path.getLastPathComponent());
+			}
 		}
 		
 		// Remove old and any existing new tree
