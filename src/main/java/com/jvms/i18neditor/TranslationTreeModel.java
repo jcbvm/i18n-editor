@@ -45,4 +45,18 @@ public class TranslationTreeModel extends DefaultTreeModel {
 			return (TranslationTreeNode) getRoot();
 		}
 	}
+	
+	public void insertNodeInto(TranslationTreeNode node, TranslationTreeNode parent) {
+		insertNodeInto(node, parent, getChildIndex(node, parent));
+	}
+	
+	private int getChildIndex(TranslationTreeNode node, TranslationTreeNode parent) {
+		int result = 0;
+		for (TranslationTreeNode n : parent.getChildren()) {
+			if (n.toString().compareTo(node.toString()) < 0) {
+				result++;
+			}
+		}
+		return result;
+	}
 }

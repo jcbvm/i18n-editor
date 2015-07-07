@@ -2,6 +2,7 @@ package com.jvms.i18neditor;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Enumeration;
 import java.util.List;
 
 import javax.swing.JTree;
@@ -60,7 +61,7 @@ public class TranslationTree extends JTree {
 			String name = TranslationKeys.firstPart(newKey);
 			List<String> keys = restKey.isEmpty() ? Lists.newArrayList() : Lists.newArrayList(restKey);
 			node = new TranslationTreeNode(name, keys);
-			model.insertNodeInto(node, parent, getNodeIndex(node, parent.getChildren()));
+			model.insertNodeInto(node, parent);
 			setSelectedNode((TranslationTreeNode) node.getFirstLeaf());
 		} else {
 			setSelectedNode(node);
@@ -85,12 +86,31 @@ public class TranslationTree extends JTree {
 		TranslationTreeModel model = (TranslationTreeModel) getModel();
 		TranslationTreeNode oldNode = model.getNodeByKey(key);
 		TranslationTreeNode newNode = model.getNodeByKey(newKey);
+		
+		// Store expansion state of old tree
+		List<TranslationTreeNode> expandedNodes = Lists.newLinkedList();
+		Enumeration<TreePath> expandedChilds = getExpandedDescendants(new TreePath(oldNode.getPath()));
+		while (expandedChilds.hasMoreElements()) {
+			TreePath path = expandedChilds.nextElement();
+			expandedNodes.add((TranslationTreeNode) path.getLastPathComponent());
+		}
+		
+		// Remove old and any existing new tree
 		model.removeNodeFromParent(oldNode);
 		if (newNode != null) {
 			model.removeNodeFromParent(newNode);
 		}
-		TranslationTreeNode parent = addNodeByKey(newKey);
-		Lists.reverse(oldNode.getChildren()).forEach(c -> model.insertNodeInto(c, parent, 0));
+		
+		// Create new node from new key and add it to parent of old node
+		TranslationTreeNode parent = addNodeByKey(TranslationKeys.withoutLastPart(newKey));
+		oldNode.setName(TranslationKeys.lastPart(newKey));
+		model.insertNodeInto(oldNode, parent);
+		
+		// Restore expansion state
+		expandedNodes.forEach(n -> expandPath(new TreePath(n.getPath())));
+		
+		// Restore selected node
+		setSelectedNode(oldNode);
 	}
 	
 	public TranslationTreeNode getSelectedNode() {
@@ -105,16 +125,6 @@ public class TranslationTree extends JTree {
 	
 	public void clear() {
 		setModel(new TranslationTreeModel());
-	}
-	
-	private int getNodeIndex(TranslationTreeNode node, List<TranslationTreeNode> nodes) {
-		int result = 0;
-		for (TranslationTreeNode n : nodes) {
-			if (n.toString().compareTo(node.toString()) < 0) {
-				result++;
-			}
-		}
-		return result;
 	}
 	
 	private void setup() {
