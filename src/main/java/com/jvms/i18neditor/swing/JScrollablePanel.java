@@ -6,12 +6,23 @@ import java.awt.Rectangle;
 import javax.swing.JPanel;
 import javax.swing.Scrollable;
 
+/**
+ * This class extends a default {@link JPanel} with {@link Scrollable} capabilities.
+ * 
+ * @author Jacob
+ */
 public class JScrollablePanel extends JPanel implements Scrollable {
 	private static final long serialVersionUID = -7947570506111556197L;
 	
 	private final boolean scrollableTracksViewportWidth;
 	private final boolean scrollableTracksViewportHeight;
 	
+	/**
+	 * Creates a new JScrollablePanel.
+	 * 
+	 * @param 	scrollableTracksViewportWidth whether to force the width of this panel to match the width of the viewport.
+	 * @param 	scrollableTracksViewportHeight whether to force the height of this panel to match the height of the viewport.
+	 */
 	public JScrollablePanel(boolean scrollableTracksViewportWidth, boolean scrollableTracksViewportHeight) {
 		super();
 		this.scrollableTracksViewportWidth = scrollableTracksViewportWidth;

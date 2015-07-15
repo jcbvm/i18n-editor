@@ -7,8 +7,12 @@ import javax.swing.UIManager;
 
 import com.jvms.i18neditor.util.ExtendedProperties;
 
+/**
+ * The main entry class of the program.
+ * 
+ * @author Jacob
+ */
 public class Main {
-	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(() -> {
 			setupLookAndFeel();

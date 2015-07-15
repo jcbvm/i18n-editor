@@ -2,6 +2,11 @@ package com.jvms.i18neditor;
 
 import javax.swing.JPopupMenu;
 
+/**
+ * This class represents a right click menu for the translation tree.
+ * 
+ * @author Jacob
+ */
 public class TranslationTreeMenu extends JPopupMenu {
 	private static final long serialVersionUID = -4407236120087907574L;
 	

@@ -10,6 +10,11 @@ import javax.swing.tree.TreeNode;
 
 import com.jvms.i18neditor.util.TranslationKeys;
 
+/**
+ * This class represents a single node of the translation tree.
+ * 
+ * @author Jacob
+ */
 public class TranslationTreeNode extends DefaultMutableTreeNode {
 	private static final long serialVersionUID = -7372403592538358822L;
 	

@@ -4,7 +4,12 @@ import javax.swing.JMenuItem;
 
 import com.jvms.i18neditor.util.MessageBundle;
 
-class CollapseTranslationsMenuItem extends JMenuItem {
+/**
+ * This class represents a menu item for collapsing all keys of the translation tree.
+ * 
+ * @author Jacob
+ */
+public class CollapseTranslationsMenuItem extends JMenuItem {
 	private static final long serialVersionUID = 7885728865417192564L;
 
 	public CollapseTranslationsMenuItem(TranslationTree tree) {

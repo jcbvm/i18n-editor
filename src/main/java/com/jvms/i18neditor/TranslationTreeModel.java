@@ -7,6 +7,11 @@ import javax.swing.tree.DefaultTreeModel;
 
 import com.jvms.i18neditor.util.TranslationKeys;
 
+/**
+ * This class represents a model for the translation tree.
+ * 
+ * @author Jacob
+ */
 public class TranslationTreeModel extends DefaultTreeModel {
 	private static final long serialVersionUID = 3261808274177599488L;
 	

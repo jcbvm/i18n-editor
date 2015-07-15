@@ -39,6 +39,11 @@ import com.jvms.i18neditor.util.MessageBundle;
 import com.jvms.i18neditor.util.Resources;
 import com.jvms.i18neditor.util.TranslationKeys;
 
+/**
+ * This class represents the main class of the editor.
+ * 
+ * @author Jacob
+ */
 public class Editor extends JFrame {
 	private static final long serialVersionUID = 1113029729495390082L;
 	

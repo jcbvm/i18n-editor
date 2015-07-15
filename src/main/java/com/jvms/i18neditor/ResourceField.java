@@ -11,6 +11,11 @@ import javax.swing.KeyStroke;
 import javax.swing.border.Border;
 import javax.swing.undo.UndoManager;
 
+/**
+ * This class represents a text area to edit the value of a translation.
+ * 
+ * @author Jacob
+ */
 public class ResourceField extends JTextArea implements Comparable<ResourceField> {
 	private static final long serialVersionUID = 2034814490878477055L;
 	

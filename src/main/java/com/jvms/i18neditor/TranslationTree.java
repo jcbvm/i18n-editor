@@ -13,6 +13,11 @@ import javax.swing.tree.TreePath;
 import com.google.common.collect.Lists;
 import com.jvms.i18neditor.util.TranslationKeys;
 
+/**
+ * This class represents a tree view for the translation keys.
+ * 
+ * @author Jacob
+ */
 public class TranslationTree extends JTree {
 	private static final long serialVersionUID = -2888673305196385241L;
 	

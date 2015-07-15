@@ -8,6 +8,11 @@ import javax.swing.JTextField;
 
 import com.jvms.i18neditor.util.TranslationKeys;
 
+/**
+ * This class represents a text field for adding a new translation key.
+ * 
+ * @author Jacob
+ */
 public class TranslationField extends JTextField {
 	private static final long serialVersionUID = -3951187528785224704L;
 	

@@ -23,27 +23,64 @@ import com.google.gson.JsonPrimitive;
 import com.jvms.i18neditor.Resource;
 import com.jvms.i18neditor.Resource.ResourceType;
 
+/**
+ * This class provides utility functions for {@link Resource}s.
+ * 
+ * @author Jacob
+ */
 public final class Resources {
-	public final static String RESOURCE_FILENAME = "translations";
-	public final static String LOCALE_REGEX = "[a-z]{2}(_[a-z]{2})?";
-	public final static Charset DEFAULT_ENCODING = Charset.forName("UTF-8");
+	private static final String RESOURCE_FILENAME = "translations";
+	private static final Charset DEFAULT_ENCODING = Charset.forName("UTF-8");
+	private static final String LOCALE_REGEX = "[a-z]{2}(_[a-z]{2})?";
 	
+	/**
+	 * Checks whether the given path is a valid resource path.
+	 * A valid resource path is either a valid JSON or ES6 resource path.
+	 * 
+	 * @see {@link #isJsonResource(Path)}.
+	 * @see {@link #isEs6Resource(Path)}.
+	 * 
+	 * @param 	path the path to check.
+	 * @return 	whether the given path is a valid resource path.
+	 */
 	public static boolean isResource(Path path) {
 		return isJsonResource(path) || isEs6Resource(path);
 	}
 	
+	/**
+	 * Checks whether the given path is a valid JSON resource path.
+	 * A valid JSON resource path is of the form 'en_US/translations.json'.
+	 * 
+	 * @param 	path the path to check.
+	 * @return 	whether the given path is a valid JSON resource path.
+	 */
 	public static boolean isJsonResource(Path path) {
 		return Files.isDirectory(path) 
 				&& Pattern.matches("^(?i:" + LOCALE_REGEX + ")$", path.getFileName().toString())
 				&& Files.isRegularFile(Paths.get(path.toString(), RESOURCE_FILENAME + ".json"));
 	}
 	
+	/**
+	 * Checks whether the given path is a valid ES6 resource path.
+	 * A valid ES6 resource path is of the form 'en_US/translations.js'.
+	 * 
+	 * @param 	path the path to check.
+	 * @return 	whether the given path is a valid ES6 resource path.
+	 */
 	public static boolean isEs6Resource(Path path) {
 		return Files.isDirectory(path) 
 				&& Pattern.matches("^(?i:" + LOCALE_REGEX + ")$", path.getFileName().toString())
 				&& Files.isRegularFile(Paths.get(path.toString(), RESOURCE_FILENAME + ".js"));
 	}
 	
+	/**
+	 * Creates a new {@link Resource} from the given resource path.
+	 * If the path is not a valid resource path, {@code null} will be returned.
+	 * 
+	 * @param 	path the path to read.
+	 * @return	the resource.
+	 * @throws 	IOException if an I/O error occurs reading the file.
+	 */
 	public static Resource read(Path path) throws IOException {
 		if (!isResource(path)) return null;
 		ResourceType type;
@@ -63,6 +100,12 @@ public final class Resources {
 		return new Resource(type, filePath, locale, fromJson(content));
 	}
 	
+	/**
+	 * Writes the contents of the given resource to disk.
+	 * 
+	 * @param 	resource the resource to write.
+	 * @throws 	IOException if an I/O error occurs writing the file.
+	 */
 	public static void write(Resource resource) throws IOException {
 		String content = toJson(resource.getTranslations());
 		if (resource.getType() == ResourceType.ES6) {
@@ -75,6 +118,16 @@ public final class Resources {
 		Files.write(resource.getPath(), Lists.newArrayList(content), DEFAULT_ENCODING);
 	}
 	
+	/**
+	 * Creates a new {@link Resource} from the given {@link ResourceType} and resource path.
+	 * This function should be used to create new resources. For creating an instance of an
+	 * existing resource on disk, see {@link #read(Path)}.
+	 * 
+	 * @param 	type the type of the resource to create.
+	 * @param 	path the path to write the resource to.
+	 * @return	The newly created resource.
+	 * @throws 	IOException if an I/O error occurs writing the file.
+	 */
 	public static Resource create(ResourceType type, Path path) throws IOException {
 		Path filePath = Paths.get(path.toString(), RESOURCE_FILENAME + ".json");
 		Locale locale = parseLocale(path.getFileName().toString());

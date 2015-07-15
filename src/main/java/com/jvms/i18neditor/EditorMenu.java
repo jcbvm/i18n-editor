@@ -12,6 +12,11 @@ import javax.swing.KeyStroke;
 import com.jvms.i18neditor.Resource.ResourceType;
 import com.jvms.i18neditor.util.MessageBundle;
 
+/**
+ * This class represents the top bar menu of the editor.
+ * 
+ * @author Jacob
+ */
 public class EditorMenu extends JMenuBar {
 	private static final long serialVersionUID = -101788804096708514L;
 	
