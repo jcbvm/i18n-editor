@@ -56,6 +56,10 @@ public class TranslationTree extends JTree {
 		}
 	}
 	
+	public void expand(List<TranslationTreeNode> nodes) {
+		nodes.forEach(n -> expandPath(new TreePath(n.getPath())));
+	}
+	
 	public TranslationTreeNode addNodeByKey(String key) {
 		TranslationTreeModel model = (TranslationTreeModel) getModel();
 		TranslationTreeNode node = model.getNodeByKey(key);
@@ -87,20 +91,33 @@ public class TranslationTree extends JTree {
 		return model.getNodeByKey(key);
 	}
 	
+	public List<TranslationTreeNode> getExpandedNodes() {
+		TranslationTreeNode node = (TranslationTreeNode) getModel().getRoot();
+		return getExpandedNodes(node);
+	}
+	
+	public List<TranslationTreeNode> getExpandedNodes(TranslationTreeNode node) {
+		List<TranslationTreeNode> expandedNodes = Lists.newLinkedList();
+		Enumeration<TreePath> expandedChilds = getExpandedDescendants(new TreePath(node.getPath()));
+		if (expandedChilds != null) {
+			while (expandedChilds.hasMoreElements()) {
+				TreePath path = expandedChilds.nextElement();
+				TranslationTreeNode expandedNode = (TranslationTreeNode) path.getLastPathComponent();
+				if (!expandedNode.isRoot()) { // do not return the root node
+					expandedNodes.add(expandedNode);
+				}
+			}
+		}
+		return expandedNodes;
+	}
+	
 	public void renameNodeByKey(String key, String newKey) {
 		TranslationTreeModel model = (TranslationTreeModel) getModel();
 		TranslationTreeNode oldNode = model.getNodeByKey(key);
 		TranslationTreeNode newNode = model.getNodeByKey(newKey);
 		
 		// Store expansion state of old tree
-		List<TranslationTreeNode> expandedNodes = Lists.newLinkedList();
-		Enumeration<TreePath> expandedChilds = getExpandedDescendants(new TreePath(oldNode.getPath()));
-		if (expandedChilds != null) {
-			while (expandedChilds.hasMoreElements()) {
-				TreePath path = expandedChilds.nextElement();
-				expandedNodes.add((TranslationTreeNode) path.getLastPathComponent());
-			}
-		}
+		List<TranslationTreeNode> expandedNodes = getExpandedNodes(oldNode);
 		
 		// Remove old and any existing new tree
 		model.removeNodeFromParent(oldNode);
@@ -114,7 +131,7 @@ public class TranslationTree extends JTree {
 		model.insertNodeInto(oldNode, parent);
 		
 		// Restore expansion state
-		expandedNodes.forEach(n -> expandPath(new TreePath(n.getPath())));
+		expand(expandedNodes);
 		
 		// Restore selected node
 		setSelectedNode(oldNode);

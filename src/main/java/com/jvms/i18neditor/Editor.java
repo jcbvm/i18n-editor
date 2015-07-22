@@ -3,6 +3,7 @@ package com.jvms.i18neditor;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Image;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -14,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -368,10 +370,7 @@ public class Editor extends JFrame {
 	private void setup() {
 		setTitle(TITLE);
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-		
-		setPreferredSize(new Dimension(
-				settings.getIntegerProperty("window_width", 1024), 
-				settings.getIntegerProperty("window_height", 768)));
+		addWindowListener(new EditorWindowListener());
 		
 		setIconImages(Lists.newArrayList(
 				getResourceImage("images/icon-512.png"),
@@ -405,8 +404,19 @@ public class Editor extends JFrame {
 		contentPane.add(editorMenu, BorderLayout.NORTH);
 		contentPane.add(contentPanel);
 		
+		restoreEditorState();
+	}
+	
+	private Image getResourceImage(String path) {
+		return new ImageIcon(getClass().getClassLoader().getResource(path)).getImage();
+	}
+	
+	private void restoreEditorState() {
+		// Restore window bounds
+		setPreferredSize(new Dimension(
+				settings.getIntegerProperty("window_width", 1024), 
+				settings.getIntegerProperty("window_height", 768)));
 		pack();
-		
 		if (settings.containsKey("window_pos_x") && settings.containsKey("window_pos_y")) {
 			setLocation(settings.getIntegerProperty("window_pos_x"), 
 						settings.getIntegerProperty("window_pos_y"));
@@ -414,19 +424,43 @@ public class Editor extends JFrame {
 			setLocationRelativeTo(null);
 		}
 		
-		addWindowListener(new EditorWindowListener());
+		EventQueue.invokeLater(() -> {
+			List<String> expandedKeys = settings.getListProperty("last_expanded");
+			String selectedKey = settings.getProperty("last_selected");
+			
+			// Restore last expanded nodes
+			List<TranslationTreeNode> expandedNodes = expandedKeys.stream()
+					.map(k -> translationTree.getNodeByKey(k))
+					.filter(n -> n != null)
+					.collect(Collectors.toList());
+			translationTree.expand(expandedNodes);
+			
+			// Restore last selected node
+			TranslationTreeNode selectedNode = translationTree.getNodeByKey(selectedKey);
+			if (selectedNode != null) {
+				translationTree.setSelectedNode(selectedNode);
+			}
+		});
 	}
 	
-	private Image getResourceImage(String path) {
-		return new ImageIcon(getClass().getClassLoader().getResource(path)).getImage();
-	}
-	
-	private void storeWindowState() {
+	private void storeEditorState() {
+		// Store window bounds
 		settings.setProperty("window_width", getWidth());
 		settings.setProperty("window_height", getHeight());
 		settings.setProperty("window_pos_x", getX());
 		settings.setProperty("window_pos_y", getY());
 		settings.setProperty("divider_pos", contentPanel.getDividerLocation());
+		
+		// Store keys of expanded nodes
+		List<String> expandedNodeKeys = translationTree.getExpandedNodes().stream()
+				.map(n -> n.getKey())
+				.collect(Collectors.toList());
+		settings.setProperty("last_expanded", expandedNodeKeys);
+		
+		// Store key of selected node
+		TranslationTreeNode selectedNode = translationTree.getSelectedNode();
+		settings.setProperty("last_selected", selectedNode == null ? "" : selectedNode.getKey());
+		
 		settings.store(SETTINGS_PATH);
 	}
 	
@@ -468,7 +502,7 @@ public class Editor extends JFrame {
 		@Override
 		public void windowClosing(WindowEvent e) {
 			if (closeCurrentSession()) {
-				storeWindowState();
+				storeEditorState();
 				System.exit(0);
 			}
   		}
