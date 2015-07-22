@@ -417,7 +417,7 @@ public class Editor extends JFrame {
 				settings.getIntegerProperty("window_width", 1024), 
 				settings.getIntegerProperty("window_height", 768)));
 		pack();
-		if (settings.containsKey("window_pos_x") && settings.containsKey("window_pos_y")) {
+		if (settings.containsKeys("window_pos_x", "window_pos_y")) {
 			setLocation(settings.getIntegerProperty("window_pos_x"), 
 						settings.getIntegerProperty("window_pos_y"));
 		} else {
