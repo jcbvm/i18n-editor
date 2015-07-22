@@ -122,7 +122,7 @@ public class Resource {
 	public void storeTranslation(String key, String value) {
 		String existing = translations.get(key);
 		if (existing != null && existing.equals(value)) return;
-		if (existing == null && value.isEmpty()) return;
+		//if (existing == null && value.isEmpty()) return;
 		removeParents(key);
 		removeChildren(key);
 		if (value.isEmpty()) {
