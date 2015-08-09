@@ -389,7 +389,7 @@ public class Editor extends JFrame {
 		translationsPanel = new JPanel(new BorderLayout());
         translationTree = new TranslationTree(this);
         translationTree.addTreeSelectionListener(new TranslationTreeNodeSelectionListener());
-		translationField = new TranslationField(this);
+		translationField = new TranslationField(this, translationTree);
 		translationsPanel.add(new JScrollPane(translationTree));
 		translationsPanel.add(translationField, BorderLayout.SOUTH);
 		

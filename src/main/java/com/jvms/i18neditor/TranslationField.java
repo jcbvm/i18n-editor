@@ -11,15 +11,20 @@ import com.jvms.i18neditor.util.TranslationKeys;
 /**
  * This class represents a text field for adding a new translation key.
  * 
+ * <p>When the entered value targets an existing translation, instead of adding a new
+ * translation key the existing translation key will be selected.</p>
+ * 
  * @author Jacob
  */
 public class TranslationField extends JTextField {
 	private static final long serialVersionUID = -3951187528785224704L;
 	
+	private final TranslationTree tree;
 	private final Editor editor;
 	
-	public TranslationField(Editor editor) {
+	public TranslationField(Editor editor, TranslationTree tree) {
 		super();
+		this.tree = tree;
 		this.editor = editor;
 		setup();
 	}
@@ -36,7 +41,12 @@ public class TranslationField extends JTextField {
 			if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 				String key = getText().trim();
 				if (TranslationKeys.isValid(key)) {
-					editor.addTranslationKey(key);
+					TranslationTreeNode node = tree.getNodeByKey(key);
+					if (node == null) {
+						editor.addTranslationKey(key);						
+					} else {
+						tree.setSelectedNode(node);
+					}
 				}
 			}
 		}
