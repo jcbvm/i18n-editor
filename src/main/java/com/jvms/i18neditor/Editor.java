@@ -11,6 +11,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -85,7 +86,7 @@ public class Editor extends JFrame {
 		}
 		resourcesDir = Paths.get(dir);
 		try {
-			Files.walk(Paths.get(dir),1).filter(path -> Resources.isResource(path)).forEach(path -> {
+			Files.walk(resourcesDir, 1).filter(path -> Resources.isResource(path)).forEach(path -> {
 				try {
 					Resource resource = Resources.read(path);
 					setupResource(resource);
@@ -110,9 +111,11 @@ public class Editor extends JFrame {
 			translationTree.setModel(new TranslationTreeModel(MessageBundle.get("translations.model.name"), keyList));
 			
 			update();
+		} catch (NoSuchFileException e) {
+			showError(MessageBundle.get("resources.open.error.nosuchfile", resourcesDir.toString()));
 		} catch (IOException e) {
 			e.printStackTrace();
-			showError(MessageBundle.get("resource.open.error.multiple"));
+			showError(MessageBundle.get("resources.open.error.multiple"));
 		}
 	}
 	
@@ -413,34 +416,32 @@ public class Editor extends JFrame {
 	
 	private void restoreEditorState() {
 		// Restore window bounds
-		setPreferredSize(new Dimension(
-				settings.getIntegerProperty("window_width", 1024), 
-				settings.getIntegerProperty("window_height", 768)));
+		setPreferredSize(new Dimension(settings.getIntegerProperty("window_width", 1024), settings.getIntegerProperty("window_height", 768)));
 		pack();
 		if (settings.containsKeys("window_pos_x", "window_pos_y")) {
-			setLocation(settings.getIntegerProperty("window_pos_x"), 
-						settings.getIntegerProperty("window_pos_y"));
+			setLocation(settings.getIntegerProperty("window_pos_x"), settings.getIntegerProperty("window_pos_y"));
 		} else {
 			setLocationRelativeTo(null);
 		}
 		
-		EventQueue.invokeLater(() -> {
-			List<String> expandedKeys = settings.getListProperty("last_expanded");
-			String selectedKey = settings.getProperty("last_selected");
-			
-			// Restore last expanded nodes
-			List<TranslationTreeNode> expandedNodes = expandedKeys.stream()
-					.map(k -> translationTree.getNodeByKey(k))
-					.filter(n -> n != null)
-					.collect(Collectors.toList());
-			translationTree.expand(expandedNodes);
-			
-			// Restore last selected node
-			TranslationTreeNode selectedNode = translationTree.getNodeByKey(selectedKey);
-			if (selectedNode != null) {
-				translationTree.setSelectedNode(selectedNode);
-			}
-		});
+		if (!resources.isEmpty()) {
+			EventQueue.invokeLater(() -> {
+				// Restore last expanded nodes
+				List<String> expandedKeys = settings.getListProperty("last_expanded");
+				List<TranslationTreeNode> expandedNodes = expandedKeys.stream()
+						.map(k -> translationTree.getNodeByKey(k))
+						.filter(n -> n != null)
+						.collect(Collectors.toList());
+				translationTree.expand(expandedNodes);
+				
+				// Restore last selected node
+				String selectedKey = settings.getProperty("last_selected");
+				TranslationTreeNode selectedNode = translationTree.getNodeByKey(selectedKey);
+				if (selectedNode != null) {
+					translationTree.setSelectedNode(selectedNode);
+				}
+			});
+		}
 	}
 	
 	private void storeEditorState() {
@@ -451,15 +452,17 @@ public class Editor extends JFrame {
 		settings.setProperty("window_pos_y", getY());
 		settings.setProperty("divider_pos", contentPanel.getDividerLocation());
 		
-		// Store keys of expanded nodes
-		List<String> expandedNodeKeys = translationTree.getExpandedNodes().stream()
-				.map(n -> n.getKey())
-				.collect(Collectors.toList());
-		settings.setProperty("last_expanded", expandedNodeKeys);
-		
-		// Store key of selected node
-		TranslationTreeNode selectedNode = translationTree.getSelectedNode();
-		settings.setProperty("last_selected", selectedNode == null ? "" : selectedNode.getKey());
+		if (!resources.isEmpty()) {
+			// Store keys of expanded nodes
+			List<String> expandedNodeKeys = translationTree.getExpandedNodes().stream()
+					.map(n -> n.getKey())
+					.collect(Collectors.toList());
+			settings.setProperty("last_expanded", expandedNodeKeys);
+			
+			// Store key of selected node
+			TranslationTreeNode selectedNode = translationTree.getSelectedNode();
+			settings.setProperty("last_selected", selectedNode == null ? "" : selectedNode.getKey());
+		}
 		
 		settings.store(SETTINGS_PATH);
 	}

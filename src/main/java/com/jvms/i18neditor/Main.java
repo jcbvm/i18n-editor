@@ -1,6 +1,8 @@
 package com.jvms.i18neditor;
 
 import java.awt.EventQueue;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 import javax.swing.UIManager;
@@ -33,12 +35,17 @@ public class Main {
 		settings.load(Editor.SETTINGS_PATH);
 		Editor editor = new Editor(settings);
 		editor.setVisible(true);
+		
+		// Try to load previously loaded resources
 		List<String> dirs = settings.getListProperty("history");
-    	if (dirs.isEmpty()) {
-    		editor.showImportDialog();
-    	} else {
+    	if (!dirs.isEmpty()) {
     		String lastDir = dirs.get(dirs.size()-1);
-    		editor.importResources(lastDir);
+    		if (Files.exists(Paths.get(lastDir))) {
+    			editor.importResources(lastDir);
+    			return;
+    		}
     	}
+    	
+    	editor.showImportDialog();
 	}
 }
