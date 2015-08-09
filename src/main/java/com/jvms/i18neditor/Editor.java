@@ -424,24 +424,24 @@ public class Editor extends JFrame {
 			setLocationRelativeTo(null);
 		}
 		
-		if (!resources.isEmpty()) {
-			EventQueue.invokeLater(() -> {
-				// Restore last expanded nodes
-				List<String> expandedKeys = settings.getListProperty("last_expanded");
-				List<TranslationTreeNode> expandedNodes = expandedKeys.stream()
-						.map(k -> translationTree.getNodeByKey(k))
-						.filter(n -> n != null)
-						.collect(Collectors.toList());
-				translationTree.expand(expandedNodes);
-				
-				// Restore last selected node
-				String selectedKey = settings.getProperty("last_selected");
-				TranslationTreeNode selectedNode = translationTree.getNodeByKey(selectedKey);
-				if (selectedNode != null) {
-					translationTree.setSelectedNode(selectedNode);
-				}
-			});
-		}
+		EventQueue.invokeLater(() -> {
+			if (!resources.isEmpty()) {
+					// Restore last expanded nodes
+					List<String> expandedKeys = settings.getListProperty("last_expanded");
+					List<TranslationTreeNode> expandedNodes = expandedKeys.stream()
+							.map(k -> translationTree.getNodeByKey(k))
+							.filter(n -> n != null)
+							.collect(Collectors.toList());
+					translationTree.expand(expandedNodes);
+					
+					// Restore last selected node
+					String selectedKey = settings.getProperty("last_selected");
+					TranslationTreeNode selectedNode = translationTree.getNodeByKey(selectedKey);
+					if (selectedNode != null) {
+						translationTree.setSelectedNode(selectedNode);
+					}
+			}
+		});
 	}
 	
 	private void storeEditorState() {
