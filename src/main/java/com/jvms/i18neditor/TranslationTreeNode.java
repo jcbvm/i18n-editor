@@ -55,8 +55,20 @@ public class TranslationTreeNode extends DefaultMutableTreeNode {
 		return Collections.list(children());
 	}
 	
+	public TranslationTreeNode cloneWithChildren() {
+		return cloneWithChildren(this);
+	}
+	
 	@Override
 	public String toString() {
 		return name;
+	}
+	
+	private TranslationTreeNode cloneWithChildren(TranslationTreeNode parent) {
+		TranslationTreeNode newParent = (TranslationTreeNode) parent.clone();
+		for (TranslationTreeNode n : parent.getChildren()) {
+			newParent.add(cloneWithChildren(n));
+		}
+		return newParent;
 	}
 }

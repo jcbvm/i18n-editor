@@ -3,7 +3,6 @@ package com.jvms.i18neditor;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.Image;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -69,11 +68,11 @@ public class Editor extends JFrame {
 	private List<ResourceField> resourceFields;
 	private ExtendedProperties settings;
 	
-	public Editor(ExtendedProperties settings) {
+	public Editor() {
 		super();
-		this.settings = settings;
 		resources = Lists.newLinkedList();
 		resourceFields = Lists.newLinkedList();
+		settings = new ExtendedProperties();
 		setup();
 	}
 	
@@ -153,6 +152,13 @@ public class Editor extends JFrame {
 		}
 	}
 	
+	public void duplicateSelectedTranslation() {
+		TranslationTreeNode node = translationTree.getSelectedNode();
+		if (node != null && !node.isRoot()) {
+			showDuplicateTranslationDialog(node.getKey());
+		}
+	}
+	
 	public void addTranslationKey(String key) {
 		if (resources.isEmpty()) return;
 		resources.forEach(resource -> resource.storeTranslation(key, ""));
@@ -169,6 +175,12 @@ public class Editor extends JFrame {
 		if (resources.isEmpty()) return;
 		resources.forEach(resource -> resource.renameTranslation(key, newKey));
 		translationTree.renameNodeByKey(key, newKey);
+	}
+	
+	public void duplicateTranslationKey(String key, String newKey) {
+		if (resources.isEmpty()) return;
+		resources.forEach(resource -> resource.duplicateTranslation(key, newKey));
+		translationTree.duplicateNodeByKey(key, newKey);
 	}
 	
 	public boolean isDirty() {
@@ -255,6 +267,24 @@ public class Editor extends JFrame {
 		}
 	}
 	
+	public void showDuplicateTranslationDialog(String key) {
+		String newKey = "";
+		while (newKey != null && newKey.isEmpty()) {
+			newKey = (String) JOptionPane.showInputDialog(this, 
+					MessageBundle.get("dialogs.translation.duplicate.text"), 
+					MessageBundle.get("dialogs.translation.duplicate.title"), 
+					JOptionPane.QUESTION_MESSAGE, null, null, key);
+			if (newKey != null) {
+				newKey = newKey.trim();
+				if (!TranslationKeys.isValid(newKey)) {
+					showError(MessageBundle.get("dialogs.translation.duplicate.error"));
+				} else {
+					duplicateTranslationKey(key, newKey);
+				}
+			}
+		}
+	}
+	
 	public void showAddTranslationDialog() {
 		String key = "";
 		String newKey = "";
@@ -319,6 +349,26 @@ public class Editor extends JFrame {
 			return result != JOptionPane.CANCEL_OPTION;
 		}
 		return true;
+	}
+	
+	public void launch() {
+		settings.load(Editor.SETTINGS_PATH);
+		
+		// Try to load previously loaded resources
+		List<String> dirs = settings.getListProperty("history");
+    	if (!dirs.isEmpty()) {
+    		String lastDir = dirs.get(dirs.size()-1);
+    		if (Files.exists(Paths.get(lastDir))) {
+    			importResources(lastDir);
+    		}
+    	}
+    	
+    	restoreEditorState();
+    	setVisible(true);
+    	
+    	if (resources.isEmpty()) {
+    		showImportDialog();    		
+    	}
 	}
 	
 	public void reset() {
@@ -398,7 +448,6 @@ public class Editor extends JFrame {
         resourcesPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
         
 		contentPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, translationsPanel, new JScrollPane(resourcesPanel));
-     	contentPanel.setDividerLocation(settings.getIntegerProperty("divider_pos", 250));
      	contentPanel.setVisible(false);
 		
      	editorMenu = new EditorMenu(this, translationTree);
@@ -406,8 +455,6 @@ public class Editor extends JFrame {
 		Container contentPane = getContentPane();
 		contentPane.add(editorMenu, BorderLayout.NORTH);
 		contentPane.add(contentPanel);
-		
-		restoreEditorState();
 	}
 	
 	private Image getResourceImage(String path) {
@@ -417,6 +464,7 @@ public class Editor extends JFrame {
 	private void restoreEditorState() {
 		// Restore window bounds
 		setPreferredSize(new Dimension(settings.getIntegerProperty("window_width", 1024), settings.getIntegerProperty("window_height", 768)));
+		contentPanel.setDividerLocation(settings.getIntegerProperty("divider_pos", 250));
 		pack();
 		if (settings.containsKeys("window_pos_x", "window_pos_y")) {
 			setLocation(settings.getIntegerProperty("window_pos_x"), settings.getIntegerProperty("window_pos_y"));
@@ -424,24 +472,22 @@ public class Editor extends JFrame {
 			setLocationRelativeTo(null);
 		}
 		
-		EventQueue.invokeLater(() -> {
-			if (!resources.isEmpty()) {
-					// Restore last expanded nodes
-					List<String> expandedKeys = settings.getListProperty("last_expanded");
-					List<TranslationTreeNode> expandedNodes = expandedKeys.stream()
-							.map(k -> translationTree.getNodeByKey(k))
-							.filter(n -> n != null)
-							.collect(Collectors.toList());
-					translationTree.expand(expandedNodes);
-					
-					// Restore last selected node
-					String selectedKey = settings.getProperty("last_selected");
-					TranslationTreeNode selectedNode = translationTree.getNodeByKey(selectedKey);
-					if (selectedNode != null) {
-						translationTree.setSelectedNode(selectedNode);
-					}
+		if (!resources.isEmpty()) {
+			// Restore last expanded nodes
+			List<String> expandedKeys = settings.getListProperty("last_expanded");
+			List<TranslationTreeNode> expandedNodes = expandedKeys.stream()
+					.map(k -> translationTree.getNodeByKey(k))
+					.filter(n -> n != null)
+					.collect(Collectors.toList());
+			translationTree.expand(expandedNodes);
+			
+			// Restore last selected node
+			String selectedKey = settings.getProperty("last_selected");
+			TranslationTreeNode selectedNode = translationTree.getNodeByKey(selectedKey);
+			if (selectedNode != null) {
+				translationTree.setSelectedNode(selectedNode);
 			}
-		});
+		}
 	}
 	
 	private void storeEditorState() {

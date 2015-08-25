@@ -112,29 +112,11 @@ public class TranslationTree extends JTree {
 	}
 	
 	public void renameNodeByKey(String key, String newKey) {
-		TranslationTreeModel model = (TranslationTreeModel) getModel();
-		TranslationTreeNode oldNode = model.getNodeByKey(key);
-		TranslationTreeNode newNode = model.getNodeByKey(newKey);
-		
-		// Store expansion state of old tree
-		List<TranslationTreeNode> expandedNodes = getExpandedNodes(oldNode);
-		
-		// Remove old and any existing new tree
-		model.removeNodeFromParent(oldNode);
-		if (newNode != null) {
-			model.removeNodeFromParent(newNode);
-		}
-		
-		// Create new node from new key and add it to parent of old node
-		TranslationTreeNode parent = addNodeByKey(TranslationKeys.withoutLastPart(newKey));
-		oldNode.setName(TranslationKeys.lastPart(newKey));
-		model.insertNodeInto(oldNode, parent);
-		
-		// Restore expansion state
-		expand(expandedNodes);
-		
-		// Restore selected node
-		setSelectedNode(oldNode);
+		duplicateNodeByKey(key, newKey, false);
+	}
+	
+	public void duplicateNodeByKey(String key, String newKey) {
+		duplicateNodeByKey(key, newKey, true);
 	}
 	
 	public TranslationTreeNode getSelectedNode() {
@@ -160,6 +142,34 @@ public class TranslationTree extends JTree {
         setEditable(false);
         // Remove F2 keystroke binding
         getActionMap().getParent().remove("startEditing");
+	}
+	
+	private void duplicateNodeByKey(String key, String newKey, boolean keepOld) {
+		TranslationTreeModel model = (TranslationTreeModel) getModel();
+		TranslationTreeNode node = model.getNodeByKey(key);
+		TranslationTreeNode newNode = model.getNodeByKey(newKey);
+		List<TranslationTreeNode> expandedNodes = null;
+		
+		if (keepOld) {
+			node = node.cloneWithChildren();
+		} else {
+			expandedNodes = getExpandedNodes(node);
+			model.removeNodeFromParent(node);
+		}
+		
+		if (newNode != null) {
+			model.removeNodeFromParent(newNode);
+		}
+		
+		TranslationTreeNode parent = addNodeByKey(TranslationKeys.withoutLastPart(newKey));
+		node.setName(TranslationKeys.lastPart(newKey));
+		model.insertNodeInto(node, parent);
+		
+		if (expandedNodes != null) {
+			expand(expandedNodes);
+		}
+		
+		setSelectedNode(node);
 	}
 	
 	private class TranslationTreeMouseListener extends MouseAdapter {

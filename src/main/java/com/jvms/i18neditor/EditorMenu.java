@@ -28,6 +28,7 @@ public class EditorMenu extends JMenuBar {
 	private JMenuItem addTranslationMenuItem;
 	private JMenuItem findTranslationMenuItem;
 	private JMenuItem renameTranslationMenuItem;
+	private JMenuItem duplicateTranslationMenuItem;
 	private JMenuItem removeTranslationMenuItem;
 	private JMenu editMenu;
 	private JMenu viewMenu;
@@ -126,6 +127,7 @@ public class EditorMenu extends JMenuBar {
         findTranslationMenuItem = new FindTranslationMenuItem(editor, false);
         
         removeTranslationMenuItem = new RemoveTranslationMenuItem(editor, false);
+        duplicateTranslationMenuItem = new DuplicateTranslationMenuItem(editor, true);
         renameTranslationMenuItem = new RenameTranslationMenuItem(editor, false);
         
         editMenu.add(addLocaleMenuItem);
@@ -134,6 +136,7 @@ public class EditorMenu extends JMenuBar {
         editMenu.add(findTranslationMenuItem);
         editMenu.addSeparator();
         editMenu.add(renameTranslationMenuItem);
+        editMenu.add(duplicateTranslationMenuItem);
         editMenu.add(removeTranslationMenuItem);
         
         viewMenu = new JMenu(MessageBundle.get("menu.view.title"));
@@ -157,8 +160,10 @@ public class EditorMenu extends JMenuBar {
      	
      	tree.addTreeSelectionListener(e -> {
      		TranslationTreeNode node = tree.getSelectedNode();
-			renameTranslationMenuItem.setEnabled(node != null && !node.isRoot());
-			removeTranslationMenuItem.setEnabled(node != null && !node.isRoot());
+     		boolean enabled = node != null && !node.isRoot();
+			renameTranslationMenuItem.setEnabled(enabled);
+			duplicateTranslationMenuItem.setEnabled(enabled);
+			removeTranslationMenuItem.setEnabled(enabled);
      	});
 	}
 }

@@ -125,4 +125,67 @@ public class ResourceTest {
 		assertEquals(translations.get("a.b.a"), null);
 		assertEquals(translations.get("a.b.b"), null);
 	}
+	
+	@Test
+	public void duplicateTranslationToUniqueKeyTest() {
+		SortedMap<String,String> translations;
+		
+		resource.storeTranslation("b.a", "ba");
+		resource.storeTranslation("b.b", "bb");
+		resource.duplicateTranslation("b", "c");
+		
+		translations = resource.getTranslations();
+		assertEquals(translations.size(), 6);
+		assertEquals(translations.get("a.a"), "aa");
+		assertEquals(translations.get("a.b"), "ab");
+		assertEquals(translations.get("b.a"), "ba");
+		assertEquals(translations.get("b.b"), "bb");
+		assertEquals(translations.get("c.a"), "ba");
+		assertEquals(translations.get("c.b"), "bb");
+		
+		resource.duplicateTranslation("c.a", "d");
+		
+		translations = resource.getTranslations();
+		assertEquals(translations.size(), 7);
+		assertEquals(translations.get("d"), "ba");
+		assertEquals(translations.get("a.a"), "aa");
+		assertEquals(translations.get("a.b"), "ab");
+		assertEquals(translations.get("b.a"), "ba");
+		assertEquals(translations.get("b.b"), "bb");
+		assertEquals(translations.get("c.a"), "ba");
+		assertEquals(translations.get("c.b"), "bb");
+	}
+	
+	@Test
+	public void duplicateTranslationToExistingKeyTest() {
+		SortedMap<String,String> translations;
+		
+		resource.storeTranslation("a.c", "ac");
+		resource.storeTranslation("b.a", "ba");
+		resource.storeTranslation("b.b.a", "bba");
+		resource.storeTranslation("b.b.b", "bbb");
+		resource.duplicateTranslation("b", "a");
+		
+		translations = resource.getTranslations();
+		assertEquals(translations.size(), 6);
+		assertEquals(translations.get("a.c"), null);
+		assertEquals(translations.get("a.a"), "ba");
+		assertEquals(translations.get("a.b.a"), "bba");
+		assertEquals(translations.get("a.b.b"), "bbb");
+		assertEquals(translations.get("b.a"), "ba");
+		assertEquals(translations.get("b.b.a"), "bba");
+		assertEquals(translations.get("b.b.b"), "bbb");
+		
+		resource.duplicateTranslation("a.b", "a");
+		
+		translations = resource.getTranslations();
+		assertEquals(translations.size(), 5);
+		assertEquals(translations.get("a.a"), "bba");
+		assertEquals(translations.get("a.b"), "bbb");
+		assertEquals(translations.get("a.b.a"), null);
+		assertEquals(translations.get("a.b.b"), null);
+		assertEquals(translations.get("b.a"), "ba");
+		assertEquals(translations.get("b.b.a"), "bba");
+		assertEquals(translations.get("b.b.b"), "bbb");
+	}
 }

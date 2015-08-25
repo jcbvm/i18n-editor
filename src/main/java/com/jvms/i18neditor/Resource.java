@@ -153,21 +153,18 @@ public class Resource {
 	 * @param 	newKey the new key.
 	 */
 	public void renameTranslation(String key, String newKey) {
-		Map<String,String> newTranslations = Maps.newTreeMap();
-		translations.keySet().forEach(k -> {
-			if (TranslationKeys.isChildKeyOf(k, key)) {
-				String nk = TranslationKeys.create(newKey, TranslationKeys.childKey(k, key));
-				newTranslations.put(nk, translations.get(k));
-			}
-		});
-		if (translations.containsKey(key)) {
-			newTranslations.put(newKey, translations.get(key));
-		}
-		removeChildren(newKey);
-		translations.remove(newKey);
-		removeChildren(key);
-		translations.remove(key);
-		translations.putAll(newTranslations);
+		duplicateTranslation(key, newKey, false);
+		notifyListeners();
+	}
+	
+	/**
+	 * Duplicates a translation key, and any child keys, in the resource's translations.
+	 * 
+	 * @param 	key the key of the translation to duplicate.
+	 * @param 	newKey the new key.
+	 */
+	public void duplicateTranslation(String key, String newKey) {
+		duplicateTranslation(key, newKey, true);
 		notifyListeners();
 	}
 	
@@ -188,6 +185,26 @@ public class Resource {
 	 */
 	public void removeListener(ResourceListener listener) {
 		listeners.remove(listener);
+	}
+	
+	private void duplicateTranslation(String key, String newKey, boolean keepOld) {
+		Map<String,String> newTranslations = Maps.newTreeMap();
+		translations.keySet().forEach(k -> {
+			if (TranslationKeys.isChildKeyOf(k, key)) {
+				String nk = TranslationKeys.create(newKey, TranslationKeys.childKey(k, key));
+				newTranslations.put(nk, translations.get(k));
+			}
+		});
+		if (translations.containsKey(key)) {
+			newTranslations.put(newKey, translations.get(key));
+		}
+		removeChildren(newKey);
+		translations.remove(newKey);
+		if (!keepOld) {
+			removeChildren(key);
+			translations.remove(key);
+		}
+		translations.putAll(newTranslations);
 	}
 	
 	private void removeChildren(String key) {
