@@ -46,10 +46,15 @@ public class ResourceField extends JTextArea implements Comparable<ResourceField
 		setWrapStyleWord(true);
 		setRows(10);
 		
-		// Add undo support
 		getDocument().addUndoableEditListener(e -> undoManager.addEdit(e.getEdit()));
+		
+		// Add undo support
 		getActionMap().put("undo", new UndoAction());
 		getInputMap().put(KeyStroke.getKeyStroke('Z', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()), "undo");
+		
+		// Add redo support
+		getActionMap().put("redo", new RedoAction());
+		getInputMap().put(KeyStroke.getKeyStroke('Y', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()), "redo");
 	}
 	
 	@SuppressWarnings("serial")
@@ -58,6 +63,16 @@ public class ResourceField extends JTextArea implements Comparable<ResourceField
 		public void actionPerformed(ActionEvent e) {
 			if (undoManager.canUndo()) {
 				undoManager.undo();
+			}
+		}
+	}
+	
+	@SuppressWarnings("serial")
+	private class RedoAction extends AbstractAction {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if (undoManager.canRedo()) {
+				undoManager.redo();
 			}
 		}
 	}
