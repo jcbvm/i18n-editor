@@ -1,5 +1,7 @@
 package com.jvms.i18neditor;
 
+import java.awt.Toolkit;
+
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
@@ -15,7 +17,7 @@ public class DuplicateTranslationMenuItem extends JMenuItem {
 	
 	public DuplicateTranslationMenuItem(Editor editor, boolean enabled) {
         super(MessageBundle.get("menu.edit.duplicate.title"));
-		setAccelerator(KeyStroke.getKeyStroke("ctrl D"));
+		setAccelerator(KeyStroke.getKeyStroke('D', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 		addActionListener(e -> editor.duplicateSelectedTranslation());
 		setEnabled(enabled);
 	}
