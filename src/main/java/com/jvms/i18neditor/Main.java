@@ -4,6 +4,8 @@ import java.awt.EventQueue;
 
 import javax.swing.UIManager;
 
+import org.apache.commons.lang3.SystemUtils;
+
 /**
  * The main entry class of the program.
  * 
@@ -19,7 +21,9 @@ public class Main {
 	
 	private static void setupLookAndFeel() {
 		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			if (!SystemUtils.IS_OS_LINUX) {
+				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());				
+			}
 		} catch (Exception e) {
 			//
 		}

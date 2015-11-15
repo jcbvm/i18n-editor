@@ -51,7 +51,7 @@ public class Editor extends JFrame {
 	
 	public static final Path SETTINGS_PATH = Paths.get(System.getProperty("user.home"), ".i18n-editor");
 	public static final String TITLE = "i18n Editor";
-	public static final String VERSION = "0.3.0";
+	public static final String VERSION = "0.3.1";
 	public static final int DEFAULT_WIDTH = 1024;
 	public static final int DEFAULT_HEIGHT = 768;
 	
@@ -352,7 +352,7 @@ public class Editor extends JFrame {
 	}
 	
 	public void launch() {
-		settings.load(Editor.SETTINGS_PATH);
+		settings.load(SETTINGS_PATH);
 		
 		// Try to load previously loaded resources
 		List<String> dirs = settings.getListProperty("history");

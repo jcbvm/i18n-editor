@@ -173,10 +173,8 @@ public class TranslationTree extends JTree {
 	}
 	
 	private class TranslationTreeMouseListener extends MouseAdapter {
-		@Override
-		public void mouseReleased(MouseEvent e) {
-			if (!e.isPopupTrigger() || !isEditable()) return;
-	    	TreePath path = getPathForLocation(e.getX(), e.getY());
+		private void showPopupMenu(MouseEvent e) {
+			TreePath path = getPathForLocation(e.getX(), e.getY());
 	    	if (path == null) {
 	    		setSelectionPath(null);
 	    		TranslationTreeMenu menu = new TranslationTreeMenu(editor, TranslationTree.this);
@@ -187,6 +185,18 @@ public class TranslationTree extends JTree {
 	    		TranslationTreeNodeMenu menu = new TranslationTreeNodeMenu(editor, node);
 	    		menu.show(e.getComponent(), e.getX(), e.getY());
 	    	}
+		}
+		
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			if (!e.isPopupTrigger() || !isEditable()) return;
+			showPopupMenu(e);
+	    }
+		
+		@Override
+		public void mousePressed(MouseEvent e) {
+			if (!e.isPopupTrigger() || !isEditable()) return;
+			showPopupMenu(e);
 	    }
 	}
 }
