@@ -9,8 +9,8 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
-import com.jvms.i18neditor.Resource.ResourceType;
 import com.jvms.i18neditor.util.MessageBundle;
+import com.jvms.i18neditor.util.Resource.ResourceType;
 
 /**
  * This class represents the top bar menu of the editor.

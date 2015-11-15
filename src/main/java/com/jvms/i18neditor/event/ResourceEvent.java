@@ -1,6 +1,6 @@
 package com.jvms.i18neditor.event;
 
-import com.jvms.i18neditor.Resource;
+import com.jvms.i18neditor.util.Resource;
 
 /**
  * An event wrapper for a {@link Resource}.

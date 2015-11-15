@@ -2,7 +2,7 @@ package com.jvms.i18neditor.event;
 
 import java.util.EventListener;
 
-import com.jvms.i18neditor.Resource;
+import com.jvms.i18neditor.util.Resource;
 
 /**
  * Defines an object which listens for {@link ResourceEvent}s.

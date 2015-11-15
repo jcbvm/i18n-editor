@@ -11,6 +11,8 @@ import javax.swing.KeyStroke;
 import javax.swing.border.Border;
 import javax.swing.undo.UndoManager;
 
+import com.jvms.i18neditor.util.Resource;
+
 /**
  * This class represents a text area to edit the value of a translation.
  * 

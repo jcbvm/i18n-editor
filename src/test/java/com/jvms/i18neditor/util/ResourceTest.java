@@ -1,4 +1,4 @@
-package com.jvms.i18neditor;
+package com.jvms.i18neditor.util;
 
 import java.util.Locale;
 import java.util.SortedMap;
@@ -7,8 +7,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.google.common.collect.Maps;
-import com.jvms.i18neditor.Resource;
-import com.jvms.i18neditor.Resource.ResourceType;
+import com.jvms.i18neditor.util.Resource;
+import com.jvms.i18neditor.util.Resource.ResourceType;
 
 import static org.junit.Assert.*;
 

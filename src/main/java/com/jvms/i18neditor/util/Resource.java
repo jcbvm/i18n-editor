@@ -1,4 +1,4 @@
-package com.jvms.i18neditor;
+package com.jvms.i18neditor.util;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -11,7 +11,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jvms.i18neditor.event.ResourceEvent;
 import com.jvms.i18neditor.event.ResourceListener;
-import com.jvms.i18neditor.util.TranslationKeys;
 
 /**
  * A resource is a container for storing translation data and is defined by the following properties:

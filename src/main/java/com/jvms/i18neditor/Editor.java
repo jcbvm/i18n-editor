@@ -34,12 +34,13 @@ import javax.swing.event.TreeSelectionListener;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.jvms.i18neditor.Resource.ResourceType;
 import com.jvms.i18neditor.swing.JScrollablePanel;
 import com.jvms.i18neditor.util.ExtendedProperties;
 import com.jvms.i18neditor.util.MessageBundle;
+import com.jvms.i18neditor.util.Resource;
 import com.jvms.i18neditor.util.Resources;
 import com.jvms.i18neditor.util.TranslationKeys;
+import com.jvms.i18neditor.util.Resource.ResourceType;
 
 /**
  * This class represents the main class of the editor.
