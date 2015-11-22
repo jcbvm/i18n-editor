@@ -38,9 +38,9 @@ import com.jvms.i18neditor.swing.JScrollablePanel;
 import com.jvms.i18neditor.util.ExtendedProperties;
 import com.jvms.i18neditor.util.MessageBundle;
 import com.jvms.i18neditor.util.Resource;
+import com.jvms.i18neditor.util.Resource.ResourceType;
 import com.jvms.i18neditor.util.Resources;
 import com.jvms.i18neditor.util.TranslationKeys;
-import com.jvms.i18neditor.util.Resource.ResourceType;
 
 /**
  * This class represents the main class of the editor.
@@ -186,6 +186,10 @@ public class Editor extends JFrame {
 	
 	public boolean isDirty() {
 		return dirty;
+	}
+	
+	public Path getResourcesPath() {
+		return resourcesDir;
 	}
 	
 	public void setDirty(boolean dirty) {

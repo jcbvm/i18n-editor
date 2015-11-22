@@ -1,7 +1,9 @@
 package com.jvms.i18neditor;
 
+import java.awt.Desktop;
 import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.util.List;
 
 import javax.swing.JMenu;
@@ -30,6 +32,7 @@ public class EditorMenu extends JMenuBar {
 	private JMenuItem renameTranslationMenuItem;
 	private JMenuItem duplicateTranslationMenuItem;
 	private JMenuItem removeTranslationMenuItem;
+	private JMenuItem openContainingFolderMenuItem;
 	private JMenu editMenu;
 	private JMenu viewMenu;
 	private JMenu openRecentMenuItem;
@@ -48,6 +51,7 @@ public class EditorMenu extends JMenuBar {
 	@Override
 	public void setEnabled(boolean enabled) {
 		reloadMenuItem.setEnabled(enabled);
+		openContainingFolderMenuItem.setEnabled(enabled);
 		editMenu.setEnabled(enabled);
 		viewMenu.setEnabled(enabled);
 	}
@@ -81,6 +85,15 @@ public class EditorMenu extends JMenuBar {
      	openMenuItem.setAccelerator(KeyStroke.getKeyStroke('O', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         openMenuItem.addActionListener(e -> editor.showImportDialog());
         
+        openContainingFolderMenuItem = new JMenuItem(MessageBundle.get("menu.file.folder.title"));
+        openContainingFolderMenuItem.addActionListener(e -> {
+        	try {
+    			Desktop.getDesktop().open(editor.getResourcesPath().toFile());
+    		} catch (IOException ex) {
+    			//
+    		}
+        });
+        
         openRecentMenuItem = new JMenu(MessageBundle.get("menu.file.recent.title"));
         openRecentMenuItem.setMnemonic(MessageBundle.getMnemonic("menu.file.recent.vk"));
         
@@ -98,6 +111,9 @@ public class EditorMenu extends JMenuBar {
         exitMenuItem.addActionListener(e -> editor.dispatchEvent(new WindowEvent(editor, WindowEvent.WINDOW_CLOSING)));
         
         fileMenu.add(openMenuItem);
+        if (Desktop.isDesktopSupported()) {
+	        fileMenu.add(openContainingFolderMenuItem);
+		}
         fileMenu.add(openRecentMenuItem);
         fileMenu.addSeparator();
         fileMenu.add(saveMenuItem);
