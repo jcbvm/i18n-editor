@@ -1,6 +1,6 @@
 # Ember i18n Editor [![Build Status](https://travis-ci.org/jcbvm/ember-i18n-editor.svg?branch=master)](https://travis-ci.org/jcbvm/require-i18next)
 
-This application lets you manage multiple translations files for [Ember-I18n](https://github.com/jamesarosen/ember-i18n) (version 4.0.0 or greater), but can also be used without it. The application saves the translations files in `JSON` or `ES6` format (the latter will save the JSON wrapped in an ES6 module which can be used for Ember-I18n).
+This application lets you manage multiple translations files for [ember-i18n](https://github.com/jamesarosen/ember-i18n) (>= v4.0.0), but can also be used without it. The application saves the translations files in `JSON` or `ES6` format (the latter will save the JSON wrapped in an ES6 module which can be used for ember-i18n).
 
 <img src="https://raw.github.com/jcbvm/ember-i18n-editor/master/screenshot.jpg?2" width="600">
 
@@ -16,7 +16,7 @@ This zip file includes a `.exe` file for windows systems and a `.jar` file for o
 
 ## Usage
 
-When you open the program for the first time, it will ask you to choose a folder, this can be any folder you want to put your translation files in (normally when using Ember-I18n this will be your `app/locales/` directory). 
+When you open the editor for the first time, it will ask you to choose a folder, this can be any folder you want to put your translation files in (normally when using ember-i18n this will be your `app/locales/` directory). 
 
 To add a locale, go to `Edit > Add Locale` where you can choose whether you want to create a `JSON` or an `ES6` file, enter the locale you want to create the tranlations for and press OK. A new directory will be created for you named after the locale you entered, with a `translations.json` file if you chose for JSON format and a `translations.js` file if you chose for ES6 format. This is where your translations will be put in.
 
