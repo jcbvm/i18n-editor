@@ -4,6 +4,13 @@ This application lets you manage multiple translations files for [ember-i18n](ht
 
 <img src="https://raw.github.com/jcbvm/ember-i18n-editor/master/screenshot.jpg?2" width="600">
 
+## Features
+
+- Editing multiple translation files at once.
+- Creating new translations/locales or editing existing ones.
+- Drag&Drop translation directories for editing.
+- Option to specify if output should be minified or not.
+
 ## Requirements
 
 The application requires java 8 to be installed on your system.<br>
