@@ -65,7 +65,7 @@ public class Editor extends JFrame {
 	private EditorMenu editorMenu;
 	private JSplitPane contentPane;
 	private JPanel translationsPanel;
-	private JScrollPane resourcesPane;
+	private JScrollPane resourcesScrollPane;
 	private TranslationTree translationTree;
 	private TranslationField translationField;
 	private JPanel resourcesPanel;
@@ -410,15 +410,16 @@ public class Editor extends JFrame {
 		TranslationTreeNode selectedNode = translationTree.getSelectedNode();
 		
 		resourcesPanel.removeAll();
-		resourceFields.sort((f1, f2) -> f1.compareTo(f2));
-		resourceFields.forEach(f -> {
-			f.setEditable(selectedNode != null && selectedNode.isEditable());
-			resourcesPanel.add(new JLabel(f.getResource().getLocale().getDisplayName()));
+		resourceFields.stream().sorted().forEach(field -> {
+			field.setEditable(selectedNode != null && selectedNode.isEditable());
 			resourcesPanel.add(Box.createVerticalStrut(5));
-			resourcesPanel.add(f);
+			resourcesPanel.add(new JLabel(field.getResource().getLocale().getDisplayName()));
+			resourcesPanel.add(Box.createVerticalStrut(5));
+			resourcesPanel.add(field);
 			resourcesPanel.add(Box.createVerticalStrut(5));
 		});
 		if (!resourceFields.isEmpty()) {
+			resourcesPanel.remove(0);
 			resourcesPanel.remove(resourcesPanel.getComponentCount()-1);
 		}
 		
@@ -486,8 +487,10 @@ public class Editor extends JFrame {
         resourcesPanel.setLayout(new BoxLayout(resourcesPanel, BoxLayout.Y_AXIS));
         resourcesPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
         
-        resourcesPane = new JScrollPane(resourcesPanel);
-		contentPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, translationsPanel, resourcesPane);
+        resourcesScrollPane = new JScrollPane(resourcesPanel);
+        resourcesScrollPane.getViewport().setOpaque(false);
+        
+		contentPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, translationsPanel, resourcesScrollPane);
      	editorMenu = new EditorMenu(this, translationTree);
      	
 		Container container = getContentPane();
@@ -547,7 +550,7 @@ public class Editor extends JFrame {
 			
 			if (node != null) {
 				// Store scroll position
-				int scrollValue = resourcesPane.getVerticalScrollBar().getValue();
+				int scrollValue = resourcesScrollPane.getVerticalScrollBar().getValue();
 				
 				// Update UI values
 				String key = node.getKey();
@@ -558,7 +561,7 @@ public class Editor extends JFrame {
 				});
 				
 				// Restore scroll position
-				SwingUtilities.invokeLater(() -> resourcesPane.getVerticalScrollBar().setValue(scrollValue));
+				SwingUtilities.invokeLater(() -> resourcesScrollPane.getVerticalScrollBar().setValue(scrollValue));
 			}
 		}
 	}
