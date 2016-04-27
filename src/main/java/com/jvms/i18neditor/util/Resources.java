@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -104,10 +105,11 @@ public final class Resources {
 	 * Writes the contents of the given resource to disk.
 	 * 
 	 * @param 	resource the resource to write.
+	 * @param   prettyPrinting whether to pretty print the contents
 	 * @throws 	IOException if an I/O error occurs writing the file.
 	 */
-	public static void write(Resource resource) throws IOException {
-		String content = toJson(resource.getTranslations());
+	public static void write(Resource resource, boolean prettyPrinting) throws IOException {
+		String content = toJson(resource.getTranslations(), prettyPrinting);
 		if (resource.getType() == ResourceType.ES6) {
 			content = jsonToEs6(content);
 		}
@@ -129,10 +131,15 @@ public final class Resources {
 	 * @throws 	IOException if an I/O error occurs writing the file.
 	 */
 	public static Resource create(ResourceType type, Path path) throws IOException {
-		Path filePath = Paths.get(path.toString(), RESOURCE_FILENAME + ".json");
+		Path filePath;
+		if (type == ResourceType.ES6) {
+			filePath = Paths.get(path.toString(), RESOURCE_FILENAME + ".js");
+		} else {
+			filePath = Paths.get(path.toString(), RESOURCE_FILENAME + ".json");
+		}
 		Locale locale = parseLocale(path.getFileName().toString());
-		Resource resource = new Resource(ResourceType.JSON, filePath, locale);
-		write(resource);
+		Resource resource = new Resource(type, filePath, locale);
+		write(resource, false);
 		return resource;
 	}
 	
@@ -167,10 +174,14 @@ public final class Resources {
 		}
 	}
 	
-	private static String toJson(Map<String,String> translations) {
+	private static String toJson(Map<String,String> translations, boolean prettyPrinting) {
 		List<String> keys = Lists.newArrayList(translations.keySet());
 		JsonElement elem = toJson(translations, null, keys);
-		return elem.toString();
+		GsonBuilder builder = new GsonBuilder();
+		if (prettyPrinting) {
+			builder.setPrettyPrinting();
+		}
+		return builder.create().toJson(elem);
 	}
 	
 	private static JsonElement toJson(Map<String,String> translations, String key, List<String> keys) {

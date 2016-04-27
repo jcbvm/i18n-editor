@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -164,17 +165,22 @@ public class EditorMenu extends JMenuBar {
         viewMenu.add(new ExpandTranslationsMenuItem(tree));
         viewMenu.add(new CollapseTranslationsMenuItem(tree));
         
+        JMenu settingsMenu = new JMenu(MessageBundle.get("menu.settings.title"));
+        settingsMenu.setMnemonic(MessageBundle.getMnemonic("menu.settings.vk"));
+        JCheckBoxMenuItem minifyMenuItem = new JCheckBoxMenuItem(MessageBundle.get("menu.settings.minify.title"), editor.isMinifyOutput());
+        minifyMenuItem.addActionListener(e -> editor.setMinifyOutput(minifyMenuItem.isSelected()));
+        settingsMenu.add(minifyMenuItem);
+        
      	JMenu helpMenu = new JMenu(MessageBundle.get("menu.help.title"));
      	helpMenu.setMnemonic(MessageBundle.getMnemonic("menu.help.vk"));
-     	
      	JMenuItem aboutMenuItem = new JMenuItem(MessageBundle.get("menu.help.about.title", Editor.TITLE), MessageBundle.getMnemonic("menu.help.about.vk"));
      	aboutMenuItem.addActionListener(e -> editor.showAboutDialog());
-     	
      	helpMenu.add(aboutMenuItem);
      	
      	add(fileMenu);
      	add(editMenu);
      	add(viewMenu);
+     	add(settingsMenu);
      	add(helpMenu);
      	
      	tree.addTreeSelectionListener(e -> {

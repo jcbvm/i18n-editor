@@ -113,6 +113,17 @@ public class ExtendedProperties extends Properties {
 	}
 	
 	/**
+	 * Sets a value in the property list. The {@code boolean} value will be 
+	 * stored as a {@code String} value; "1" for {@code true}, "0" for {@code false}.
+	 * 
+	 * @param 	key the key to be placed in this property list.
+	 * @param 	value the value corresponding to {@code key}.
+	 */
+	public void setProperty(String key, boolean value) {
+		setProperty(key, value ? 1 : 0);
+	}
+	
+	/**
 	 * Gets a value from the property list as a {@code List}. This method should be used
 	 * to retrieve a value previously stored by {@link #setProperty(String, List)}.
 	 * 
@@ -134,6 +145,19 @@ public class ExtendedProperties extends Properties {
 	public Integer getIntegerProperty(String key) {
 		String value = getProperty(key);
 		return value != null && !value.isEmpty() ? Integer.parseInt(value) : null;
+	}
+	
+	/**
+	 * Gets a value from the property list as an {@code boolean}. This method should be used 
+	 * to retrieve a value previously stored by {@link #setProperty(String, boolean)}.
+	 * 
+	 * @param 	key the property key.
+	 * @return 	the value in this property list with the specified key value or {@code false}
+	 * 			if no such key exists.
+	 */
+	public boolean getBooleanProperty(String key) {
+		Integer value = getIntegerProperty(key, 0);
+		return value == 1;
 	}
 	
 	/**

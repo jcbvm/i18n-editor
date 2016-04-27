@@ -1,4 +1,4 @@
 language: java
-install: cd parent && mvn install && cd ../editor && mvn compile
+install: cd editor && mvn compile
 jdk:
   - oraclejdk8

@@ -35,13 +35,12 @@ import javax.swing.event.TreeSelectionListener;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jvms.i18neditor.Resource.ResourceType;
+import com.jvms.i18neditor.swing.JFileDrop;
 import com.jvms.i18neditor.swing.JScrollablePanel;
 import com.jvms.i18neditor.util.ExtendedProperties;
 import com.jvms.i18neditor.util.MessageBundle;
 import com.jvms.i18neditor.util.Resources;
 import com.jvms.i18neditor.util.TranslationKeys;
-
-import net.iharder.dnd.FileDrop;
 
 /**
  * This class represents the main class of the editor.
@@ -53,13 +52,15 @@ public class Editor extends JFrame {
 	
 	public final static Path SETTINGS_PATH = Paths.get(System.getProperty("user.home"), ".i18n-editor");
 	public final static String TITLE = "i18n Editor";
-	public final static String VERSION = "0.4.0";
+	public final static String VERSION = "0.5.0";
+	public final static String COPYRIGHT_YEAR = "2016";
 	public final static int DEFAULT_WIDTH = 1024;
 	public final static int DEFAULT_HEIGHT = 768;
 	
 	private List<Resource> resources = Lists.newLinkedList();
 	private Path resourcesDir;
 	private boolean dirty;
+	private boolean minifyOutput;
 	
 	private EditorMenu editorMenu;
 	private JSplitPane contentPane;
@@ -124,7 +125,7 @@ public class Editor extends JFrame {
 		boolean error = false;
 		for (Resource resource : resources) {
 			try {
-				Resources.write(resource);
+				Resources.write(resource, !minifyOutput);
 			} catch (Exception e) {
 				error = true;
 				e.printStackTrace();
@@ -197,6 +198,14 @@ public class Editor extends JFrame {
 		this.dirty = dirty;
 		updateTitle();
 		editorMenu.setSaveable(dirty);
+	}
+	
+	public boolean isMinifyOutput() {
+		return minifyOutput;
+	}
+	
+	public void setMinifyOutput(boolean minifyOutput) {
+		this.minifyOutput = minifyOutput;
 	}
 	
 	public void showError(String message) {
@@ -332,15 +341,13 @@ public class Editor extends JFrame {
 	
 	public void showAboutDialog() {
 		showMessage(MessageBundle.get("dialogs.about.title", TITLE), 
-				"<html>" +
-						"<body style=\"text-align:center;width:200px;\"><br>" +
-							"<span style=\"font-weight:bold;font-size:1.2em;\">" + TITLE + "</span><br>" +
-							"v" + VERSION + "<br><br>" +
-							"(c) Copyright 2015<br>" +
-							"Jacob van Mourik<br>" +
-							"MIT Licensed<br><br>" +
-						"</body>" +
-				"</html>");
+				"<html><body style=\"text-align:center;width:200px;\"><br>" +
+					"<span style=\"font-weight:bold;font-size:1.2em;\">" + TITLE + "</span><br>" +
+					"v" + VERSION + "<br><br>" +
+					"(c) Copyright " + COPYRIGHT_YEAR + "<br>" +
+					"Jacob van Mourik<br>" +
+					"MIT Licensed<br><br>" +
+				"</body></html>");
 	}
 	
 	public boolean closeCurrentSession() {
@@ -359,6 +366,9 @@ public class Editor extends JFrame {
 	
 	public void launch() {
 		settings.load(SETTINGS_PATH);
+		
+		// Restore editor settings
+		minifyOutput = settings.getBooleanProperty("minify_output");
     	
 		// Restore window bounds
 		setPreferredSize(new Dimension(settings.getIntegerProperty("window_width", 1024), settings.getIntegerProperty("window_height", 768)));
@@ -368,9 +378,7 @@ public class Editor extends JFrame {
     	pack();
     	setVisible(true);
     	
-    	boolean showImportDialog = !loadResourcesFromHistory();
-    	
-    	if (showImportDialog) {
+    	if (!loadResourcesFromHistory()) {
     		showImportDialog();
     	} else {
     		// Restore last expanded nodes
@@ -488,7 +496,7 @@ public class Editor extends JFrame {
 	}
 	
 	private void setupFileDrop() {
-		new FileDrop(this, new FileDrop.Listener() {
+		new JFileDrop(this, new JFileDrop.Listener() {
 			@Override
 			public void filesDropped(java.io.File[] files) {
 				try {
@@ -507,6 +515,9 @@ public class Editor extends JFrame {
 	}
 	
 	private void storeEditorState() {
+		// Store editor settings
+		settings.setProperty("minify_output", minifyOutput);
+		
 		// Store window bounds
 		settings.setProperty("window_width", getWidth());
 		settings.setProperty("window_height", getHeight());
