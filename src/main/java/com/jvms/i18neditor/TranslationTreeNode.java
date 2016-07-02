@@ -3,6 +3,7 @@ package com.jvms.i18neditor;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -17,7 +18,6 @@ import com.jvms.i18neditor.util.TranslationKeys;
  */
 public class TranslationTreeNode extends DefaultMutableTreeNode {
 	private final static long serialVersionUID = -7372403592538358822L;
-	
 	private String name;
 	
 	public TranslationTreeNode(String name, List<String> keys) {
@@ -53,6 +53,13 @@ public class TranslationTreeNode extends DefaultMutableTreeNode {
 	@SuppressWarnings("unchecked")
 	public List<TranslationTreeNode> getChildren() {
 		return Collections.list(children());
+	}
+	
+	public TranslationTreeNode getChild(String name) {
+		Optional<TranslationTreeNode> child = getChildren().stream()
+				.filter(i -> i.getName().equals(name))
+				.findFirst();
+		return child.isPresent() ? child.get() : null;
 	}
 	
 	public TranslationTreeNode cloneWithChildren() {

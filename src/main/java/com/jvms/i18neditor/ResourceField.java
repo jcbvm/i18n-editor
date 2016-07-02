@@ -18,7 +18,6 @@ import javax.swing.undo.UndoManager;
  */
 public class ResourceField extends JTextArea implements Comparable<ResourceField> {
 	private final static long serialVersionUID = 2034814490878477055L;
-	
 	private final Resource resource;
 	private final UndoManager undoManager = new UndoManager();
 	
@@ -28,8 +27,12 @@ public class ResourceField extends JTextArea implements Comparable<ResourceField
 		setupUI();
 	}
 	
+	public String getValue() {
+		return getText().trim();
+	}
+	
 	public void updateValue(String key) {
-		setText(resource.getTranslations().get(key));
+		setText(resource.getTranslation(key));
 		undoManager.discardAllEdits();
 	}
 	
@@ -56,7 +59,6 @@ public class ResourceField extends JTextArea implements Comparable<ResourceField
 		getInputMap().put(KeyStroke.getKeyStroke('Y', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()), "redo");
 	}
 	
-	@SuppressWarnings("serial")
 	private class UndoAction extends AbstractAction {
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -66,7 +68,6 @@ public class ResourceField extends JTextArea implements Comparable<ResourceField
 		}
 	}
 	
-	@SuppressWarnings("serial")
 	private class RedoAction extends AbstractAction {
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -78,6 +79,8 @@ public class ResourceField extends JTextArea implements Comparable<ResourceField
 	
 	@Override
 	public int compareTo(ResourceField o) {
-		return getResource().getLocale().getDisplayName().compareTo(o.getResource().getLocale().getDisplayName());
+		String a = getResource().getLocale().getDisplayName();
+		String b = o.getResource().getLocale().getDisplayName();
+		return a.compareTo(b);
 	}
 }

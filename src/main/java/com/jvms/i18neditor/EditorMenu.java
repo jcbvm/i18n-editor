@@ -24,10 +24,8 @@ import com.jvms.i18neditor.util.MessageBundle;
  */
 public class EditorMenu extends JMenuBar {
 	private final static long serialVersionUID = -101788804096708514L;
-	
 	private final Editor editor;
 	private final TranslationTree tree;
-	
 	private JMenuItem saveMenuItem;
 	private JMenuItem reloadMenuItem;
 	private JMenuItem addTranslationMenuItem;

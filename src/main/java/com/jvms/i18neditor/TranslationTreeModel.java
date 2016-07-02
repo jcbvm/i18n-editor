@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.swing.tree.DefaultTreeModel;
 
+import com.jvms.i18neditor.util.MessageBundle;
 import com.jvms.i18neditor.util.TranslationKeys;
 
 /**
@@ -19,11 +20,10 @@ public class TranslationTreeModel extends DefaultTreeModel {
 		super(null);
 	}
 	
-	public TranslationTreeModel(String rootName, List<String> keys) {
-		super(new TranslationTreeNode(rootName, keys));
+	public TranslationTreeModel(List<String> keys) {
+		super(new TranslationTreeNode(MessageBundle.get("translations.model.name"), keys));
 	}
 	
-	@SuppressWarnings("unchecked")
 	public TranslationTreeNode getNodeByKey(String key) {
 		TranslationTreeNode node = (TranslationTreeNode) getRoot();
 		Enumeration<TranslationTreeNode> e = node.depthFirstEnumeration();
@@ -51,14 +51,30 @@ public class TranslationTreeModel extends DefaultTreeModel {
 		}
 	}
 	
-	public void insertNodeInto(TranslationTreeNode node, TranslationTreeNode parent) {
-		insertNodeInto(node, parent, getChildIndex(node, parent));
+	public void insertNodeInto(TranslationTreeNode newChild, TranslationTreeNode parent) {
+		insertNodeInto(newChild, parent, getNewChildIndex(newChild, parent));
 	}
 	
-	private int getChildIndex(TranslationTreeNode node, TranslationTreeNode parent) {
+	public void insertDescendantsInto(TranslationTreeNode source, TranslationTreeNode target) {
+		source.getChildren().forEach(child -> {
+			TranslationTreeNode existing = target.getChild(child.getName());
+			if (existing != null) {
+				if (existing.isLeaf()) {
+					removeNodeFromParent(existing);
+					insertNodeInto(child, target);
+				} else {
+					insertDescendantsInto(child, existing);					
+				}
+			} else {
+				insertNodeInto(child, target);
+			}
+		});
+	}
+	
+	private int getNewChildIndex(TranslationTreeNode newChild, TranslationTreeNode parent) {
 		int result = 0;
 		for (TranslationTreeNode n : parent.getChildren()) {
-			if (n.toString().compareTo(node.toString()) < 0) {
+			if (n.getName().compareTo(newChild.getName()) < 0) {
 				result++;
 			}
 		}

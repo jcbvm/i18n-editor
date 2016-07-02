@@ -18,7 +18,7 @@ import com.jvms.i18neditor.util.TranslationKeys;
  * <li>{@code type} the type of the resource, either {@code JSON} or {@code ES6}.</li>
  * <li>{@code path}	the path to the translation file on disk.</li>
  * <li>{@code locale} the locale of the translations.</li>
- * <li>{@code translations} a sorted map containing the translations.</li>
+ * <li>{@code translations} a sorted map containing the translations by key value pair.</li>
  * </ul>
  * 
  * <p>Objects can listen to a resource by adding a {@link ResourceListener} which 
@@ -103,6 +103,16 @@ public class Resource {
 	}
 	
 	/**
+	 * Gets a translation from the resource's translations.
+	 * 
+	 * @param	key the key of the translation to get.
+	 * @return 	value of the translation or <code>null</code> if there is no translation for the given key.
+	 */
+	public String getTranslation(String key) {
+		return translations.get(key);
+	}
+	
+	/**
 	 * Stores a translation to the resource's translations.
 	 * 
 	 * <ul>
@@ -118,7 +128,6 @@ public class Resource {
 	public void storeTranslation(String key, String value) {
 		String existing = translations.get(key);
 		if (existing != null && existing.equals(value)) return;
-		//if (existing == null && value.isEmpty()) return;
 		removeParents(key);
 		removeChildren(key);
 		if (value.isEmpty()) {
@@ -194,13 +203,11 @@ public class Resource {
 		if (translations.containsKey(key)) {
 			newTranslations.put(newKey, translations.get(key));
 		}
-		removeChildren(newKey);
-		translations.remove(newKey);
 		if (!keepOld) {
 			removeChildren(key);
 			translations.remove(key);
 		}
-		translations.putAll(newTranslations);
+		newTranslations.forEach(this::storeTranslation);
 	}
 	
 	private void removeChildren(String key) {

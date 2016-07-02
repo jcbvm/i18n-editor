@@ -107,9 +107,10 @@ public class ResourceTest {
 		resource.renameTranslation("b", "a");
 		
 		translations = resource.getTranslations();
-		assertEquals(translations.size(), 3);
-		assertEquals(translations.get("a.c"), null);
+		assertEquals(translations.size(), 4);
 		assertEquals(translations.get("a.a"), "ba");
+		assertEquals(translations.get("a.b"), null);
+		assertEquals(translations.get("a.c"), "ac");
 		assertEquals(translations.get("a.b.a"), "bba");
 		assertEquals(translations.get("a.b.b"), "bbb");
 		assertEquals(translations.get("b.a"), null);
@@ -119,9 +120,10 @@ public class ResourceTest {
 		resource.renameTranslation("a.b", "a");
 		
 		translations = resource.getTranslations();
-		assertEquals(translations.size(), 2);
+		assertEquals(translations.size(), 3);
 		assertEquals(translations.get("a.a"), "bba");
 		assertEquals(translations.get("a.b"), "bbb");
+		assertEquals(translations.get("a.c"), "ac");
 		assertEquals(translations.get("a.b.a"), null);
 		assertEquals(translations.get("a.b.b"), null);
 	}
@@ -167,9 +169,10 @@ public class ResourceTest {
 		resource.duplicateTranslation("b", "a");
 		
 		translations = resource.getTranslations();
-		assertEquals(translations.size(), 6);
-		assertEquals(translations.get("a.c"), null);
+		assertEquals(translations.size(), 7);
 		assertEquals(translations.get("a.a"), "ba");
+		assertEquals(translations.get("a.b"), null);
+		assertEquals(translations.get("a.c"), "ac");
 		assertEquals(translations.get("a.b.a"), "bba");
 		assertEquals(translations.get("a.b.b"), "bbb");
 		assertEquals(translations.get("b.a"), "ba");
@@ -179,9 +182,10 @@ public class ResourceTest {
 		resource.duplicateTranslation("a.b", "a");
 		
 		translations = resource.getTranslations();
-		assertEquals(translations.size(), 5);
+		assertEquals(translations.size(), 6);
 		assertEquals(translations.get("a.a"), "bba");
 		assertEquals(translations.get("a.b"), "bbb");
+		assertEquals(translations.get("a.c"), "ac");
 		assertEquals(translations.get("a.b.a"), null);
 		assertEquals(translations.get("a.b.b"), null);
 		assertEquals(translations.get("b.a"), "ba");

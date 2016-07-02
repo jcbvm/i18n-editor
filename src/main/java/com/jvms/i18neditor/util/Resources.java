@@ -177,7 +177,7 @@ public final class Resources {
 	private static String toJson(Map<String,String> translations, boolean prettyPrinting) {
 		List<String> keys = Lists.newArrayList(translations.keySet());
 		JsonElement elem = toJson(translations, null, keys);
-		GsonBuilder builder = new GsonBuilder();
+		GsonBuilder builder = new GsonBuilder().disableHtmlEscaping();
 		if (prettyPrinting) {
 			builder.setPrettyPrinting();
 		}

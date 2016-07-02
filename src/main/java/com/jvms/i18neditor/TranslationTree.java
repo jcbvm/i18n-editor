@@ -6,7 +6,10 @@ import java.util.Enumeration;
 import java.util.List;
 
 import javax.swing.JTree;
+import javax.swing.event.TreeExpansionEvent;
+import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
@@ -20,7 +23,6 @@ import com.jvms.i18neditor.util.TranslationKeys;
  */
 public class TranslationTree extends JTree {
 	private final static long serialVersionUID = -2888673305196385241L;
-	
 	private final Editor editor;
 	
 	public TranslationTree(Editor editor) {
@@ -44,8 +46,7 @@ public class TranslationTree extends JTree {
 	}
 	
 	public void collapseAll() {
-		// Collapse all but root node
-		for (int i = getRowCount(); i > 0; i--) {
+		for (int i = getRowCount(); i >= 0; i--) {
 		    collapseRow(i);
 		}
 	}
@@ -139,6 +140,7 @@ public class TranslationTree extends JTree {
         renderer.setClosedIcon(null);
         renderer.setOpenIcon(null);
         addMouseListener(new TranslationTreeMouseListener());
+        addTreeWillExpandListener(new TranslationTreeExpandListener());
         setEditable(false);
         // Remove F2 keystroke binding
         getActionMap().getParent().remove("startEditing");
@@ -158,12 +160,13 @@ public class TranslationTree extends JTree {
 		}
 		
 		if (newNode != null) {
-			model.removeNodeFromParent(newNode);
+			model.insertDescendantsInto(node, newNode);
+			node = newNode;
+		} else {
+			TranslationTreeNode parent = addNodeByKey(TranslationKeys.withoutLastPart(newKey));
+			node.setName(TranslationKeys.lastPart(newKey));
+			model.insertNodeInto(node, parent);			
 		}
-		
-		TranslationTreeNode parent = addNodeByKey(TranslationKeys.withoutLastPart(newKey));
-		node.setName(TranslationKeys.lastPart(newKey));
-		model.insertNodeInto(node, parent);
 		
 		if (expandedNodes != null) {
 			expand(expandedNodes);
@@ -172,7 +175,34 @@ public class TranslationTree extends JTree {
 		setSelectedNode(node);
 	}
 	
+	private class TranslationTreeExpandListener implements TreeWillExpandListener {
+		@Override
+		public void treeWillExpand(TreeExpansionEvent event) throws ExpandVetoException {}
+		
+		@Override
+    	public void treeWillCollapse(TreeExpansionEvent e) throws ExpandVetoException {
+			// Prevent root key from being collapsed
+    		if (e.getPath().getPathCount() == 1) {
+    			throw new ExpandVetoException(e);        			
+    		}
+    	}
+	}
+	
 	private class TranslationTreeMouseListener extends MouseAdapter {
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			if (e.isPopupTrigger() && isEditable()) {
+				showPopupMenu(e);				
+			}
+	    }
+		
+		@Override
+		public void mousePressed(MouseEvent e) {
+			if (e.isPopupTrigger() && isEditable()) {
+				showPopupMenu(e);				
+			}
+	    }
+		
 		private void showPopupMenu(MouseEvent e) {
 			TreePath path = getPathForLocation(e.getX(), e.getY());
 	    	if (path == null) {
@@ -186,17 +216,5 @@ public class TranslationTree extends JTree {
 	    		menu.show(e.getComponent(), e.getX(), e.getY());
 	    	}
 		}
-		
-		@Override
-		public void mouseReleased(MouseEvent e) {
-			if (!e.isPopupTrigger() || !isEditable()) return;
-			showPopupMenu(e);
-	    }
-		
-		@Override
-		public void mousePressed(MouseEvent e) {
-			if (!e.isPopupTrigger() || !isEditable()) return;
-			showPopupMenu(e);
-	    }
 	}
 }

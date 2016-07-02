@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.jvms</groupId>
 	<artifactId>i18n-editor</artifactId>
-	<version>0.5.0</version>
+	<version>0.6.0</version>
 	<packaging>jar</packaging>
 	<dependencies>
 		<dependency>
@@ -51,7 +51,7 @@
 						<configuration>
 							<archive>
 								<manifest>
-									<mainClass>com.jvms.i18neditor.Main</mainClass>
+									<mainClass>com.jvms.i18neditor.Editor</mainClass>
 								</manifest>
 							</archive>
 							<descriptorRefs>
@@ -78,7 +78,7 @@
 							<jar>${project.build.directory}/${project.artifactId}-${project.version}-jar-with-dependencies.jar</jar>
 							<errTitle>i18n Editor</errTitle>
 							<classPath>
-								<mainClass>com.jvms.i18neditor.Main</mainClass>
+								<mainClass>com.jvms.i18neditor.Editor</mainClass>
 							</classPath>
 							<jre>
 								<minVersion>1.8.0</minVersion>

@@ -29,8 +29,11 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+
+import org.apache.commons.lang3.SystemUtils;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -52,7 +55,7 @@ public class Editor extends JFrame {
 	
 	public final static Path SETTINGS_PATH = Paths.get(System.getProperty("user.home"), ".i18n-editor");
 	public final static String TITLE = "i18n Editor";
-	public final static String VERSION = "0.5.0";
+	public final static String VERSION = "0.6.0";
 	public final static String COPYRIGHT_YEAR = "2016";
 	public final static int DEFAULT_WIDTH = 1024;
 	public final static int DEFAULT_HEIGHT = 768;
@@ -112,7 +115,7 @@ public class Editor extends JFrame {
 			Map<String,String> keys = Maps.newTreeMap();
 			resources.forEach(resource -> keys.putAll(resource.getTranslations()));
 			List<String> keyList = Lists.newArrayList(keys.keySet());
-			translationTree.setModel(new TranslationTreeModel(MessageBundle.get("translations.model.name"), keyList));
+			translationTree.setModel(new TranslationTreeModel(keyList));
 			
 			updateUI();
 		} catch (IOException e) {
@@ -364,6 +367,41 @@ public class Editor extends JFrame {
 		return true;
 	}
 	
+	public void reset() {
+		translationTree.clear();
+		resources.clear();
+		resourceFields.clear();
+		setDirty(false);
+		updateUI();
+	}
+	
+	public void updateUI() {
+		TranslationTreeNode selectedNode = translationTree.getSelectedNode();
+		
+		resourcesPanel.removeAll();
+		resourceFields.stream().sorted().forEach(field -> {
+			field.setEditable(selectedNode != null && selectedNode.isEditable());
+			resourcesPanel.add(Box.createVerticalStrut(5));
+			resourcesPanel.add(new JLabel(field.getResource().getLocale().getDisplayName()));
+			resourcesPanel.add(Box.createVerticalStrut(5));
+			resourcesPanel.add(field);
+			resourcesPanel.add(Box.createVerticalStrut(5));
+		});
+		if (!resourceFields.isEmpty()) {
+			resourcesPanel.remove(0);
+			resourcesPanel.remove(resourcesPanel.getComponentCount()-1);
+		}
+		
+		editorMenu.setEnabled(resourcesDir != null);
+		editorMenu.setEditable(!resources.isEmpty());
+		translationTree.setEditable(!resources.isEmpty());
+		translationField.setEditable(!resources.isEmpty());
+		
+		updateTitle();
+		validate();
+		repaint();
+	}
+	
 	public void launch() {
 		settings.load(SETTINGS_PATH);
 		
@@ -398,39 +436,18 @@ public class Editor extends JFrame {
     	}
 	}
 	
-	public void reset() {
-		translationTree.clear();
-		resources.clear();
-		resourceFields.clear();
-		setDirty(false);
-		updateUI();
-	}
-	
-	public void updateUI() {
-		TranslationTreeNode selectedNode = translationTree.getSelectedNode();
-		
-		resourcesPanel.removeAll();
-		resourceFields.stream().sorted().forEach(field -> {
-			field.setEditable(selectedNode != null && selectedNode.isEditable());
-			resourcesPanel.add(Box.createVerticalStrut(5));
-			resourcesPanel.add(new JLabel(field.getResource().getLocale().getDisplayName()));
-			resourcesPanel.add(Box.createVerticalStrut(5));
-			resourcesPanel.add(field);
-			resourcesPanel.add(Box.createVerticalStrut(5));
+	public static void main(String[] args) {
+		SwingUtilities.invokeLater(() -> {
+			try {
+				// Only use native look an feel when not running Linux, Linux might cause visual issues
+				if (!SystemUtils.IS_OS_LINUX) {
+					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());				
+				}
+			} catch (Exception e) {
+				//
+			}
+			new Editor().launch();
 		});
-		if (!resourceFields.isEmpty()) {
-			resourcesPanel.remove(0);
-			resourcesPanel.remove(resourcesPanel.getComponentCount()-1);
-		}
-		
-		editorMenu.setEnabled(resourcesDir != null);
-		editorMenu.setEditable(!resources.isEmpty());
-		translationTree.setEditable(!resources.isEmpty());
-		translationField.setEditable(!resources.isEmpty());
-		
-		updateTitle();
-		validate();
-		repaint();
 	}
 	
 	private boolean loadResourcesFromHistory() {
@@ -479,7 +496,8 @@ public class Editor extends JFrame {
 		translationsPanel = new JPanel(new BorderLayout());
         translationTree = new TranslationTree(this);
         translationTree.addTreeSelectionListener(new TranslationTreeNodeSelectionListener());
-		translationField = new TranslationField(this, translationTree);
+		translationField = new TranslationField();
+		translationField.addKeyListener(new TranslationFieldKeyListener());
 		translationsPanel.add(new JScrollPane(translationTree));
 		translationsPanel.add(translationField, BorderLayout.SOUTH);
 		
@@ -571,8 +589,26 @@ public class Editor extends JFrame {
 		public void keyReleased(KeyEvent e) {
 			ResourceField field = (ResourceField) e.getSource();
 			String key = translationTree.getSelectedNode().getKey();
-			String value = field.getText().trim();
+			String value = field.getValue();
 			field.getResource().storeTranslation(key, value);
+		}
+	}
+	
+	private class TranslationFieldKeyListener extends KeyAdapter {
+		@Override
+		public void keyReleased(KeyEvent e) {
+			if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+				TranslationField field = (TranslationField) e.getSource();
+				String key = field.getValue();
+				if (TranslationKeys.isValid(key)) {
+					TranslationTreeNode node = translationTree.getNodeByKey(key);
+					if (node == null) {
+						addTranslationKey(key);						
+					} else {
+						translationTree.setSelectedNode(node);
+					}
+				}
+			}
 		}
 	}
 	
