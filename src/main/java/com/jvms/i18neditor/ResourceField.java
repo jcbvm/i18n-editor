@@ -1,6 +1,7 @@
 package com.jvms.i18neditor;
 
 import java.awt.Color;
+import java.awt.KeyboardFocusManager;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 
@@ -57,6 +58,10 @@ public class ResourceField extends JTextArea implements Comparable<ResourceField
 		// Add redo support
 		getActionMap().put("redo", new RedoAction());
 		getInputMap().put(KeyStroke.getKeyStroke('Y', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()), "redo");
+		
+		// Add focus traversal support
+		setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, null);
+	    setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, null);
 	}
 	
 	private class UndoAction extends AbstractAction {
