@@ -171,6 +171,11 @@ public class EditorMenu extends JMenuBar {
         
      	JMenu helpMenu = new JMenu(MessageBundle.get("menu.help.title"));
      	helpMenu.setMnemonic(MessageBundle.getMnemonic("menu.help.vk"));
+     	
+     	JMenuItem versionMenuItem = new JMenuItem(MessageBundle.get("menu.help.version.title"), MessageBundle.getMnemonic("menu.help.version.vk"));
+     	versionMenuItem.addActionListener(e -> editor.showVersionDialog());
+     	helpMenu.add(versionMenuItem);
+     	
      	JMenuItem aboutMenuItem = new JMenuItem(MessageBundle.get("menu.help.about.title", Editor.TITLE), MessageBundle.getMnemonic("menu.help.about.vk"));
      	aboutMenuItem.addActionListener(e -> editor.showAboutDialog());
      	helpMenu.add(aboutMenuItem);

@@ -1,8 +1,11 @@
 package com.jvms.i18neditor;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Container;
+import java.awt.Desktop;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -21,6 +24,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
+import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -30,6 +34,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
@@ -41,6 +46,8 @@ import com.jvms.i18neditor.Resource.ResourceType;
 import com.jvms.i18neditor.swing.JFileDrop;
 import com.jvms.i18neditor.swing.JScrollablePanel;
 import com.jvms.i18neditor.util.ExtendedProperties;
+import com.jvms.i18neditor.util.GithubRepoUtils;
+import com.jvms.i18neditor.util.GithubRepoUtils.GithubReleaseData;
 import com.jvms.i18neditor.util.MessageBundle;
 import com.jvms.i18neditor.util.Resources;
 import com.jvms.i18neditor.util.TranslationKeys;
@@ -57,6 +64,7 @@ public class Editor extends JFrame {
 	public final static String TITLE = "i18n Editor";
 	public final static String VERSION = "0.6.0";
 	public final static String COPYRIGHT_YEAR = "2016";
+	public final static String GITHUB_REPO = "jcbvm/ember-i18n-editor";
 	public final static int DEFAULT_WIDTH = 1024;
 	public final static int DEFAULT_HEIGHT = 768;
 	
@@ -223,8 +231,16 @@ public class Editor extends JFrame {
 		showMessageDialog(title, message, JOptionPane.PLAIN_MESSAGE);
 	}
 	
+	public void showMessage(String title, Component component) {
+		showMessageDialog(title, component, JOptionPane.PLAIN_MESSAGE);
+	}
+	
 	public void showMessageDialog(String title, String message, int type) {
 		JOptionPane.showMessageDialog(this, message, title, type);
+	}
+	
+	public void showMessageDialog(String title, Component component, int type) {
+		JOptionPane.showMessageDialog(this, component, title, type);
 	}
 	
 	public void showImportDialog() {
@@ -344,13 +360,38 @@ public class Editor extends JFrame {
 	
 	public void showAboutDialog() {
 		showMessage(MessageBundle.get("dialogs.about.title", TITLE), 
-				"<html><body style=\"text-align:center;width:200px;\"><br>" +
+				"<html><body style=\"text-align:center;width:200px;\">" +
 					"<span style=\"font-weight:bold;font-size:1.2em;\">" + TITLE + "</span><br>" +
 					"v" + VERSION + "<br><br>" +
 					"(c) Copyright " + COPYRIGHT_YEAR + "<br>" +
 					"Jacob van Mourik<br>" +
 					"MIT Licensed<br><br>" +
 				"</body></html>");
+	}
+	
+	public void showVersionDialog() {
+		GithubReleaseData data = GithubRepoUtils.getLatestRelease(GITHUB_REPO);
+		String content = "";
+		if (data != null && !VERSION.equals(data.getTagName())) {
+			content = MessageBundle.get("dialogs.version.new", data.getTagName()) + "<br>" + 
+					"<a href=\"" + data.getHtmlUrl() + "\">" + MessageBundle.get("dialogs.version.link") + "</a>";
+		} else {
+			content = MessageBundle.get("dialogs.version.uptodate");
+		}
+		Font font = getFont();
+	    JEditorPane pane = new JEditorPane("text/html", "<html><body style=\"font-family:" + font.getFamily() + ";font-size:" + font.getSize() + "pt;text-align:center;width:200px;\">" + content + "</body></html>");
+	    pane.addHyperlinkListener(e -> {
+            if (e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
+            	try {
+	                Desktop.getDesktop().browse(e.getURL().toURI());
+	            } catch (Exception e1) {
+	                //
+	            }
+            }
+	    });
+	    pane.setBackground(getBackground());
+	    pane.setEditable(false);
+		showMessage(MessageBundle.get("dialogs.version.title"), pane);
 	}
 	
 	public boolean closeCurrentSession() {

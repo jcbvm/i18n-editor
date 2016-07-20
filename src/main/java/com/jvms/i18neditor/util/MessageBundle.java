@@ -5,7 +5,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
- * This class retrieves translations from a resource bundle.<br>
+ * This class provides utility functions for retrieving translations from a resource bundle.<br>
  * By default it loads translations from {@value #RESOURCES_PATH}.
  * 
  * <p>The locale used is the current value of the default locale for this instance of the Java Virtual Machine.</p>
