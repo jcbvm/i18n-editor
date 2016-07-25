@@ -18,8 +18,7 @@ http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.h
 
 ## Download
 
-You can download the latest release by going to [this page](https://github.com/jcbvm/ember-i18n-editor/releases/latest) and download the `i18n-editor.zip` file.<br>
-This zip file includes a `.exe` file for windows systems and a `.jar` file for other systems.<br>
+You can download the latest release by going to [this page](https://github.com/jcbvm/ember-i18n-editor/releases/latest) and downloading the `.zip` file.<br> If you're on Windows you can install the application by running the `.exe` file. If you're on Linux or Mac you can run the application by executing the `.jar` file.<br>
 
 ## Usage
 
