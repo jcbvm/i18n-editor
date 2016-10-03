@@ -7,6 +7,7 @@ import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -32,6 +33,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.HyperlinkEvent;
@@ -560,6 +562,14 @@ public class Editor extends JFrame {
 		Container container = getContentPane();
 		container.add(editorMenu, BorderLayout.NORTH);
 		container.add(contentPane);
+		
+		// Instead of selecting text in text field when applying focus, set caret position to end of input
+		KeyboardFocusManager.getCurrentKeyboardFocusManager().addPropertyChangeListener("permanentFocusOwner", e -> {
+	        if (e.getNewValue() instanceof JTextField) {
+	        	JTextField field = (JTextField) e.getNewValue();
+	        	field.setCaretPosition(field.getText().length());	        	
+	        }
+		});
 	}
 	
 	private void setupFileDrop() {
