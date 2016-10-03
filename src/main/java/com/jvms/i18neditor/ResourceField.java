@@ -64,6 +64,7 @@ public class ResourceField extends JTextArea implements Comparable<ResourceField
 	    setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, null);
 	}
 	
+	@SuppressWarnings("serial")
 	private class UndoAction extends AbstractAction {
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -73,6 +74,7 @@ public class ResourceField extends JTextArea implements Comparable<ResourceField
 		}
 	}
 	
+	@SuppressWarnings("serial")
 	private class RedoAction extends AbstractAction {
 		@Override
 		public void actionPerformed(ActionEvent e) {

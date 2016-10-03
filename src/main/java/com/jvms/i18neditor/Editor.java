@@ -353,7 +353,7 @@ public class Editor extends JFrame {
 				MessageBundle.get("dialogs.translation.find.title"), 
 				JOptionPane.QUESTION_MESSAGE);
 		if (key != null) {
-			TranslationTreeNode node = translationTree.getNodeByKey(key.trim());
+			TranslationTreeNode node = translationTree.findNodeByKey(key.trim());
 			if (node == null) {
 				showWarning(MessageBundle.get("dialogs.translation.find.title"), 
 						MessageBundle.get("dialogs.translation.find.error"));
