@@ -175,8 +175,13 @@ public class Editor extends JFrame {
 	
 	public void addTranslationKey(String key) {
 		if (resources.isEmpty()) return;
-		resources.forEach(resource -> resource.storeTranslation(key, ""));
-		translationTree.addNodeByKey(key);
+		TranslationTreeNode node = translationTree.getNodeByKey(key);
+		if (node != null) {
+			translationTree.setSelectedNode(node);
+		} else {
+			resources.forEach(resource -> resource.storeTranslation(key, ""));
+			translationTree.addNodeByKey(key);			
+		}
 	}
 	
 	public void removeTranslationKey(String key) {
@@ -186,13 +191,13 @@ public class Editor extends JFrame {
 	}
 	
 	public void renameTranslationKey(String key, String newKey) {
-		if (resources.isEmpty()) return;
+		if (resources.isEmpty() || key.equals(newKey)) return;
 		resources.forEach(resource -> resource.renameTranslation(key, newKey));
 		translationTree.renameNodeByKey(key, newKey);
 	}
 	
 	public void duplicateTranslationKey(String key, String newKey) {
-		if (resources.isEmpty()) return;
+		if (resources.isEmpty() || key.equals(newKey)) return;
 		resources.forEach(resource -> resource.duplicateTranslation(key, newKey));
 		translationTree.duplicateNodeByKey(key, newKey);
 	}
@@ -642,12 +647,7 @@ public class Editor extends JFrame {
 				TranslationField field = (TranslationField) e.getSource();
 				String key = field.getValue();
 				if (TranslationKeys.isValid(key)) {
-					TranslationTreeNode node = translationTree.getNodeByKey(key);
-					if (node == null) {
-						addTranslationKey(key);						
-					} else {
-						translationTree.setSelectedNode(node);
-					}
+					addTranslationKey(key);						
 				}
 			}
 		}
