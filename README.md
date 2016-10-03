@@ -10,8 +10,9 @@ This project is mainly designed for [ember-i18n](https://github.com/jamesarosen/
 
 - Editing multiple translation files at once.
 - Creating new translations/locales or editing existing ones.
-- Drag&Drop translation directories for editing.
-- Option to specify if output should be minified or not.
+- Renaming, duplicating, creating or deleting individual translations.
+- Drag&Drop directories for editing.
+- Minifying output.
 
 ## Requirements
 
