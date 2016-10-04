@@ -242,12 +242,20 @@ public class Editor extends JFrame {
 		showMessageDialog(title, component, JOptionPane.PLAIN_MESSAGE);
 	}
 	
+	public boolean showConfirmation(String title, String message) {
+		return showConfirmDialog(title, message, JOptionPane.WARNING_MESSAGE);
+	}
+	
 	public void showMessageDialog(String title, String message, int type) {
 		JOptionPane.showMessageDialog(this, message, title, type);
 	}
 	
 	public void showMessageDialog(String title, Component component, int type) {
 		JOptionPane.showMessageDialog(this, component, title, type);
+	}
+	
+	public boolean showConfirmDialog(String title, String message, int type) {
+		return JOptionPane.showConfirmDialog(this, message, title, JOptionPane.YES_NO_OPTION, type) == 0 ? true : false;
 	}
 	
 	public void showImportDialog() {
@@ -302,7 +310,18 @@ public class Editor extends JFrame {
 				if (!TranslationKeys.isValid(newKey)) {
 					showError(MessageBundle.get("dialogs.translation.rename.error"));
 				} else {
-					renameTranslationKey(key, newKey);
+					TranslationTreeNode newNode = translationTree.getNodeByKey(newKey);
+					TranslationTreeNode oldNode = translationTree.getNodeByKey(key);
+					if (newNode != null) {
+						boolean isReplace = newNode.isLeaf() || oldNode.isLeaf();
+						boolean confirm = showConfirmation(MessageBundle.get("dialogs.translation.conflict.title"), 
+								MessageBundle.get("dialogs.translation.conflict.text." + (isReplace ? "replace" : "merge")));
+						if (confirm) {
+							renameTranslationKey(key, newKey);
+						}
+					} else {
+						renameTranslationKey(key, newKey);
+					}
 				}
 			}
 		}
@@ -320,7 +339,18 @@ public class Editor extends JFrame {
 				if (!TranslationKeys.isValid(newKey)) {
 					showError(MessageBundle.get("dialogs.translation.duplicate.error"));
 				} else {
-					duplicateTranslationKey(key, newKey);
+					TranslationTreeNode newNode = translationTree.getNodeByKey(newKey);
+					TranslationTreeNode oldNode = translationTree.getNodeByKey(key);
+					if (newNode != null) {
+						boolean isReplace = newNode.isLeaf() || oldNode.isLeaf();
+						boolean confirm = showConfirmation(MessageBundle.get("dialogs.translation.conflict.title"), 
+								MessageBundle.get("dialogs.translation.conflict.text." + (isReplace ? "replace" : "merge")));
+						if (confirm) {
+							duplicateTranslationKey(key, newKey);
+						}
+					} else {
+						duplicateTranslationKey(key, newKey);
+					}
 				}
 			}
 		}

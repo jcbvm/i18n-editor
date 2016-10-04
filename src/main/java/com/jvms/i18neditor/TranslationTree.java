@@ -164,6 +164,10 @@ public class TranslationTree extends JTree {
 			model.removeNodeFromParent(node);
 		}
 		
+		if (node.isLeaf() && newNode != null) {
+			model.removeNodeFromParent(newNode);
+			newNode = null;
+		}
 		if (newNode != null) {
 			model.insertDescendantsInto(node, newNode);
 			node = newNode;
