@@ -64,7 +64,7 @@ public class Editor extends JFrame {
 	
 	public final static Path SETTINGS_PATH = Paths.get(System.getProperty("user.home"), ".i18n-editor");
 	public final static String TITLE = "i18n Editor";
-	public final static String VERSION = "0.7.0";
+	public final static String VERSION = "0.8.0";
 	public final static String COPYRIGHT_YEAR = "2016";
 	public final static String GITHUB_REPO = "jcbvm/ember-i18n-editor";
 	public final static int DEFAULT_WIDTH = 1024;
