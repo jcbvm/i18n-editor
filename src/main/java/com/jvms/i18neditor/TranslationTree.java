@@ -63,7 +63,7 @@ public class TranslationTree extends JTree {
 	
 	public TranslationTreeNode addNodeByKey(String key) {
 		TranslationTreeModel model = (TranslationTreeModel) getModel();
-		TranslationTreeNode node = model.getNodeByKey(key, false);
+		TranslationTreeNode node = model.getNodeByKey(key);
 		if (node == null) {
 			TranslationTreeNode parent = (TranslationTreeNode) model.getClosestParentNodeByKey(key);
 			String newKey = TranslationKeys.childKey(key, parent.getKey());
@@ -81,20 +81,15 @@ public class TranslationTree extends JTree {
 	
 	public void removeNodeByKey(String key) {
 		TranslationTreeModel model = (TranslationTreeModel) getModel();
-		TranslationTreeNode node = model.getNodeByKey(key, false);
+		TranslationTreeNode node = model.getNodeByKey(key);
 		if (node != null) {
 			model.removeNodeFromParent(node);
 		}
 	}
 	
-	public TranslationTreeNode findNodeByKey(String key) {
-		TranslationTreeModel model = (TranslationTreeModel) getModel();
-		return model.getNodeByKey(key, true);
-	}
-	
 	public TranslationTreeNode getNodeByKey(String key) {
 		TranslationTreeModel model = (TranslationTreeModel) getModel();
-		return model.getNodeByKey(key, false);
+		return model.getNodeByKey(key);
 	}
 	
 	public List<TranslationTreeNode> getExpandedNodes() {
@@ -153,8 +148,8 @@ public class TranslationTree extends JTree {
 	
 	private void duplicateNodeByKey(String key, String newKey, boolean keepOld) {
 		TranslationTreeModel model = (TranslationTreeModel) getModel();
-		TranslationTreeNode node = model.getNodeByKey(key, false);
-		TranslationTreeNode newNode = model.getNodeByKey(newKey, false);
+		TranslationTreeNode node = model.getNodeByKey(key);
+		TranslationTreeNode newNode = model.getNodeByKey(newKey);
 		List<TranslationTreeNode> expandedNodes = null;
 		
 		if (keepOld) {

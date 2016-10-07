@@ -16,7 +16,7 @@ public class AddTranslationMenuItem extends JMenuItem {
 	private final static long serialVersionUID = -2673278052970076105L;
 	
 	public AddTranslationMenuItem(Editor editor, boolean enabled) {
-		super(MessageBundle.get("menu.edit.add.translation.title"), MessageBundle.getMnemonic("menu.edit.add.translation.vk"));
+		super(MessageBundle.get("menu.edit.add.translation.title"));
 		setAccelerator(KeyStroke.getKeyStroke('T', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         addActionListener(e -> editor.showAddTranslationDialog());
         setEnabled(enabled);

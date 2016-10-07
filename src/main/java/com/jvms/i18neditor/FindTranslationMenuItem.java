@@ -16,7 +16,7 @@ public class FindTranslationMenuItem extends JMenuItem {
 	private final static long serialVersionUID = 5207946396515235714L;
 
 	public FindTranslationMenuItem(Editor editor, boolean enabled) {
-		super(MessageBundle.get("menu.edit.find.translation.title"), MessageBundle.getMnemonic("menu.edit.find.translation.vk"));
+		super(MessageBundle.get("menu.edit.find.translation.title"));
 		setAccelerator(KeyStroke.getKeyStroke('F', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         addActionListener(e -> editor.showFindTranslationDialog());
         setEnabled(enabled);

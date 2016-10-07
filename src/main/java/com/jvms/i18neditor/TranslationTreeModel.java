@@ -25,12 +25,12 @@ public class TranslationTreeModel extends DefaultTreeModel {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public TranslationTreeNode getNodeByKey(String key, boolean ignoreCase) {
+	public TranslationTreeNode getNodeByKey(String key) {
 		TranslationTreeNode node = (TranslationTreeNode) getRoot();
 		Enumeration<TranslationTreeNode> e = node.depthFirstEnumeration();
 	    while (e.hasMoreElements()) {
 	    	TranslationTreeNode n = e.nextElement();
-	        if (ignoreCase ? n.getKey().equalsIgnoreCase(key) : n.getKey().equals(key)) {
+	        if (n.getKey().equals(key)) {
 	            return n;
 	        }
 	    }
@@ -42,7 +42,7 @@ public class TranslationTreeModel extends DefaultTreeModel {
 		int count = TranslationKeys.size(key);
 		while (node == null && count > 0) {
 			key = TranslationKeys.withoutLastPart(key);
-			node = getNodeByKey(key, false);
+			node = getNodeByKey(key);
 			count--;
 		}
 		if (node != null) {

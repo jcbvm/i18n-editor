@@ -64,7 +64,7 @@ public class Editor extends JFrame {
 	
 	public final static Path SETTINGS_PATH = Paths.get(System.getProperty("user.home"), ".i18n-editor");
 	public final static String TITLE = "i18n Editor";
-	public final static String VERSION = "0.8.0";
+	public final static String VERSION = "0.8.1";
 	public final static String COPYRIGHT_YEAR = "2016";
 	public final static String GITHUB_REPO = "jcbvm/ember-i18n-editor";
 	public final static int DEFAULT_WIDTH = 1024;
@@ -385,7 +385,7 @@ public class Editor extends JFrame {
 				MessageBundle.get("dialogs.translation.find.title"), 
 				JOptionPane.QUESTION_MESSAGE);
 		if (key != null) {
-			TranslationTreeNode node = translationTree.findNodeByKey(key.trim());
+			TranslationTreeNode node = translationTree.getNodeByKey(key.trim());
 			if (node == null) {
 				showWarning(MessageBundle.get("dialogs.translation.find.title"), 
 						MessageBundle.get("dialogs.translation.find.error"));
