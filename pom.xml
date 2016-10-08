@@ -67,14 +67,13 @@
 				<version>1.7.7</version>
 				<executions>
 					<execution>
-						<id>l4j-clui</id>
 						<phase>package</phase>
 						<goals>
 							<goal>launch4j</goal>
 						</goals>
 						<configuration>
 							<headerType>gui</headerType>
-							<outfile>${project.build.directory}/${project.artifactId}-${project.version}.exe</outfile>
+							<outfile>${project.build.directory}/${project.artifactId}.exe</outfile>
 							<jar>${project.build.directory}/${project.artifactId}-${project.version}-jar-with-dependencies.jar</jar>
 							<errTitle>i18n Editor</errTitle>
 							<classPath>
@@ -87,6 +86,25 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+			  	<groupId>org.apache.maven.plugins</groupId>
+			  	<artifactId>maven-antrun-plugin</artifactId>
+			  	<version>1.8</version>
+			  	<executions>
+			    	<execution>
+			      		<phase>install</phase>
+			      		<goals>
+			        		<goal>run</goal>
+			      		</goals>
+			      		<configuration>
+			        		<target>
+			          			<copy file="${project.build.directory}/${project.artifactId}-${project.version}-jar-with-dependencies.jar" 
+			          				  toFile="${basedir}/dist/${project.artifactId}-${project.version}.jar"/>
+			        		</target>
+			      		</configuration>
+		    		</execution>
+			  	</executions>
 			</plugin>
 		</plugins>
 	</build>
