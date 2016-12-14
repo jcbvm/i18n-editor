@@ -17,7 +17,7 @@ public class JScrollablePanel extends JPanel implements Scrollable {
 	private final boolean scrollableTracksViewportHeight;
 	
 	/**
-	 * Creates a new JScrollablePanel.
+	 * Constructs a {@link JScrollablePanel}.
 	 * 
 	 * @param 	scrollableTracksViewportWidth whether to force the width of this panel to match the width of the viewport.
 	 * @param 	scrollableTracksViewportHeight whether to force the height of this panel to match the height of the viewport.

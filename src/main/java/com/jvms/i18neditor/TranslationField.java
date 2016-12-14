@@ -2,14 +2,14 @@ package com.jvms.i18neditor;
 
 import java.awt.Insets;
 
-import javax.swing.JTextField;
+import com.jvms.i18neditor.swing.JUndoableTextField;
 
 /**
  * This class represents a text field for adding a new translation key.
  * 
  * @author Jacob
  */
-public class TranslationField extends JTextField {
+public class TranslationField extends JUndoableTextField {
 	private final static long serialVersionUID = -3951187528785224704L;
 	
 	public TranslationField() {
@@ -19,6 +19,11 @@ public class TranslationField extends JTextField {
 	
 	public String getValue() {
 		return getText().trim();
+	}
+	
+	public void setValue(String value) {
+		setText(value);
+		undoManager.discardAllEdits();
 	}
 	
 	private void setupUI() {

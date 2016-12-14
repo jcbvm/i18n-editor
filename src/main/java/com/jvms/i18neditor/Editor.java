@@ -1,13 +1,10 @@
 package com.jvms.i18neditor;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Container;
-import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
-import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -25,7 +22,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
-import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -33,10 +29,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
@@ -46,7 +40,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jvms.i18neditor.Resource.ResourceType;
 import com.jvms.i18neditor.swing.JFileDrop;
+import com.jvms.i18neditor.swing.JHtmlPane;
 import com.jvms.i18neditor.swing.JScrollablePanel;
+import com.jvms.i18neditor.util.Dialogs;
 import com.jvms.i18neditor.util.ExtendedProperties;
 import com.jvms.i18neditor.util.GithubRepoUtils;
 import com.jvms.i18neditor.util.GithubRepoUtils.GithubReleaseData;
@@ -204,12 +200,12 @@ public class Editor extends JFrame {
 		translationTree.duplicateNodeByKey(key, newKey);
 	}
 	
-	public boolean isDirty() {
-		return dirty;
-	}
-	
 	public Path getResourcesPath() {
 		return resourcesDir;
+	}
+	
+	public boolean isDirty() {
+		return dirty;
 	}
 	
 	public void setDirty(boolean dirty) {
@@ -224,38 +220,6 @@ public class Editor extends JFrame {
 	
 	public void setMinifyOutput(boolean minifyOutput) {
 		this.minifyOutput = minifyOutput;
-	}
-	
-	public void showError(String message) {
-		showMessageDialog(MessageBundle.get("dialogs.error.title"), message, JOptionPane.ERROR_MESSAGE);
-	}
-	
-	public void showWarning(String title, String message) {
-		showMessageDialog(title, message, JOptionPane.WARNING_MESSAGE);
-	}
-	
-	public void showMessage(String title, String message) {
-		showMessageDialog(title, message, JOptionPane.PLAIN_MESSAGE);
-	}
-	
-	public void showMessage(String title, Component component) {
-		showMessageDialog(title, component, JOptionPane.PLAIN_MESSAGE);
-	}
-	
-	public boolean showConfirmation(String title, String message) {
-		return showConfirmDialog(title, message, JOptionPane.WARNING_MESSAGE);
-	}
-	
-	public void showMessageDialog(String title, String message, int type) {
-		JOptionPane.showMessageDialog(this, message, title, type);
-	}
-	
-	public void showMessageDialog(String title, Component component, int type) {
-		JOptionPane.showMessageDialog(this, component, title, type);
-	}
-	
-	public boolean showConfirmDialog(String title, String message, int type) {
-		return JOptionPane.showConfirmDialog(this, message, title, JOptionPane.YES_NO_OPTION, type) == 0 ? true : false;
 	}
 	
 	public void showImportDialog() {
@@ -275,10 +239,10 @@ public class Editor extends JFrame {
 	public void showAddLocaleDialog(ResourceType type) {
 		String locale = "";
 		while (locale != null && locale.isEmpty()) {
-			locale = (String) JOptionPane.showInputDialog(this, 
-					MessageBundle.get("dialogs.locale.add.text"), 
-					MessageBundle.get("dialogs.locale.add.title", type.toString()), 
-					JOptionPane.QUESTION_MESSAGE);
+			locale = Dialogs.showInputDialog(this,
+					MessageBundle.get("dialogs.locale.add.title", type),
+					MessageBundle.get("dialogs.locale.add.text"),
+					null, JOptionPane.QUESTION_MESSAGE);
 			if (locale != null) {
 				locale = locale.trim();
 				Path path = Paths.get(resourcesDir.toString(), locale);
@@ -301,12 +265,11 @@ public class Editor extends JFrame {
 	public void showRenameTranslationDialog(String key) {
 		String newKey = "";
 		while (newKey != null && newKey.isEmpty()) {
-			newKey = (String) JOptionPane.showInputDialog(this, 
-					MessageBundle.get("dialogs.translation.rename.text"), 
-					MessageBundle.get("dialogs.translation.rename.title"), 
-					JOptionPane.QUESTION_MESSAGE, null, null, key);
+			newKey = Dialogs.showInputDialog(this,
+					MessageBundle.get("dialogs.translation.rename.title"),
+					MessageBundle.get("dialogs.translation.rename.text"),
+					key, JOptionPane.QUESTION_MESSAGE);
 			if (newKey != null) {
-				newKey = newKey.trim();
 				if (!TranslationKeys.isValid(newKey)) {
 					showError(MessageBundle.get("dialogs.translation.rename.error"));
 				} else {
@@ -314,7 +277,8 @@ public class Editor extends JFrame {
 					TranslationTreeNode oldNode = translationTree.getNodeByKey(key);
 					if (newNode != null) {
 						boolean isReplace = newNode.isLeaf() || oldNode.isLeaf();
-						boolean confirm = showConfirmation(MessageBundle.get("dialogs.translation.conflict.title"), 
+						boolean confirm = Dialogs.showConfirmDialog(this, 
+								MessageBundle.get("dialogs.translation.conflict.title"), 
 								MessageBundle.get("dialogs.translation.conflict.text." + (isReplace ? "replace" : "merge")));
 						if (confirm) {
 							renameTranslationKey(key, newKey);
@@ -330,10 +294,10 @@ public class Editor extends JFrame {
 	public void showDuplicateTranslationDialog(String key) {
 		String newKey = "";
 		while (newKey != null && newKey.isEmpty()) {
-			newKey = (String) JOptionPane.showInputDialog(this, 
-					MessageBundle.get("dialogs.translation.duplicate.text"), 
-					MessageBundle.get("dialogs.translation.duplicate.title"), 
-					JOptionPane.QUESTION_MESSAGE, null, null, key);
+			newKey = Dialogs.showInputDialog(this,
+					MessageBundle.get("dialogs.translation.duplicate.title"),
+					MessageBundle.get("dialogs.translation.duplicate.text"),
+					key, JOptionPane.QUESTION_MESSAGE);
 			if (newKey != null) {
 				newKey = newKey.trim();
 				if (!TranslationKeys.isValid(newKey)) {
@@ -343,7 +307,8 @@ public class Editor extends JFrame {
 					TranslationTreeNode oldNode = translationTree.getNodeByKey(key);
 					if (newNode != null) {
 						boolean isReplace = newNode.isLeaf() || oldNode.isLeaf();
-						boolean confirm = showConfirmation(MessageBundle.get("dialogs.translation.conflict.title"), 
+						boolean confirm = Dialogs.showConfirmDialog(this, 
+								MessageBundle.get("dialogs.translation.conflict.title"), 
 								MessageBundle.get("dialogs.translation.conflict.text." + (isReplace ? "replace" : "merge")));
 						if (confirm) {
 							duplicateTranslationKey(key, newKey);
@@ -361,13 +326,13 @@ public class Editor extends JFrame {
 		String newKey = "";
 		TranslationTreeNode node = translationTree.getSelectedNode();
 		if (node != null && !node.isRoot()) {
-			key = node.getKey();
+			key = node.getKey() + ".";
 		}
 		while (newKey != null && newKey.isEmpty()) {
-			newKey = (String) JOptionPane.showInputDialog(this, 
-					MessageBundle.get("dialogs.translation.add.text"), 
-					MessageBundle.get("dialogs.translation.add.title"), 
-					JOptionPane.QUESTION_MESSAGE, null, null, key);
+			newKey = Dialogs.showInputDialog(this,
+					MessageBundle.get("dialogs.translation.add.title"),
+					MessageBundle.get("dialogs.translation.add.text"),
+					key, JOptionPane.QUESTION_MESSAGE);
 			if (newKey != null) {
 				newKey = newKey.trim();
 				if (!TranslationKeys.isValid(newKey)) {
@@ -380,14 +345,14 @@ public class Editor extends JFrame {
 	}
 	
 	public void showFindTranslationDialog() {
-		String key = (String) JOptionPane.showInputDialog(this, 
-				MessageBundle.get("dialogs.translation.find.text"), 
-				MessageBundle.get("dialogs.translation.find.title"), 
-				JOptionPane.QUESTION_MESSAGE);
+		String key = Dialogs.showInputDialog(this,
+				MessageBundle.get("dialogs.translation.find.title"),
+				MessageBundle.get("dialogs.translation.find.text"),
+				null, JOptionPane.QUESTION_MESSAGE);
 		if (key != null) {
 			TranslationTreeNode node = translationTree.getNodeByKey(key.trim());
 			if (node == null) {
-				showWarning(MessageBundle.get("dialogs.translation.find.title"), 
+				Dialogs.showWarningDialog(this, MessageBundle.get("dialogs.translation.find.title"), 
 						MessageBundle.get("dialogs.translation.find.error"));
 			} else {
 				translationTree.setSelectedNode(node);
@@ -396,7 +361,7 @@ public class Editor extends JFrame {
 	}
 	
 	public void showAboutDialog() {
-		showMessage(MessageBundle.get("dialogs.about.title", TITLE), 
+		Dialogs.showMessageDialog(this, MessageBundle.get("dialogs.about.title", TITLE), 
 				"<html><body style=\"text-align:center;width:200px;\">" +
 					"<span style=\"font-weight:bold;font-size:1.2em;\">" + TITLE + "</span><br>" +
 					"v" + VERSION + "<br><br>" +
@@ -416,19 +381,10 @@ public class Editor extends JFrame {
 			content = MessageBundle.get("dialogs.version.uptodate");
 		}
 		Font font = getFont();
-	    JEditorPane pane = new JEditorPane("text/html", "<html><body style=\"font-family:" + font.getFamily() + ";font-size:" + font.getSize() + "pt;text-align:center;width:200px;\">" + content + "</body></html>");
-	    pane.addHyperlinkListener(e -> {
-            if (e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
-            	try {
-	                Desktop.getDesktop().browse(e.getURL().toURI());
-	            } catch (Exception e1) {
-	                //
-	            }
-            }
-	    });
+		JHtmlPane pane = new JHtmlPane("<html><body style=\"font-family:" + font.getFamily() + ";font-size:" + font.getSize() + "pt;text-align:center;width:200px;\">" + content + "</body></html>");
 	    pane.setBackground(getBackground());
 	    pane.setEditable(false);
-		showMessage(MessageBundle.get("dialogs.version.title"), pane);
+		Dialogs.showMessageDialog(this, MessageBundle.get("dialogs.version.title"), pane);
 	}
 	
 	public boolean closeCurrentSession() {
@@ -541,6 +497,10 @@ public class Editor extends JFrame {
     	return false;
 	}
 	
+	private void showError(String message) {
+		Dialogs.showErrorDialog(this, MessageBundle.get("dialogs.error.title"), message);
+	}
+	
 	private void updateTitle() {
 		String dirtyPart = dirty ? "*" : "";
 		String filePart = resourcesDir == null ? "" : resourcesDir.toString() + " - ";
@@ -592,14 +552,6 @@ public class Editor extends JFrame {
 		Container container = getContentPane();
 		container.add(editorMenu, BorderLayout.NORTH);
 		container.add(contentPane);
-		
-		// Instead of selecting text in text field when applying focus, set caret position to end of input
-		KeyboardFocusManager.getCurrentKeyboardFocusManager().addPropertyChangeListener("permanentFocusOwner", e -> {
-	        if (e.getNewValue() instanceof JTextField) {
-	        	JTextField field = (JTextField) e.getNewValue();
-	        	field.setCaretPosition(field.getText().length());	        	
-	        }
-		});
 	}
 	
 	private void setupFileDrop() {
@@ -658,9 +610,9 @@ public class Editor extends JFrame {
 				
 				// Update UI values
 				String key = node.getKey();
-				translationField.setText(key);
+				translationField.setValue(key);
 				resourceFields.forEach(f -> {
-					f.updateValue(key);
+					f.setValue(key);
 					f.setEditable(node.isEditable());
 				});
 				

@@ -25,7 +25,7 @@ import com.jvms.i18neditor.Resource;
 import com.jvms.i18neditor.Resource.ResourceType;
 
 /**
- * This class provides utility functions for {@link Resource}s.
+ * This class provides utility functions for a {@link Resource}.
  * 
  * @author Jacob
  */
