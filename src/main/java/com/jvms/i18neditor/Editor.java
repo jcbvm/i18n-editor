@@ -536,6 +536,8 @@ public class Editor extends JFrame {
 		Container container = getContentPane();
 		container.add(editorMenu, BorderLayout.NORTH);
 		container.add(contentPane);
+		
+		setJMenuBar(editorMenu);
 	}
 	
 	private void setupFileDrop() {
