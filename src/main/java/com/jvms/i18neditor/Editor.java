@@ -30,11 +30,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-
-import org.apache.commons.lang3.SystemUtils;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -59,9 +56,9 @@ public class Editor extends JFrame {
 	private final static long serialVersionUID = 1113029729495390082L;
 	
 	public final static Path SETTINGS_PATH = Paths.get(System.getProperty("user.home"), ".i18n-editor");
-	public final static String TITLE = "i18n Editor";
-	public final static String VERSION = "0.8.1";
-	public final static String COPYRIGHT_YEAR = "2016";
+	public final static String TITLE = "i18n-editor";
+	public final static String VERSION = "0.9.0";
+	public final static String COPYRIGHT_YEAR = "2016 - 2017";
 	public final static String GITHUB_REPO = "jcbvm/ember-i18n-editor";
 	public final static int DEFAULT_WIDTH = 1024;
 	public final static int DEFAULT_HEIGHT = 768;
@@ -470,20 +467,6 @@ public class Editor extends JFrame {
     	}
 	}
 	
-	public static void main(String[] args) {
-		SwingUtilities.invokeLater(() -> {
-			try {
-				// Only use native look an feel when not running Linux, Linux might cause visual issues
-				if (!SystemUtils.IS_OS_LINUX) {
-					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());				
-				}
-			} catch (Exception e) {
-				//
-			}
-			new Editor().launch();
-		});
-	}
-	
 	private boolean loadResourcesFromHistory() {
 		List<String> dirs = settings.getListProperty("history");
     	if (!dirs.isEmpty()) {
@@ -545,6 +528,7 @@ public class Editor extends JFrame {
         
         resourcesScrollPane = new JScrollPane(resourcesPanel);
         resourcesScrollPane.getViewport().setOpaque(false);
+        resourcesScrollPane.setBackground(resourcesPanel.getBackground());
         
 		contentPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, translationsPanel, resourcesScrollPane);
      	editorMenu = new EditorMenu(this, translationTree);

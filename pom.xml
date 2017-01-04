@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.jvms</groupId>
 	<artifactId>i18n-editor</artifactId>
-	<version>0.8.1</version>
+	<version>0.9.0</version>
 	<packaging>jar</packaging>
 	<dependencies>
 		<dependency>
@@ -51,7 +51,7 @@
 						<configuration>
 							<archive>
 								<manifest>
-									<mainClass>com.jvms.i18neditor.Editor</mainClass>
+									<mainClass>com.jvms.i18neditor.Main</mainClass>
 								</manifest>
 							</archive>
 							<descriptorRefs>
@@ -60,6 +60,23 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+			 	<groupId>sh.tak.appbundler</groupId>
+			  	<artifactId>appbundle-maven-plugin</artifactId>
+			  	<version>1.2.0</version>
+			  	<executions>
+			    	<execution>
+			      		<phase>package</phase>
+			      		<goals>
+			        		<goal>bundle</goal>
+			      		</goals>
+			      		<configuration>
+					    	<mainClass>com.jvms.i18neditor.Main</mainClass>
+					    	<iconFile>images/icons.icns</iconFile>
+					  	</configuration>
+			    	</execution>
+			  	</executions>
 			</plugin>
 			<plugin>
 				<groupId>com.akathist.maven.plugins.launch4j</groupId>
@@ -73,11 +90,11 @@
 						</goals>
 						<configuration>
 							<headerType>gui</headerType>
-							<outfile>${project.build.directory}/${project.artifactId}.exe</outfile>
+							<outfile>${project.build.directory}/${project.artifactId}-${project.version}/${project.artifactId}.exe</outfile>
 							<jar>${project.build.directory}/${project.artifactId}-${project.version}-jar-with-dependencies.jar</jar>
 							<errTitle>i18n Editor</errTitle>
 							<classPath>
-								<mainClass>com.jvms.i18neditor.Editor</mainClass>
+								<mainClass>com.jvms.i18neditor.Main</mainClass>
 							</classPath>
 							<jre>
 								<minVersion>1.8.0</minVersion>
@@ -100,7 +117,7 @@
 			      		<configuration>
 			        		<target>
 			          			<copy file="${project.build.directory}/${project.artifactId}-${project.version}-jar-with-dependencies.jar" 
-			          				  toFile="${basedir}/dist/${project.artifactId}-${project.version}.jar"/>
+			          				  toFile="${project.build.directory}/${project.artifactId}-${project.version}/${project.artifactId}.jar"/>
 			        		</target>
 			      		</configuration>
 		    		</execution>

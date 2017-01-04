@@ -1,5 +1,5 @@
 #define AppName "i18n-editor"
-#define AppVersion "0.8.1"
+#define AppVersion "0.9.0"
 #define AppPublisher "JvMs Software"
 #define AppURL "https://github.com/jcbvm/ember-i18n-editor"
 #define AppExeName "i18n-editor.exe"
@@ -17,8 +17,8 @@ DisableProgramGroupPage=auto
 DisableDirPage=auto
 AlwaysShowDirOnReadyPage=yes
 LicenseFile=LICENSE
-OutputBaseFilename={#AppName}-{#AppVersion}
-OutputDir=dist
+OutputBaseFilename={#AppName}-{#AppVersion}-setup
+OutputDir=target\{#AppName}-{#AppVersion}
 SetupIconFile=src\main\resources\images\icon.ico
 UninstallDisplayIcon={uninstallexe}
 Compression=lzma
@@ -36,7 +36,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
 
 [Files]
-Source: "target\{#AppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "target\{#AppName}-{#AppVersion}\{#AppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
