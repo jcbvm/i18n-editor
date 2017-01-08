@@ -1,5 +1,5 @@
 #define AppName "i18n-editor"
-#define AppVersion "0.9.0"
+#define AppVersion "0.9.1"
 #define AppPublisher "JvMs Software"
 #define AppURL "https://github.com/jcbvm/ember-i18n-editor"
 #define AppExeName "i18n-editor.exe"
