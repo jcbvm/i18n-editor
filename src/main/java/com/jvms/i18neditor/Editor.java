@@ -62,8 +62,7 @@ public class Editor extends JFrame {
 	
 	public final static Path SETTINGS_PATH = Paths.get(System.getProperty("user.home"), ".i18n-editor");
 	public final static String TITLE = "i18n-editor";
-	public final static String VERSION = "0.9.0";
-	public final static String COPYRIGHT_YEAR = "2016 - 2017";
+	public final static String VERSION = "0.9.1";
 	public final static String GITHUB_REPO = "jcbvm/ember-i18n-editor";
 	public final static int DEFAULT_WIDTH = 1024;
 	public final static int DEFAULT_HEIGHT = 768;
@@ -369,7 +368,7 @@ public class Editor extends JFrame {
 				"<html><body style=\"text-align:center;width:200px;\">" +
 					"<span style=\"font-weight:bold;font-size:1.2em;\">" + TITLE + "</span><br>" +
 					"v" + VERSION + "<br><br>" +
-					"(c) Copyright " + COPYRIGHT_YEAR + "<br>" +
+					"Copyright (c) 2015 - 2017<br>" +
 					"Jacob van Mourik<br>" +
 					"MIT Licensed<br><br>" +
 				"</body></html>");
@@ -493,16 +492,9 @@ public class Editor extends JFrame {
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		addWindowListener(new EditorWindowListener());
 		
-		setIconImages(Lists.newArrayList(
-				getResourceImage("images/icon-512.png"),
-				getResourceImage("images/icon-256.png"),
-				getResourceImage("images/icon-128.png"),
-				getResourceImage("images/icon-64.png"),
-				getResourceImage("images/icon-48.png"),
-				getResourceImage("images/icon-32.png"),
-				getResourceImage("images/icon-24.png"),
-				getResourceImage("images/icon-20.png"),
-				getResourceImage("images/icon-16.png")));
+		setIconImages(Lists.newArrayList("512","256","128","64","48","32","24","20","16").stream()
+				.map(size -> getResourceImage("images/icon-" + size + ".png"))
+				.collect(Collectors.toList()));
 		
 		translationsPanel = new JPanel(new BorderLayout());
         translationTree = new TranslationTree(this);
