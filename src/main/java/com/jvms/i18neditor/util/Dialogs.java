@@ -1,13 +1,14 @@
 package com.jvms.i18neditor.util;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.GridLayout;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import com.google.common.base.Strings;
+import com.jvms.i18neditor.swing.BlinkCaret;
 import com.jvms.i18neditor.swing.JUndoableTextField;
 import com.jvms.i18neditor.swing.RequestInitialFocusListener;
 
@@ -50,13 +51,24 @@ public class Dialogs {
 		return JOptionPane.showConfirmDialog(parent, message, title, JOptionPane.YES_NO_OPTION, type) == 0 ? true : false;
 	}
 	
-	public static String showInputDialog(Component parent, String title, String label, String initialText, int type) {
-		JPanel panel = new JPanel(new BorderLayout(0, 4));
+	public static String showInputDialog(Component parent, String title, String label, int type) {
+		return showInputDialog(parent, title, label, type, null, false);
+	}
+	
+	public static String showInputDialog(Component parent, String title, String label, int type, String initialText, boolean selectAll) {
+		JPanel panel = new JPanel(new GridLayout(0, 1));
 		if (!Strings.isNullOrEmpty(label)) {
-			panel.add(new JLabel(label), BorderLayout.NORTH);
+			panel.add(new JLabel(label));
 		}
-		JUndoableTextField field =  new JUndoableTextField(initialText);
+		JUndoableTextField field =  new JUndoableTextField(initialText, 25);
 		field.addAncestorListener(new RequestInitialFocusListener());
+		field.setCaret(new BlinkCaret());
+		if (initialText != null) {
+			field.setCaretPosition(initialText.length());			
+		}
+		if (selectAll) {
+			field.selectAll();
+		}
 		panel.add(field);
 		int result = JOptionPane.showConfirmDialog(parent, panel, title, JOptionPane.OK_CANCEL_OPTION, type);
 		return result == JOptionPane.OK_OPTION ? field.getText() : null;

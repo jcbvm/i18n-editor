@@ -21,14 +21,14 @@ public class JUndoableTextField extends JTextField {
 	 * Constructs a {@link JUndoableTextField}.
 	 */
 	public JUndoableTextField() {
-		this(null);
+		this(null, 0);
 	}
 	
 	/**
 	 * Constructs a {@link JUndoableTextField} with an initial text.
 	 */
-	public JUndoableTextField(String text) {
-		super(text);
+	public JUndoableTextField(String text, int columns) {
+		super(text, columns);
 		getDocument().addUndoableEditListener(e -> undoManager.addEdit(e.getEdit()));
 		
 		// Add undo support

@@ -36,6 +36,13 @@ public class ResourceField extends JUndoableTextArea implements Comparable<Resou
 		return resource;
 	}
 	
+	@Override
+	public int compareTo(ResourceField o) {
+		String a = getResource().getLocale().getDisplayName();
+		String b = o.getResource().getLocale().getDisplayName();
+		return a.compareTo(b);
+	}
+	
 	private void setupUI() {
 		Border border = BorderFactory.createLineBorder(Color.GRAY);
 		setBorder(BorderFactory.createCompoundBorder(border, BorderFactory.createEmptyBorder(4,4,4,4)));
@@ -47,12 +54,5 @@ public class ResourceField extends JUndoableTextArea implements Comparable<Resou
 		// Add focus traversal support
 		setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, null);
 	    setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, null);
-	}
-	
-	@Override
-	public int compareTo(ResourceField o) {
-		String a = getResource().getLocale().getDisplayName();
-		String b = o.getResource().getLocale().getDisplayName();
-		return a.compareTo(b);
 	}
 }

@@ -16,6 +16,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
@@ -77,6 +82,7 @@ public class Editor extends JFrame {
 	private JPanel resourcesPanel;
 	private List<ResourceField> resourceFields = Lists.newLinkedList();
 	private ExtendedProperties settings = new ExtendedProperties();
+	private final ExecutorService executor = Executors.newCachedThreadPool();
 	
 	public Editor() {
 		super();
@@ -239,7 +245,7 @@ public class Editor extends JFrame {
 			locale = Dialogs.showInputDialog(this,
 					MessageBundle.get("dialogs.locale.add.title", type),
 					MessageBundle.get("dialogs.locale.add.text"),
-					null, JOptionPane.QUESTION_MESSAGE);
+					JOptionPane.QUESTION_MESSAGE);
 			if (locale != null) {
 				locale = locale.trim();
 				Path path = Paths.get(resourcesDir.toString(), locale);
@@ -265,7 +271,7 @@ public class Editor extends JFrame {
 			newKey = Dialogs.showInputDialog(this,
 					MessageBundle.get("dialogs.translation.rename.title"),
 					MessageBundle.get("dialogs.translation.rename.text"),
-					key, JOptionPane.QUESTION_MESSAGE);
+					JOptionPane.QUESTION_MESSAGE, key, true);
 			if (newKey != null) {
 				if (!TranslationKeys.isValid(newKey)) {
 					showError(MessageBundle.get("dialogs.translation.rename.error"));
@@ -294,7 +300,7 @@ public class Editor extends JFrame {
 			newKey = Dialogs.showInputDialog(this,
 					MessageBundle.get("dialogs.translation.duplicate.title"),
 					MessageBundle.get("dialogs.translation.duplicate.text"),
-					key, JOptionPane.QUESTION_MESSAGE);
+					JOptionPane.QUESTION_MESSAGE, key, true);
 			if (newKey != null) {
 				newKey = newKey.trim();
 				if (!TranslationKeys.isValid(newKey)) {
@@ -329,7 +335,7 @@ public class Editor extends JFrame {
 			newKey = Dialogs.showInputDialog(this,
 					MessageBundle.get("dialogs.translation.add.title"),
 					MessageBundle.get("dialogs.translation.add.text"),
-					key, JOptionPane.QUESTION_MESSAGE);
+					JOptionPane.QUESTION_MESSAGE, key, false);
 			if (newKey != null) {
 				newKey = newKey.trim();
 				if (!TranslationKeys.isValid(newKey)) {
@@ -345,11 +351,12 @@ public class Editor extends JFrame {
 		String key = Dialogs.showInputDialog(this,
 				MessageBundle.get("dialogs.translation.find.title"),
 				MessageBundle.get("dialogs.translation.find.text"),
-				null, JOptionPane.QUESTION_MESSAGE);
+				JOptionPane.QUESTION_MESSAGE);
 		if (key != null) {
 			TranslationTreeNode node = translationTree.getNodeByKey(key.trim());
 			if (node == null) {
-				Dialogs.showWarningDialog(this, MessageBundle.get("dialogs.translation.find.title"), 
+				Dialogs.showWarningDialog(this, 
+						MessageBundle.get("dialogs.translation.find.title"), 
 						MessageBundle.get("dialogs.translation.find.error"));
 			} else {
 				translationTree.setSelectedNode(node);
@@ -368,20 +375,27 @@ public class Editor extends JFrame {
 				"</body></html>");
 	}
 	
-	public void showVersionDialog() {
-		GithubReleaseData data = GithubRepoUtils.getLatestRelease(GITHUB_REPO);
-		String content = "";
-		if (data != null && !VERSION.equals(data.getTagName())) {
-			content = MessageBundle.get("dialogs.version.new", data.getTagName()) + "<br>" + 
-					"<a href=\"" + data.getHtmlUrl() + "\">" + MessageBundle.get("dialogs.version.link") + "</a>";
-		} else {
-			content = MessageBundle.get("dialogs.version.uptodate");
-		}
-		Font font = getFont();
-		JHtmlPane pane = new JHtmlPane("<html><body style=\"font-family:" + font.getFamily() + ";font-size:" + font.getSize() + "pt;text-align:center;width:200px;\">" + content + "</body></html>");
-	    pane.setBackground(getBackground());
-	    pane.setEditable(false);
-		Dialogs.showMessageDialog(this, MessageBundle.get("dialogs.version.title"), pane);
+	public void checkForNewVersion(boolean showUpToDateFeedback) {
+		executor.execute(() -> {
+			GithubReleaseData data;
+			String content;
+			try {
+				data = GithubRepoUtils.getLatestRelease(GITHUB_REPO).get(30, TimeUnit.SECONDS);
+			} catch (InterruptedException | ExecutionException | TimeoutException e) {
+				data = null;
+			}
+			if (data != null && !VERSION.equals(data.getTagName())) {
+				content = MessageBundle.get("dialogs.version.new", data.getTagName()) + "<br>" + 
+						"<a href=\"" + data.getHtmlUrl() + "\">" + MessageBundle.get("dialogs.version.link") + "</a>";
+			} else if (!showUpToDateFeedback) {
+				return;
+			} else {
+				content = MessageBundle.get("dialogs.version.uptodate");
+			}
+			Font font = getFont();
+			JHtmlPane pane = new JHtmlPane(this, "<html><body style=\"font-family:" + font.getFamily() + ";font-size:" + font.getSize() + "pt;text-align:center;width:200px;\">" + content + "</body></html>");
+			Dialogs.showMessageDialog(this, MessageBundle.get("dialogs.version.title"), pane);			
+		});
 	}
 	
 	public boolean closeCurrentSession() {
@@ -406,33 +420,6 @@ public class Editor extends JFrame {
 		updateUI();
 	}
 	
-	public void updateUI() {
-		TranslationTreeNode selectedNode = translationTree.getSelectedNode();
-		
-		resourcesPanel.removeAll();
-		resourceFields.stream().sorted().forEach(field -> {
-			field.setEditable(selectedNode != null && selectedNode.isEditable());
-			resourcesPanel.add(Box.createVerticalStrut(5));
-			resourcesPanel.add(new JLabel(field.getResource().getLocale().getDisplayName()));
-			resourcesPanel.add(Box.createVerticalStrut(5));
-			resourcesPanel.add(field);
-			resourcesPanel.add(Box.createVerticalStrut(5));
-		});
-		if (!resourceFields.isEmpty()) {
-			resourcesPanel.remove(0);
-			resourcesPanel.remove(resourcesPanel.getComponentCount()-1);
-		}
-		
-		editorMenu.setEnabled(resourcesDir != null);
-		editorMenu.setEditable(!resources.isEmpty());
-		translationTree.setEditable(!resources.isEmpty());
-		translationField.setEditable(!resources.isEmpty());
-		
-		updateTitle();
-		validate();
-		repaint();
-	}
-	
 	public void launch() {
 		settings.load(SETTINGS_PATH);
 		
@@ -447,24 +434,27 @@ public class Editor extends JFrame {
     	pack();
     	setVisible(true);
     	
-    	if (!loadResourcesFromHistory()) {
-    		showImportDialog();
-    	} else {
-    		// Restore last expanded nodes
-			List<String> expandedKeys = settings.getListProperty("last_expanded");
-			List<TranslationTreeNode> expandedNodes = expandedKeys.stream()
-					.map(k -> translationTree.getNodeByKey(k))
-					.filter(n -> n != null)
-					.collect(Collectors.toList());
-			translationTree.expand(expandedNodes);
-			
-			// Restore last selected node
-			String selectedKey = settings.getProperty("last_selected");
-			TranslationTreeNode selectedNode = translationTree.getNodeByKey(selectedKey);
-			if (selectedNode != null) {
-				translationTree.setSelectedNode(selectedNode);
-			}
-    	}
+    	executor.execute(() -> {
+    		if (!loadResourcesFromHistory()) {
+        		showImportDialog();
+        	} else {
+        		// Restore last expanded nodes
+    			List<String> expandedKeys = settings.getListProperty("last_expanded");
+    			List<TranslationTreeNode> expandedNodes = expandedKeys.stream()
+    					.map(k -> translationTree.getNodeByKey(k))
+    					.filter(n -> n != null)
+    					.collect(Collectors.toList());
+    			translationTree.expand(expandedNodes);
+    			
+    			// Restore last selected node
+    			String selectedKey = settings.getProperty("last_selected");
+    			TranslationTreeNode selectedNode = translationTree.getNodeByKey(selectedKey);
+    			if (selectedNode != null) {
+    				translationTree.setSelectedNode(selectedNode);
+    			}
+        	}
+        	checkForNewVersion(false);
+    	});
 	}
 	
 	private boolean loadResourcesFromHistory() {
@@ -531,13 +521,42 @@ public class Editor extends JFrame {
         resourcesScrollPane.setBackground(resourcesPanel.getBackground());
         
 		contentPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, translationsPanel, resourcesScrollPane);
-     	editorMenu = new EditorMenu(this, translationTree);
+		contentPane.setVisible(false);
+		editorMenu = new EditorMenu(this, translationTree);
      	
 		Container container = getContentPane();
 		container.add(editorMenu, BorderLayout.NORTH);
 		container.add(contentPane);
 		
 		setJMenuBar(editorMenu);
+	}
+	
+	private void updateUI() {
+		TranslationTreeNode selectedNode = translationTree.getSelectedNode();
+		
+		resourcesPanel.removeAll();
+		resourceFields.stream().sorted().forEach(field -> {
+			field.setEditable(selectedNode != null && selectedNode.isEditable());
+			resourcesPanel.add(Box.createVerticalStrut(5));
+			resourcesPanel.add(new JLabel(field.getResource().getLocale().getDisplayName()));
+			resourcesPanel.add(Box.createVerticalStrut(5));
+			resourcesPanel.add(field);
+			resourcesPanel.add(Box.createVerticalStrut(5));
+		});
+		if (!resourceFields.isEmpty()) {
+			resourcesPanel.remove(0);
+			resourcesPanel.remove(resourcesPanel.getComponentCount()-1);
+		}
+		
+		contentPane.setVisible(true);
+		editorMenu.setEnabled(resourcesDir != null);
+		editorMenu.setEditable(!resources.isEmpty());
+		translationTree.setEditable(!resources.isEmpty());
+		translationField.setEditable(!resources.isEmpty());
+		
+		updateTitle();
+		validate();
+		repaint();
 	}
 	
 	private void setupFileDrop() {
