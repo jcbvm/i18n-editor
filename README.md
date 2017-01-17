@@ -31,6 +31,10 @@ To add a locale, go to `Edit > Add Locale` where you can choose whether you want
 
 From here you can begin adding translations (either via the top menu, via the right click menu in the left side panel or via the key field at the bottom of the left side panel).
 
+## Help translating
+
+Want this editor in your native language? You are free to create a pull request or issue with a new translation file of your desired language. Take a look at `src/main/resources/bundles` on how to create a translation file.
+
 ## License
 
 This project is released under the MIT license.
