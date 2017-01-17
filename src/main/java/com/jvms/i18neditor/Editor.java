@@ -74,6 +74,7 @@ public class Editor extends JFrame {
 	
 	private EditorMenu editorMenu;
 	private JSplitPane contentPane;
+	private JLabel introText;
 	private JPanel translationsPanel;
 	private JScrollPane resourcesScrollPane;
 	private TranslationTree translationTree;
@@ -94,7 +95,9 @@ public class Editor extends JFrame {
 			return;
 		}
 		if (Files.isDirectory(dir, LinkOption.NOFOLLOW_LINKS)) {
-			reset();
+			if (resourcesDir != null) {
+				reset();				
+			}
 			resourcesDir = dir;
 		} else {
 			showError(MessageBundle.get("resources.open.error.multiple"));
@@ -235,6 +238,8 @@ public class Editor extends JFrame {
 		int result = fc.showOpenDialog(this);
 		if (result == JFileChooser.APPROVE_OPTION) {
 			importResources(Paths.get(fc.getSelectedFile().getPath()));
+		} else {
+			updateUI();
 		}
 	}
 	
@@ -433,27 +438,25 @@ public class Editor extends JFrame {
     	pack();
     	setVisible(true);
     	
-    	executor.execute(() -> {
-    		if (!loadResourcesFromHistory()) {
-        		showImportDialog();
-        	} else {
-        		// Restore last expanded nodes
-    			List<String> expandedKeys = settings.getListProperty("last_expanded");
-    			List<TranslationTreeNode> expandedNodes = expandedKeys.stream()
-    					.map(k -> translationTree.getNodeByKey(k))
-    					.filter(n -> n != null)
-    					.collect(Collectors.toList());
-    			translationTree.expand(expandedNodes);
-    			
-    			// Restore last selected node
-    			String selectedKey = settings.getProperty("last_selected");
-    			TranslationTreeNode selectedNode = translationTree.getNodeByKey(selectedKey);
-    			if (selectedNode != null) {
-    				translationTree.setSelectedNode(selectedNode);
-    			}
-        	}
-        	checkForNewVersion(false);
-    	});
+		if (!loadResourcesFromHistory()) {
+    		showImportDialog();
+    	} else {
+    		// Restore last expanded nodes
+			List<String> expandedKeys = settings.getListProperty("last_expanded");
+			List<TranslationTreeNode> expandedNodes = expandedKeys.stream()
+					.map(k -> translationTree.getNodeByKey(k))
+					.filter(n -> n != null)
+					.collect(Collectors.toList());
+			translationTree.expand(expandedNodes);
+			
+			// Restore last selected node
+			String selectedKey = settings.getProperty("last_selected");
+			TranslationTreeNode selectedNode = translationTree.getNodeByKey(selectedKey);
+			if (selectedNode != null) {
+				translationTree.setSelectedNode(selectedNode);
+			}
+    	}
+    	checkForNewVersion(false);
 	}
 	
 	private boolean loadResourcesFromHistory() {
@@ -513,12 +516,17 @@ public class Editor extends JFrame {
         resourcesScrollPane.setBackground(resourcesPanel.getBackground());
         
 		contentPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, translationsPanel, resourcesScrollPane);
-		contentPane.setVisible(false);
 		editorMenu = new EditorMenu(this, translationTree);
-     	
-		Container container = getContentPane();
-		container.add(editorMenu, BorderLayout.NORTH);
-		container.add(contentPane);
+		
+		introText = new JLabel("<html><body style=\"text-align:center; padding:15px;\">" + MessageBundle.get("core.intro.text") + "</body></html>");
+		introText.setOpaque(true);
+		introText.setFont(introText.getFont().deriveFont(28f));
+		introText.setHorizontalTextPosition(JLabel.CENTER);
+		introText.setVerticalTextPosition(JLabel.BOTTOM);
+		introText.setHorizontalAlignment(JLabel.CENTER);
+		introText.setVerticalAlignment(JLabel.CENTER);
+		introText.setForeground(getBackground().darker());
+		introText.setIcon(new ImageIcon(getResourceImage("images/icon-intro.png")));
 		
 		setJMenuBar(editorMenu);
 	}
@@ -540,7 +548,15 @@ public class Editor extends JFrame {
 			resourcesPanel.remove(resourcesPanel.getComponentCount()-1);
 		}
 		
-		contentPane.setVisible(true);
+		Container container = getContentPane();
+		if (resourcesDir != null) {
+			container.add(contentPane);
+			container.remove(introText);
+		} else {
+			container.add(introText);
+			container.remove(contentPane);
+		}
+		
 		editorMenu.setEnabled(resourcesDir != null);
 		editorMenu.setEditable(!resources.isEmpty());
 		translationTree.setEditable(!resources.isEmpty());
