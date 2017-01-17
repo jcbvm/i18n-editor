@@ -1,4 +1,4 @@
-# i18n-editor [![Build Status](https://travis-ci.org/jcbvm/ember-i18n-editor.svg?branch=master)](https://travis-ci.org/jcbvm/ember-i18n-editor)
+# i18n-editor [![Build Status](https://travis-ci.org/jcbvm/i18n-editor.svg?branch=master)](https://travis-ci.org/jcbvm/i18n-editor)
 
 This application lets you manage multiple translations files at once. The application can handle both `JSON` and `ES6` formatted files (the latter is JSON wrapped in an ES6 module).
 
