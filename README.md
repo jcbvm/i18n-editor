@@ -33,7 +33,7 @@ From here you can begin adding translations (either via the top menu, via the ri
 
 ## Help translating
 
-Want this editor in your native language? You are free to create a pull request or issue with a new translation file of your desired language. Take a look at `src/main/resources/bundles` on how to create a translation file.
+Do you want this editor to be in your native language? You are free to create a pull request or issue with a new translation file of your desired language. Take a look at `src/main/resources/bundles` on how to create a translation file.
 
 ## License
 
