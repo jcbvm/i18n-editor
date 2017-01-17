@@ -114,20 +114,12 @@ public class Editor extends JFrame {
 				}
 			});
 			
-			List<String> recentDirs = settings.getListProperty("history");
-			recentDirs.remove(resourcesDir);
-			recentDirs.add(resourcesDir.toString());
-			if (recentDirs.size() > 5) {
-				recentDirs.remove(0);
-			}
-			settings.setProperty("history", recentDirs);
-			editorMenu.setRecentItems(Lists.reverse(recentDirs));
-			
 			Map<String,String> keys = Maps.newTreeMap();
 			resources.forEach(resource -> keys.putAll(resource.getTranslations()));
 			List<String> keyList = Lists.newArrayList(keys.keySet());
 			translationTree.setModel(new TranslationTreeModel(keyList));
 			
+			updateHistory();
 			updateUI();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -239,6 +231,7 @@ public class Editor extends JFrame {
 		if (result == JFileChooser.APPROVE_OPTION) {
 			importResources(Paths.get(fc.getSelectedFile().getPath()));
 		} else {
+			updateHistory();
 			updateUI();
 		}
 	}
@@ -456,38 +449,8 @@ public class Editor extends JFrame {
 				translationTree.setSelectedNode(selectedNode);
 			}
     	}
+		
     	checkForNewVersion(false);
-	}
-	
-	private boolean loadResourcesFromHistory() {
-		List<String> dirs = settings.getListProperty("history");
-    	if (!dirs.isEmpty()) {
-    		String lastDir = dirs.get(dirs.size()-1);
-    		Path path = Paths.get(lastDir);
-    		if (Files.exists(path)) {
-    			importResources(path);
-    			return true;
-    		}
-    	}
-    	return false;
-	}
-	
-	private void showError(String message) {
-		Dialogs.showErrorDialog(this, MessageBundle.get("dialogs.error.title"), message);
-	}
-	
-	private void updateTitle() {
-		String dirtyPart = dirty ? "*" : "";
-		String filePart = resourcesDir == null ? "" : resourcesDir.toString() + " - ";
-		setTitle(dirtyPart + filePart + TITLE);
-	}
-	
-	private void setupResource(Resource resource) {
-		resource.addListener(e -> setDirty(true));
-		ResourceField field = new ResourceField(resource);
-		field.addKeyListener(new ResourceFieldKeyListener());
-		resources.add(resource);
-		resourceFields.add(field);
 	}
 	
 	private void setupUI() {
@@ -531,6 +494,29 @@ public class Editor extends JFrame {
 		setJMenuBar(editorMenu);
 	}
 	
+	private void setupFileDrop() {
+		new JFileDrop(this, new JFileDrop.Listener() {
+			@Override
+			public void filesDropped(java.io.File[] files) {
+				try {
+					Path path = Paths.get(files[0].getCanonicalPath());
+					importResources(path);
+                } catch (IOException e ) {
+                	e.printStackTrace();
+                	showError(MessageBundle.get("resources.open.error.multiple"));
+                }
+            }
+        });
+	}
+	
+	private void setupResource(Resource resource) {
+		resource.addListener(e -> setDirty(true));
+		ResourceField field = new ResourceField(resource);
+		field.addKeyListener(new ResourceFieldKeyListener());
+		resources.add(resource);
+		resourceFields.add(field);
+	}
+	
 	private void updateUI() {
 		TranslationTreeNode selectedNode = translationTree.getSelectedNode();
 		
@@ -567,19 +553,41 @@ public class Editor extends JFrame {
 		repaint();
 	}
 	
-	private void setupFileDrop() {
-		new JFileDrop(this, new JFileDrop.Listener() {
-			@Override
-			public void filesDropped(java.io.File[] files) {
-				try {
-					Path path = Paths.get(files[0].getCanonicalPath());
-					importResources(path);
-                } catch (IOException e ) {
-                	e.printStackTrace();
-                	showError(MessageBundle.get("resources.open.error.multiple"));
-                }
-            }
-        });
+	private void updateHistory() {
+		List<String> recentDirs = settings.getListProperty("history");
+		if (resourcesDir != null) {
+			String path = resourcesDir.toString();
+			recentDirs.remove(path);
+			recentDirs.add(path);
+			if (recentDirs.size() > 5) {
+				recentDirs.remove(0);
+			}
+			settings.setProperty("history", recentDirs);			
+		}
+		editorMenu.setRecentItems(Lists.reverse(recentDirs));
+	}
+	
+	private void updateTitle() {
+		String dirtyPart = dirty ? "*" : "";
+		String filePart = resourcesDir == null ? "" : resourcesDir.toString() + " - ";
+		setTitle(dirtyPart + filePart + TITLE);
+	}
+	
+	private boolean loadResourcesFromHistory() {
+		List<String> dirs = settings.getListProperty("history");
+    	if (!dirs.isEmpty()) {
+    		String lastDir = dirs.get(dirs.size()-1);
+    		Path path = Paths.get(lastDir);
+    		if (Files.exists(path)) {
+    			importResources(path);
+    			return true;
+    		}
+    	}
+    	return false;
+	}
+	
+	private void showError(String message) {
+		Dialogs.showErrorDialog(this, MessageBundle.get("dialogs.error.title"), message);
 	}
 	
 	private Image getResourceImage(String path) {
