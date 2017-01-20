@@ -1,4 +1,4 @@
-package com.jvms.i18neditor;
+package com.jvms.i18neditor.editor;
 
 import java.awt.Insets;
 

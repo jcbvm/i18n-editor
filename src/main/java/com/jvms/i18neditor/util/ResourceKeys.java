@@ -5,16 +5,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
+import com.jvms.i18neditor.Resource;
 
 /**
- * This class provides utility functions for translation keys.
+ * This class provides translation key utility functions for a {@link Resource}.
  * 
  * <p>A translation key is a {@code String} consisting of one or more parts separated by a dot.<br>
- * A key starting or ending with a dot or a key containing any spaces is considered to be invalid.<p> 
+ * A key starting or ending with a dot or a key containing white spaces is considered to be invalid.<p> 
  * 
  * @author Jacob
  */
-public final class TranslationKeys {
+public final class ResourceKeys {
 	
 	/**
 	 * See {@link #create(List)}.
@@ -34,18 +35,18 @@ public final class TranslationKeys {
 	}
 	
 	/**
-	 * Checks whether the given key is a valid translation key.
-	 * A key starting or ending with a dot or a key containing any spaces is considered to be invalid.
+	 * Checks whether the given key is a valid key.
+	 * A key starting or ending with a dot or a key containing white spaces is considered to be invalid.
 	 * 
 	 * @param 	key the key to validate.
 	 * @return	whether the key is valid or not.
 	 */
 	public static boolean isValid(String key) {
-		return !key.isEmpty() && !key.startsWith(".") && !key.endsWith(".") && !key.contains(" ");
+		return !key.isEmpty() && !key.startsWith(".") && !key.endsWith(".") && key.matches("[^\\s]+");
 	}
 	
 	/**
-	 * Returns the size of the translation key. 
+	 * Returns the size of a key. 
 	 * The size is the number of parts the key consists of.
 	 * 
 	 * @param 	key the key.
@@ -56,7 +57,7 @@ public final class TranslationKeys {
 	}
 	
 	/**
-	 * Returns the parts of a translation key by splitting the key on dot.
+	 * Returns the parts of a key.
 	 * 
 	 * @param 	key the key.
 	 * @return	the parts of the key.
@@ -100,7 +101,7 @@ public final class TranslationKeys {
 	}
 	
 	/**
-	 * Creates a new key consisting of all but the first part of the given key.
+	 * Creates a new key consisting of all but the first part.
 	 * If the key has only one part, an empty key will be returned.
 	 * 
 	 * @param 	key the key.
@@ -112,7 +113,7 @@ public final class TranslationKeys {
 	}
 	
 	/**
-	 * Creates a new key consisting of all but the last part of the given key.
+	 * Creates a new key consisting of all but the last part.
 	 * If the key has only one part, an empty key will be returned.
 	 * 
 	 * @param 	key the key.

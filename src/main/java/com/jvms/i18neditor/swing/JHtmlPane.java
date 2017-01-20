@@ -1,9 +1,9 @@
 package com.jvms.i18neditor.swing;
 
+import java.awt.Component;
 import java.awt.Desktop;
 
 import javax.swing.JEditorPane;
-import javax.swing.JFrame;
 import javax.swing.event.HyperlinkEvent;
 
 /**
@@ -14,10 +14,10 @@ import javax.swing.event.HyperlinkEvent;
 public class JHtmlPane extends JEditorPane {
 	private final static long serialVersionUID = 2873290055720408299L;
 	
-	public JHtmlPane(JFrame window, String content) {
+	public JHtmlPane(Component parent, String content) {
 		super("text/html", content);
 		setEditable(false);
-		setBackground(window.getBackground());
+		setBackground(parent.getBackground());
 		addHyperlinkListener(e -> {
             if (e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
             	try {

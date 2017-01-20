@@ -1,4 +1,4 @@
-package com.jvms.i18neditor;
+package com.jvms.i18neditor.editor;
 
 import java.awt.Desktop;
 import java.awt.Toolkit;
@@ -16,6 +16,14 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
 import com.jvms.i18neditor.Resource.ResourceType;
+import com.jvms.i18neditor.editor.menu.AddTranslationMenuItem;
+import com.jvms.i18neditor.editor.menu.CollapseTranslationsMenuItem;
+import com.jvms.i18neditor.editor.menu.DuplicateTranslationMenuItem;
+import com.jvms.i18neditor.editor.menu.ExpandTranslationsMenuItem;
+import com.jvms.i18neditor.editor.menu.FindTranslationMenuItem;
+import com.jvms.i18neditor.editor.menu.RemoveTranslationMenuItem;
+import com.jvms.i18neditor.editor.menu.RenameTranslationMenuItem;
+import com.jvms.i18neditor.editor.tree.TranslationTreeNode;
 import com.jvms.i18neditor.util.MessageBundle;
 
 /**
@@ -25,6 +33,7 @@ import com.jvms.i18neditor.util.MessageBundle;
  */
 public class EditorMenu extends JMenuBar {
 	private final static long serialVersionUID = -101788804096708514L;
+	
 	private final Editor editor;
 	private final TranslationTree tree;
 	private JMenuItem saveMenuItem;
@@ -182,7 +191,7 @@ public class EditorMenu extends JMenuBar {
      	helpMenu.setMnemonic(MessageBundle.getMnemonic("menu.help.vk"));
      	
      	JMenuItem versionMenuItem = new JMenuItem(MessageBundle.get("menu.help.version.title"));
-     	versionMenuItem.addActionListener(e -> editor.checkForNewVersion(true));
+     	versionMenuItem.addActionListener(e -> editor.showVersionDialog(true));
      	
      	JMenuItem aboutMenuItem = new JMenuItem(MessageBundle.get("menu.help.about.title", Editor.TITLE));
      	aboutMenuItem.addActionListener(e -> editor.showAboutDialog());

@@ -1,4 +1,4 @@
-package com.jvms.i18neditor;
+package com.jvms.i18neditor.editor.tree;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 
-import com.jvms.i18neditor.util.TranslationKeys;
+import com.jvms.i18neditor.util.ResourceKeys;
 
 /**
  * This class represents a single node of the translation tree.
@@ -23,8 +23,8 @@ public class TranslationTreeNode extends DefaultMutableTreeNode {
 	public TranslationTreeNode(String name, List<String> keys) {
 		super();
 		this.name = name;
-		TranslationKeys.uniqueRootKeys(keys).forEach(rootKey -> {
-			List<String> subKeys = TranslationKeys.extractChildKeys(keys, rootKey);
+		ResourceKeys.uniqueRootKeys(keys).forEach(rootKey -> {
+			List<String> subKeys = ResourceKeys.extractChildKeys(keys, rootKey);
 			add(new TranslationTreeNode(rootKey, subKeys));
 		});
 	}
@@ -47,7 +47,7 @@ public class TranslationTreeNode extends DefaultMutableTreeNode {
 				.filter(p -> !((TranslationTreeNode)p).isRoot())
 				.map(p -> p.toString())
 				.collect(Collectors.toList());
-		return TranslationKeys.create(parts);
+		return ResourceKeys.create(parts);
 	}
 	
 	@SuppressWarnings("unchecked")

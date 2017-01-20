@@ -6,19 +6,20 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.SortedMap;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.jvms.i18neditor.util.TranslationKeys;
+import com.jvms.i18neditor.util.ResourceKeys;
 
 /**
- * A resource is a container for storing translation data and is defined by the following properties:
+ * A resource is a container for storing i18n data and is defined by the following properties:
  * 
  * <ul>
  * <li>{@code type} the type of the resource, either {@code JSON} or {@code ES6}.</li>
- * <li>{@code path}	the path to the translation file on disk.</li>
- * <li>{@code locale} the locale of the translations.</li>
- * <li>{@code translations} a sorted map containing the translations by key value pair.</li>
+ * <li>{@code path}	the path to the resource file on disk.</li>
+ * <li>{@code locale} the locale of the resource.</li>
+ * <li>{@code translations} a sorted map containing the translations of the resource by key value pair.</li>
  * </ul>
  * 
  * <p>Objects can listen to a resource by adding a {@link ResourceListener} which 
@@ -126,6 +127,7 @@ public class Resource {
 	 * @param 	value the value of the translation to add corresponding the given key.
 	 */
 	public void storeTranslation(String key, String value) {
+		checkKey(key);
 		String existing = translations.get(key);
 		if (existing != null && existing.equals(value)) return;
 		removeParents(key);
@@ -158,6 +160,7 @@ public class Resource {
 	 * @param 	newKey the new key.
 	 */
 	public void renameTranslation(String key, String newKey) {
+		checkKey(newKey);
 		duplicateTranslation(key, newKey, false);
 		notifyListeners();
 	}
@@ -169,6 +172,7 @@ public class Resource {
 	 * @param 	newKey the new key.
 	 */
 	public void duplicateTranslation(String key, String newKey) {
+		checkKey(newKey);
 		duplicateTranslation(key, newKey, true);
 		notifyListeners();
 	}
@@ -195,8 +199,8 @@ public class Resource {
 	private void duplicateTranslation(String key, String newKey, boolean keepOld) {
 		Map<String,String> newTranslations = Maps.newTreeMap();
 		translations.keySet().forEach(k -> {
-			if (TranslationKeys.isChildKeyOf(k, key)) {
-				String nk = TranslationKeys.create(newKey, TranslationKeys.childKey(k, key));
+			if (ResourceKeys.isChildKeyOf(k, key)) {
+				String nk = ResourceKeys.create(newKey, ResourceKeys.childKey(k, key));
 				newTranslations.put(nk, translations.get(k));
 			}
 		});
@@ -212,7 +216,7 @@ public class Resource {
 	
 	private void removeChildren(String key) {
 		Lists.newLinkedList(translations.keySet()).forEach(k -> {
-			if (TranslationKeys.isChildKeyOf(k, key)) {
+			if (ResourceKeys.isChildKeyOf(k, key)) {
 				translations.remove(k);
 			}
 		});
@@ -220,7 +224,7 @@ public class Resource {
 	
 	private void removeParents(String key) {
 		Lists.newLinkedList(translations.keySet()).forEach(k -> {
-			if (TranslationKeys.isChildKeyOf(key, k)) {
+			if (ResourceKeys.isChildKeyOf(key, k)) {
 				translations.remove(k);
 			}
 		});
@@ -228,5 +232,9 @@ public class Resource {
 	
 	private void notifyListeners() {
 		listeners.forEach(l -> l.resourceChanged(new ResourceEvent(this)));
+	}
+	
+	private void checkKey(String key) {
+		Preconditions.checkArgument(ResourceKeys.isValid(key), "Key is not valid.");
 	}
 }

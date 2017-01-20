@@ -1,4 +1,4 @@
-package com.jvms.i18neditor.swing;
+package com.jvms.i18neditor.swing.text;
 
 import javax.swing.UIManager;
 import javax.swing.text.DefaultCaret;

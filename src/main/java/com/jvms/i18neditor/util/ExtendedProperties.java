@@ -24,7 +24,7 @@ import com.google.common.collect.Lists;
  */
 public class ExtendedProperties extends Properties {
 	private final static long serialVersionUID = 6042931434040718478L;
-	private final String separator;
+	private final String listSeparator;
 	
 	/**
      * Creates an empty property list with no default values and "," as list separator.
@@ -59,7 +59,7 @@ public class ExtendedProperties extends Properties {
      */
     public ExtendedProperties(Properties defaults, String separator) {
         super(defaults);
-        this.separator = separator;
+        this.listSeparator = separator;
     }
 	
 	/**
@@ -81,10 +81,11 @@ public class ExtendedProperties extends Properties {
 	 * Writes the property list to the given file path.
 	 * 
 	 * @param 	path the path to the property file.
+	 * @param   comments the comments to add to the property file.
 	 */
-	public void store(Path path) {
+	public void store(Path path, String comments) {
 		try (OutputStream out = Files.newOutputStream(path)) {
-			store(out, null);
+			store(out, comments);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -92,13 +93,13 @@ public class ExtendedProperties extends Properties {
 	
 	/**
 	 * Sets a value in the property list. The list of values will be converted
-	 * to a single string separated by {@value #separator}.
+	 * to a single string separated by {@value #listSeparator}.
 	 * 
 	 * @param 	key the key to be placed in this property list.
 	 * @param 	values the value corresponding to {@code key}.
 	 */
 	public void setProperty(String key, List<String> values) {
-		setProperty(key, values.stream().collect(Collectors.joining(separator)));
+		setProperty(key, values.stream().collect(Collectors.joining(listSeparator)));
 	}
 	
 	/**
@@ -132,7 +133,7 @@ public class ExtendedProperties extends Properties {
 	 */
 	public List<String> getListProperty(String key) {
 		String value = getProperty(key);
-		return value == null ? Lists.newLinkedList() : Lists.newLinkedList(Arrays.asList(value.split(separator)));
+		return value == null ? Lists.newLinkedList() : Lists.newLinkedList(Arrays.asList(value.split(listSeparator)));
 	}
 	
 	/**

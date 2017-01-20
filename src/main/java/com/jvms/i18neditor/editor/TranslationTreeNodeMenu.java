@@ -1,6 +1,12 @@
-package com.jvms.i18neditor;
+package com.jvms.i18neditor.editor;
 
 import javax.swing.JPopupMenu;
+
+import com.jvms.i18neditor.editor.menu.AddTranslationMenuItem;
+import com.jvms.i18neditor.editor.menu.DuplicateTranslationMenuItem;
+import com.jvms.i18neditor.editor.menu.RemoveTranslationMenuItem;
+import com.jvms.i18neditor.editor.menu.RenameTranslationMenuItem;
+import com.jvms.i18neditor.editor.tree.TranslationTreeNode;
 
 /**
  * This class represents a right click menu for a single node of the translation tree.

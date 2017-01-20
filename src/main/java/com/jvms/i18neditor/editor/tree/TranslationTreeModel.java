@@ -1,4 +1,4 @@
-package com.jvms.i18neditor;
+package com.jvms.i18neditor.editor.tree;
 
 import java.util.Enumeration;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.List;
 import javax.swing.tree.DefaultTreeModel;
 
 import com.jvms.i18neditor.util.MessageBundle;
-import com.jvms.i18neditor.util.TranslationKeys;
+import com.jvms.i18neditor.util.ResourceKeys;
 
 /**
  * This class represents a model for the translation tree.
@@ -39,9 +39,9 @@ public class TranslationTreeModel extends DefaultTreeModel {
 	
 	public TranslationTreeNode getClosestParentNodeByKey(String key) {
 		TranslationTreeNode node = null;
-		int count = TranslationKeys.size(key);
+		int count = ResourceKeys.size(key);
 		while (node == null && count > 0) {
-			key = TranslationKeys.withoutLastPart(key);
+			key = ResourceKeys.withoutLastPart(key);
 			node = getNodeByKey(key);
 			count--;
 		}

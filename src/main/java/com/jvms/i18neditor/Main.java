@@ -1,13 +1,17 @@
 package com.jvms.i18neditor;
 
+import java.io.IOException;
+
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import org.apache.commons.lang3.SystemUtils;
 
+import com.jvms.i18neditor.editor.Editor;
+
 public class Main {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		if (SystemUtils.IS_OS_MAC) {
 			System.setProperty("apple.laf.useScreenMenuBar", "true");
 		}

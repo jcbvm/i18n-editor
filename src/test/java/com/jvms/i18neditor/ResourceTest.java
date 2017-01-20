@@ -1,4 +1,4 @@
-package com.jvms.i18neditor.util;
+package com.jvms.i18neditor;
 
 import java.util.Locale;
 import java.util.SortedMap;
@@ -50,6 +50,11 @@ public class ResourceTest {
 		assertEquals(translations.get("a.a.a"), null);
 		assertEquals(translations.get("a.a"), null);
 		assertEquals(translations.get("a.b"), null);
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void addTranslationWithInvalidKeyTest() {
+		resource.storeTranslation("a a", "b");
 	}
 	
 	@Test
@@ -128,6 +133,12 @@ public class ResourceTest {
 		assertEquals(translations.get("a.b.b"), null);
 	}
 	
+	@Test(expected=IllegalArgumentException.class)
+	public void renameTranslationToInvalidKeyTest() {
+		resource.storeTranslation("a.b", "ab");
+		resource.renameTranslation("a", "b c");
+	}
+	
 	@Test
 	public void duplicateTranslationToUniqueKeyTest() {
 		SortedMap<String,String> translations;
@@ -191,5 +202,11 @@ public class ResourceTest {
 		assertEquals(translations.get("b.a"), "ba");
 		assertEquals(translations.get("b.b.a"), "bba");
 		assertEquals(translations.get("b.b.b"), "bbb");
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void duplicateTranslationToInvalidKeyTest() {
+		resource.storeTranslation("a.b", "ab");
+		resource.duplicateTranslation("a", "b c");
 	}
 }

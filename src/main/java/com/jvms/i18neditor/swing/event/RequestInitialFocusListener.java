@@ -1,4 +1,4 @@
-package com.jvms.i18neditor.swing;
+package com.jvms.i18neditor.swing.event;
 
 import javax.swing.*;
 import javax.swing.event.*;

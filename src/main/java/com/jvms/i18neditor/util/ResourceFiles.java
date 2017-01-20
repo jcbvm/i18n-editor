@@ -25,11 +25,11 @@ import com.jvms.i18neditor.Resource;
 import com.jvms.i18neditor.Resource.ResourceType;
 
 /**
- * This class provides utility functions for a {@link Resource}.
+ * This class provides file utility functions for a {@link Resource}.
  * 
  * @author Jacob
  */
-public final class Resources {
+public final class ResourceFiles {
 	private final static String RESOURCE_FILENAME = "translations";
 	private final static Charset DEFAULT_ENCODING = Charset.forName("UTF-8");
 	private final static String LOCALE_REGEX = "[a-z]{2}(_[a-z]{2})?";
@@ -162,7 +162,7 @@ public final class Resources {
 	private static void fromJson(String key, JsonElement elem, Map<String,String> content) {
 		if (elem.isJsonObject()) {
 			elem.getAsJsonObject().entrySet().forEach(entry -> {
-				String newKey = key == null ? entry.getKey() : TranslationKeys.create(key, entry.getKey());
+				String newKey = key == null ? entry.getKey() : ResourceKeys.create(key, entry.getKey());
 				fromJson(newKey, entry.getValue(), content);
 			});
 		} else if (elem.isJsonPrimitive()) {
@@ -187,9 +187,9 @@ public final class Resources {
 	private static JsonElement toJson(Map<String,String> translations, String key, List<String> keys) {
 		if (keys.size() > 0) {
 			JsonObject object = new JsonObject();
-			TranslationKeys.uniqueRootKeys(keys).forEach(rootKey -> {
-				String subKey = TranslationKeys.create(key, rootKey);
-				List<String> subKeys = TranslationKeys.extractChildKeys(keys, rootKey);
+			ResourceKeys.uniqueRootKeys(keys).forEach(rootKey -> {
+				String subKey = ResourceKeys.create(key, rootKey);
+				List<String> subKeys = ResourceKeys.extractChildKeys(keys, rootKey);
 				object.add(rootKey, toJson(translations, subKey, subKeys));
 			});
 			return object;

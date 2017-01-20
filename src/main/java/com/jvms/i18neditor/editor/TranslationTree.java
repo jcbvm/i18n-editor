@@ -1,4 +1,4 @@
-package com.jvms.i18neditor;
+package com.jvms.i18neditor.editor;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -14,7 +14,9 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
 import com.google.common.collect.Lists;
-import com.jvms.i18neditor.util.TranslationKeys;
+import com.jvms.i18neditor.editor.tree.TranslationTreeModel;
+import com.jvms.i18neditor.editor.tree.TranslationTreeNode;
+import com.jvms.i18neditor.util.ResourceKeys;
 
 /**
  * This class represents a tree view for the translation keys.
@@ -66,9 +68,9 @@ public class TranslationTree extends JTree {
 		TranslationTreeNode node = model.getNodeByKey(key);
 		if (node == null) {
 			TranslationTreeNode parent = (TranslationTreeNode) model.getClosestParentNodeByKey(key);
-			String newKey = TranslationKeys.childKey(key, parent.getKey());
-			String restKey = TranslationKeys.create(TranslationKeys.subParts(newKey, 1));
-			String name = TranslationKeys.firstPart(newKey);
+			String newKey = ResourceKeys.childKey(key, parent.getKey());
+			String restKey = ResourceKeys.create(ResourceKeys.subParts(newKey, 1));
+			String name = ResourceKeys.firstPart(newKey);
 			List<String> keys = restKey.isEmpty() ? Lists.newArrayList() : Lists.newArrayList(restKey);
 			node = new TranslationTreeNode(name, keys);
 			model.insertNodeInto(node, parent);
@@ -167,8 +169,8 @@ public class TranslationTree extends JTree {
 			model.insertDescendantsInto(node, newNode);
 			node = newNode;
 		} else {
-			TranslationTreeNode parent = addNodeByKey(TranslationKeys.withoutLastPart(newKey));
-			node.setName(TranslationKeys.lastPart(newKey));
+			TranslationTreeNode parent = addNodeByKey(ResourceKeys.withoutLastPart(newKey));
+			node.setName(ResourceKeys.lastPart(newKey));
 			model.insertNodeInto(node, parent);			
 		}
 		

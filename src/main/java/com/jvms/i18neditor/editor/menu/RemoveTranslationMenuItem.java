@@ -1,8 +1,9 @@
-package com.jvms.i18neditor;
+package com.jvms.i18neditor.editor.menu;
 
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
+import com.jvms.i18neditor.editor.Editor;
 import com.jvms.i18neditor.util.MessageBundle;
 
 /**

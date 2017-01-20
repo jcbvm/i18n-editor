@@ -1,9 +1,8 @@
-package com.jvms.i18neditor;
+package com.jvms.i18neditor.editor;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -40,17 +39,19 @@ import javax.swing.event.TreeSelectionListener;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.jvms.i18neditor.Resource;
 import com.jvms.i18neditor.Resource.ResourceType;
+import com.jvms.i18neditor.editor.tree.TranslationTreeModel;
+import com.jvms.i18neditor.editor.tree.TranslationTreeNode;
 import com.jvms.i18neditor.swing.JFileDrop;
-import com.jvms.i18neditor.swing.JHtmlPane;
 import com.jvms.i18neditor.swing.JScrollablePanel;
-import com.jvms.i18neditor.util.Dialogs;
+import com.jvms.i18neditor.swing.util.Dialogs;
 import com.jvms.i18neditor.util.ExtendedProperties;
-import com.jvms.i18neditor.util.GithubRepoUtils;
-import com.jvms.i18neditor.util.GithubRepoUtils.GithubReleaseData;
+import com.jvms.i18neditor.util.GithubRepoUtil;
+import com.jvms.i18neditor.util.GithubRepoUtil.GithubReleaseData;
 import com.jvms.i18neditor.util.MessageBundle;
-import com.jvms.i18neditor.util.Resources;
-import com.jvms.i18neditor.util.TranslationKeys;
+import com.jvms.i18neditor.util.ResourceFiles;
+import com.jvms.i18neditor.util.ResourceKeys;
 
 /**
  * This class represents the main class of the editor.
@@ -82,7 +83,7 @@ public class Editor extends JFrame {
 	private JPanel resourcesPanel;
 	private List<ResourceField> resourceFields = Lists.newLinkedList();
 	private ExtendedProperties settings = new ExtendedProperties();
-	private final ExecutorService executor = Executors.newCachedThreadPool();
+	private ExecutorService executor = Executors.newFixedThreadPool(1);
 	
 	public Editor() {
 		super();
@@ -104,12 +105,11 @@ public class Editor extends JFrame {
 			return;
 		}
 		try {
-			Files.walk(resourcesDir, 1).filter(path -> Resources.isResource(path)).forEach(path -> {
+			Files.walk(resourcesDir, 1).filter(path -> ResourceFiles.isResource(path)).forEach(path -> {
 				try {
-					Resource resource = Resources.read(path);
+					Resource resource = ResourceFiles.read(path);
 					setupResource(resource);
-				} catch (Exception e) {
-					e.printStackTrace();
+				} catch (IOException e) {
 					showError(MessageBundle.get("resources.open.error.single", path.toString()));
 				}
 			});
@@ -122,7 +122,6 @@ public class Editor extends JFrame {
 			updateHistory();
 			updateUI();
 		} catch (IOException e) {
-			e.printStackTrace();
 			showError(MessageBundle.get("resources.open.error.multiple"));
 		}
 	}
@@ -131,10 +130,9 @@ public class Editor extends JFrame {
 		boolean error = false;
 		for (Resource resource : resources) {
 			try {
-				Resources.write(resource, !minifyOutput);
-			} catch (Exception e) {
+				ResourceFiles.write(resource, !minifyOutput);
+			} catch (IOException e) {
 				error = true;
-				e.printStackTrace();
 				showError(MessageBundle.get("resources.write.error.single", resource.getPath().toString()));
 			}
 		}
@@ -250,7 +248,7 @@ public class Editor extends JFrame {
 					showError(MessageBundle.get("dialogs.locale.add.error.invalid"));
 				} else {
 					try {
-						Resource resource = Resources.create(type, path);
+						Resource resource = ResourceFiles.create(type, path);
 						setupResource(resource);
 						updateUI();
 					} catch (IOException e) {
@@ -270,7 +268,7 @@ public class Editor extends JFrame {
 					MessageBundle.get("dialogs.translation.rename.text"),
 					JOptionPane.QUESTION_MESSAGE, key, true);
 			if (newKey != null) {
-				if (!TranslationKeys.isValid(newKey)) {
+				if (!ResourceKeys.isValid(newKey)) {
 					showError(MessageBundle.get("dialogs.translation.rename.error"));
 				} else {
 					TranslationTreeNode newNode = translationTree.getNodeByKey(newKey);
@@ -300,7 +298,7 @@ public class Editor extends JFrame {
 					JOptionPane.QUESTION_MESSAGE, key, true);
 			if (newKey != null) {
 				newKey = newKey.trim();
-				if (!TranslationKeys.isValid(newKey)) {
+				if (!ResourceKeys.isValid(newKey)) {
 					showError(MessageBundle.get("dialogs.translation.duplicate.error"));
 				} else {
 					TranslationTreeNode newNode = translationTree.getNodeByKey(newKey);
@@ -335,7 +333,7 @@ public class Editor extends JFrame {
 					JOptionPane.QUESTION_MESSAGE, key, false);
 			if (newKey != null) {
 				newKey = newKey.trim();
-				if (!TranslationKeys.isValid(newKey)) {
+				if (!ResourceKeys.isValid(newKey)) {
 					showError(MessageBundle.get("dialogs.translation.add.error"));
 				} else {
 					addTranslationKey(newKey);
@@ -362,36 +360,35 @@ public class Editor extends JFrame {
 	}
 	
 	public void showAboutDialog() {
-		Dialogs.showMessageDialog(this, MessageBundle.get("dialogs.about.title", TITLE), 
-				"<html><body style=\"text-align:center;width:200px;\">" +
-					"<span style=\"font-weight:bold;font-size:1.2em;\">" + TITLE + "</span><br>" +
-					"v" + VERSION + "<br><br>" +
-					"Copyright (c) 2015 - 2017<br>" +
-					"Jacob van Mourik<br>" +
-					"MIT Licensed<br><br>" +
-				"</body></html>");
+		Dialogs.showHtmlDialog(this, MessageBundle.get("dialogs.about.title", TITLE), 
+				"<span style=\"font-size:1.2em;\"><strong>" + TITLE + "</strong></span><br>" + 
+				VERSION + "<br><br>" +
+				"Copyright (c) 2015 - 2017<br>" +
+				"Jacob van Mourik<br>" + 
+				"MIT Licensed<br><br>");
 	}
 	
-	public void checkForNewVersion(boolean showUpToDateFeedback) {
+	public void showVersionDialog(boolean newVersionOnly) {
 		executor.execute(() -> {
 			GithubReleaseData data;
 			String content;
 			try {
-				data = GithubRepoUtils.getLatestRelease(GITHUB_REPO).get(30, TimeUnit.SECONDS);
+				data = GithubRepoUtil.getLatestRelease(GITHUB_REPO).get(30, TimeUnit.SECONDS);
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {
 				data = null;
 			}
 			if (data != null && !VERSION.equals(data.getTagName())) {
-				content = MessageBundle.get("dialogs.version.new", data.getTagName()) + "<br>" + 
-						"<a href=\"" + data.getHtmlUrl() + "\">" + MessageBundle.get("dialogs.version.link") + "</a>";
-			} else if (!showUpToDateFeedback) {
-				return;
-			} else {
+				content = MessageBundle.get("dialogs.version.new") + " " +
+						"<strong>" + data.getTagName() + "</strong><br>" + 
+						"<a href=\"" + data.getHtmlUrl() + "\">" + 
+							MessageBundle.get("dialogs.version.link") + 
+						"</a><br><br>";
+			} else if (!newVersionOnly) {
 				content = MessageBundle.get("dialogs.version.uptodate");
+			} else {
+				return;
 			}
-			Font font = getFont();
-			JHtmlPane pane = new JHtmlPane(this, "<html><body style=\"font-family:" + font.getFamily() + ";font-size:" + font.getSize() + "pt;text-align:center;width:200px;\">" + content + "</body></html>");
-			Dialogs.showMessageDialog(this, MessageBundle.get("dialogs.version.title"), pane);			
+			Dialogs.showHtmlDialog(this, MessageBundle.get("dialogs.version.title"), content);		
 		});
 	}
 	
@@ -450,7 +447,7 @@ public class Editor extends JFrame {
 			}
     	}
 		
-    	checkForNewVersion(false);
+    	showVersionDialog(false);
 	}
 	
 	private void setupUI() {
@@ -617,7 +614,7 @@ public class Editor extends JFrame {
 			settings.setProperty("last_selected", selectedNode == null ? "" : selectedNode.getKey());
 		}
 		
-		settings.store(SETTINGS_PATH);
+		settings.store(SETTINGS_PATH, TITLE + " " + VERSION);
 	}
 	
 	private class TranslationTreeNodeSelectionListener implements TreeSelectionListener {
@@ -659,7 +656,7 @@ public class Editor extends JFrame {
 			if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 				TranslationField field = (TranslationField) e.getSource();
 				String key = field.getValue();
-				if (TranslationKeys.isValid(key)) {
+				if (ResourceKeys.isValid(key)) {
 					addTranslationKey(key);						
 				}
 			}

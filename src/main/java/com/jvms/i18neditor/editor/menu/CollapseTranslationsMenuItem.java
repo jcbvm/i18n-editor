@@ -1,7 +1,8 @@
-package com.jvms.i18neditor;
+package com.jvms.i18neditor.editor.menu;
 
 import javax.swing.JMenuItem;
 
+import com.jvms.i18neditor.editor.TranslationTree;
 import com.jvms.i18neditor.util.MessageBundle;
 
 /**

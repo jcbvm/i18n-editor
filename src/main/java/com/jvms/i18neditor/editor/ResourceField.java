@@ -1,4 +1,4 @@
-package com.jvms.i18neditor;
+package com.jvms.i18neditor.editor;
 
 import java.awt.Color;
 import java.awt.KeyboardFocusManager;
@@ -6,6 +6,7 @@ import java.awt.KeyboardFocusManager;
 import javax.swing.BorderFactory;
 import javax.swing.border.Border;
 
+import com.jvms.i18neditor.Resource;
 import com.jvms.i18neditor.swing.JUndoableTextArea;
 
 /**

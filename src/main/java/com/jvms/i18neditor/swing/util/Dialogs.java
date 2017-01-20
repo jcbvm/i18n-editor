@@ -1,6 +1,7 @@
-package com.jvms.i18neditor.util;
+package com.jvms.i18neditor.swing.util;
 
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.GridLayout;
 
 import javax.swing.JLabel;
@@ -8,16 +9,17 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import com.google.common.base.Strings;
-import com.jvms.i18neditor.swing.BlinkCaret;
+import com.jvms.i18neditor.swing.JHtmlPane;
 import com.jvms.i18neditor.swing.JUndoableTextField;
-import com.jvms.i18neditor.swing.RequestInitialFocusListener;
+import com.jvms.i18neditor.swing.event.RequestInitialFocusListener;
+import com.jvms.i18neditor.swing.text.BlinkCaret;
 
 /**
  * This class provides utility functions for dialogs using {@link JOptionPane}.
  * 
  * @author Jacob
  */
-public class Dialogs {
+public final class Dialogs {
 	
 	public static void showErrorDialog(Component parent, String title, String message) {
 		showMessageDialog(parent, title, message, JOptionPane.ERROR_MESSAGE);
@@ -41,6 +43,12 @@ public class Dialogs {
 	
 	public static void showMessageDialog(Component parent, String title, Component component, int type) {
 		JOptionPane.showMessageDialog(parent, component, title, type);
+	}
+	
+	public static void showHtmlDialog(Component parent, String title, String body) {
+		Font font = parent.getFont();
+		JHtmlPane pane = new JHtmlPane(parent, "<html><body style=\"font-family:" + font.getFamily() + ";font-size:" + font.getSize() + "pt;text-align:center;min-width:200px;\">" + body + "</body></html>");
+		showMessageDialog(parent, title, pane);	
 	}
 	
 	public static boolean showConfirmDialog(Component parent, String title, String message) {
