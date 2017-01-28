@@ -556,7 +556,8 @@ public class Editor extends JFrame {
 		contentPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, translationsPanel, resourcesScrollPane);
 		editorMenu = new EditorMenuBar(this, translationTree);
 		
-		introText = new JLabel("<html><body style=\"text-align:center; padding:15px;\">" + MessageBundle.get("core.intro.text") + "</body></html>");
+		introText = new JLabel("<html><body style=\"text-align:center; padding:30px;\">" + 
+				MessageBundle.get("core.intro.text") + "</body></html>");
 		introText.setOpaque(true);
 		introText.setFont(introText.getFont().deriveFont(28f));
 		introText.setHorizontalTextPosition(JLabel.CENTER);
@@ -600,9 +601,10 @@ public class Editor extends JFrame {
 		resourcesPanel.removeAll();
 		resourceFields.stream().sorted().forEach(field -> {
 			Locale locale = field.getResource().getLocale();
+			String label = locale != null ? locale.getDisplayName() : MessageBundle.get("resources.locale.default");
 			field.setEditable(selectedNode != null && selectedNode.isEditable());
 			resourcesPanel.add(Box.createVerticalStrut(5));
-			resourcesPanel.add(new JLabel(locale != null ? locale.getDisplayName() : "Default"));
+			resourcesPanel.add(new JLabel(label));
 			resourcesPanel.add(Box.createVerticalStrut(5));
 			resourcesPanel.add(field);
 			resourcesPanel.add(Box.createVerticalStrut(5));
