@@ -22,45 +22,33 @@ import com.jvms.i18neditor.swing.text.BlinkCaret;
 public final class Dialogs {
 	
 	public static void showErrorDialog(Component parent, String title, String message) {
-		showMessageDialog(parent, title, message, JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(parent, message, title, JOptionPane.ERROR_MESSAGE);
 	}
 	
 	public static void showWarningDialog(Component parent, String title, String message) {
-		showMessageDialog(parent, title, message, JOptionPane.WARNING_MESSAGE);
+		JOptionPane.showMessageDialog(parent, message, title, JOptionPane.WARNING_MESSAGE);
+	}
+	
+	public static void showInfoDialog(Component parent, String title, String message) {
+		JOptionPane.showMessageDialog(parent, message, title, JOptionPane.INFORMATION_MESSAGE);
 	}
 	
 	public static void showMessageDialog(Component parent, String title, String message) {
-		showMessageDialog(parent, title, message, JOptionPane.PLAIN_MESSAGE);
+		JOptionPane.showMessageDialog(parent, message, title, JOptionPane.PLAIN_MESSAGE);
 	}
 	
-	public static void showMessageDialog(Component parent, String title, Component component) {
-		showMessageDialog(parent, title, component, JOptionPane.PLAIN_MESSAGE);
-	}
-	
-	public static void showMessageDialog(Component parent, String title, String message, int type) {
-		JOptionPane.showMessageDialog(parent, message, title, type);
-	}
-	
-	public static void showMessageDialog(Component parent, String title, Component component, int type) {
-		JOptionPane.showMessageDialog(parent, component, title, type);
+	public static void showComponentDialog(Component parent, String title, Component component) {
+		JOptionPane.showMessageDialog(parent, component, title, JOptionPane.PLAIN_MESSAGE);
 	}
 	
 	public static void showHtmlDialog(Component parent, String title, String body) {
 		Font font = parent.getFont();
 		JHtmlPane pane = new JHtmlPane(parent, "<html><body style=\"font-family:" + font.getFamily() + ";font-size:" + font.getSize() + "pt;text-align:center;min-width:200px;\">" + body + "</body></html>");
-		showMessageDialog(parent, title, pane);	
-	}
-	
-	public static boolean showConfirmDialog(Component parent, String title, String message) {
-		return showConfirmDialog(parent, title, message, JOptionPane.WARNING_MESSAGE);
+		showComponentDialog(parent, title, pane);	
 	}
 	
 	public static boolean showConfirmDialog(Component parent, String title, String message, int type) {
-		return JOptionPane.showConfirmDialog(parent, message, title, JOptionPane.YES_NO_OPTION, type) == 0 ? true : false;
-	}
-	
-	public static String showInputDialog(Component parent, String title, String label, int type) {
-		return showInputDialog(parent, title, label, type, null, false);
+		return JOptionPane.showConfirmDialog(parent, message, title, type) == JOptionPane.YES_OPTION;
 	}
 	
 	public static String showInputDialog(Component parent, String title, String label, int type, String initialText, boolean selectAll) {
@@ -80,5 +68,9 @@ public final class Dialogs {
 		panel.add(field);
 		int result = JOptionPane.showConfirmDialog(parent, panel, title, JOptionPane.OK_CANCEL_OPTION, type);
 		return result == JOptionPane.OK_OPTION ? field.getText() : null;
+	}
+	
+	public static String showInputDialog(Component parent, String title, String label, int type) {
+		return showInputDialog(parent, title, label, type, null, false);
 	}
 }

@@ -14,7 +14,7 @@ import com.jvms.i18neditor.util.MessageBundle;
  * @author Jacob
  */
 public class FindTranslationMenuItem extends JMenuItem {
-	private final static long serialVersionUID = 5207946396515235714L;
+	private final static long serialVersionUID = -1298283182450978961L;
 
 	public FindTranslationMenuItem(Editor editor, boolean enabled) {
 		super(MessageBundle.get("menu.edit.find.translation.title"));

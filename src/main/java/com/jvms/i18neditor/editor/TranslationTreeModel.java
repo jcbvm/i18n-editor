@@ -1,4 +1,4 @@
-package com.jvms.i18neditor.editor.tree;
+package com.jvms.i18neditor.editor;
 
 import java.util.Enumeration;
 import java.util.List;
@@ -21,7 +21,7 @@ public class TranslationTreeModel extends DefaultTreeModel {
 	}
 	
 	public TranslationTreeModel(List<String> keys) {
-		super(new TranslationTreeNode(MessageBundle.get("translations.model.name"), keys));
+		super(new TranslationTreeNode(MessageBundle.get("tree.root.name"), keys));
 	}
 	
 	@SuppressWarnings("unchecked")

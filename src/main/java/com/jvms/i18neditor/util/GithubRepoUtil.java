@@ -14,7 +14,7 @@ import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * This class provides utility functions for retrieving Github repo data.
+ * This class provides utility functions for retrieving Github Repository data.
  * 
  * @author Jacob
  */
@@ -24,24 +24,24 @@ public final class GithubRepoUtil {
 	
 	static {
 		executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
-				.setNameFormat("github-repo-pool-%d")
+				.setNameFormat("github-repo-util-pool-%d")
 				.build());
 	}
 	
 	/**
-	 * Gets the latest release data of a Github repo.
+	 * Gets the latest release data of a Github Repository.
 	 * 
-	 * @param 	repo the Github repo to get the latest release data from.
-	 * @return	the latest Github release data.
+	 * @param 	repo the Github Repository to get the latest release data from.
+	 * @return	the latest Github Repository release data.
 	 */
-	public static Future<GithubReleaseData> getLatestRelease(String repo) {
+	public static Future<GithubRepoReleaseData> getLatestRelease(String repo) {
 		return executor.submit(() -> {
 			HttpURLConnection connection = null;
 			URL url = new URL("https://api.github.com/repos/" + repo + "/releases/latest");
 			try {
 				connection = (HttpURLConnection)url.openConnection();
 				try (InputStreamReader reader = new InputStreamReader(connection.getInputStream(), Charsets.UTF_8)) {
-					return gson.fromJson(reader, GithubReleaseData.class);
+					return gson.fromJson(reader, GithubRepoReleaseData.class);
 				}
 			} catch (IOException e) {
 				return null;
@@ -54,9 +54,9 @@ public final class GithubRepoUtil {
 	}
 	
 	/**
-	 * This class represents Github release data.
+	 * This class represents Github Repository release data.
 	 */
-	public final class GithubReleaseData {
+	public final class GithubRepoReleaseData {
 		@SerializedName("tag_name")
 		private String tagName;
 		@SerializedName("html_url")

@@ -8,7 +8,6 @@ import org.junit.Test;
 
 import com.google.common.collect.Maps;
 import com.jvms.i18neditor.Resource;
-import com.jvms.i18neditor.Resource.ResourceType;
 
 import static org.junit.Assert.*;
 
@@ -20,7 +19,8 @@ public class ResourceTest {
 		SortedMap<String,String> translations = Maps.newTreeMap();
 		translations.put("a.a", "aa");
 		translations.put("a.b", "ab");
-		resource = new Resource(ResourceType.JSON, null, new Locale("en"), translations);
+		resource = new Resource(ResourceType.JSON, null, new Locale("en"));
+		resource.setTranslations(translations);
 	}
 	
 	@Test

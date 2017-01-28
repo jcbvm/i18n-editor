@@ -6,7 +6,6 @@ import com.jvms.i18neditor.editor.menu.AddTranslationMenuItem;
 import com.jvms.i18neditor.editor.menu.DuplicateTranslationMenuItem;
 import com.jvms.i18neditor.editor.menu.RemoveTranslationMenuItem;
 import com.jvms.i18neditor.editor.menu.RenameTranslationMenuItem;
-import com.jvms.i18neditor.editor.tree.TranslationTreeNode;
 
 /**
  * This class represents a right click menu for a single node of the translation tree.
@@ -14,8 +13,8 @@ import com.jvms.i18neditor.editor.tree.TranslationTreeNode;
  * @author Jacob
  */
 public class TranslationTreeNodeMenu extends JPopupMenu {
-	private final static long serialVersionUID = -4407236120087907574L;
-	
+	private final static long serialVersionUID = -8450484152294368841L;
+
 	public TranslationTreeNodeMenu(Editor editor, TranslationTreeNode node) {
 		super();
 		add(new AddTranslationMenuItem(editor, true));

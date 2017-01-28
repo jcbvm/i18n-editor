@@ -1,4 +1,4 @@
-package com.jvms.i18neditor.editor.tree;
+package com.jvms.i18neditor.editor;
 
 import java.util.Arrays;
 import java.util.Collections;

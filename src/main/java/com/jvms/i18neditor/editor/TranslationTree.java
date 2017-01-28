@@ -14,8 +14,6 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
 import com.google.common.collect.Lists;
-import com.jvms.i18neditor.editor.tree.TranslationTreeModel;
-import com.jvms.i18neditor.editor.tree.TranslationTreeNode;
 import com.jvms.i18neditor.util.ResourceKeys;
 
 /**

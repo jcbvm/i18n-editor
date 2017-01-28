@@ -10,11 +10,12 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -37,21 +38,22 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
+import org.apache.commons.lang3.LocaleUtils;
+
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jvms.i18neditor.Resource;
-import com.jvms.i18neditor.Resource.ResourceType;
-import com.jvms.i18neditor.editor.tree.TranslationTreeModel;
-import com.jvms.i18neditor.editor.tree.TranslationTreeNode;
+import com.jvms.i18neditor.ResourceType;
 import com.jvms.i18neditor.swing.JFileDrop;
 import com.jvms.i18neditor.swing.JScrollablePanel;
 import com.jvms.i18neditor.swing.util.Dialogs;
 import com.jvms.i18neditor.util.ExtendedProperties;
 import com.jvms.i18neditor.util.GithubRepoUtil;
-import com.jvms.i18neditor.util.GithubRepoUtil.GithubReleaseData;
+import com.jvms.i18neditor.util.GithubRepoUtil.GithubRepoReleaseData;
 import com.jvms.i18neditor.util.MessageBundle;
-import com.jvms.i18neditor.util.ResourceFiles;
 import com.jvms.i18neditor.util.ResourceKeys;
+import com.jvms.i18neditor.util.Resources;
 
 /**
  * This class represents the main class of the editor.
@@ -61,19 +63,20 @@ import com.jvms.i18neditor.util.ResourceKeys;
 public class Editor extends JFrame {
 	private final static long serialVersionUID = 1113029729495390082L;
 	
-	public final static Path SETTINGS_PATH = Paths.get(System.getProperty("user.home"), ".i18n-editor");
 	public final static String TITLE = "i18n-editor";
-	public final static String VERSION = "1.0.0";
+	public final static String VERSION = "1.0.0-beta.1";
 	public final static String GITHUB_REPO = "jcbvm/i18n-editor";
-	public final static int DEFAULT_WIDTH = 1024;
-	public final static int DEFAULT_HEIGHT = 768;
+	public final static String DEFAULT_RESOURCE_NAME = "translations";
+	public final static String PROJECT_FILE = ".i18n-editor-metadata";
+	public final static String SETTINGS_FILE = ".i18n-editor";
+	public final static String SETTINGS_DIR = System.getProperty("user.home");
 	
-	private List<Resource> resources = Lists.newLinkedList();
-	private Path resourcesDir;
+	private EditorProject project;
+	private EditorSettings settings = new EditorSettings();
+	private ExecutorService executor = Executors.newCachedThreadPool();
 	private boolean dirty;
-	private boolean minifyOutput;
 	
-	private EditorMenu editorMenu;
+	private EditorMenuBar editorMenu;
 	private JSplitPane contentPane;
 	private JLabel introText;
 	private JPanel translationsPanel;
@@ -82,8 +85,6 @@ public class Editor extends JFrame {
 	private TranslationField translationField;
 	private JPanel resourcesPanel;
 	private List<ResourceField> resourceFields = Lists.newLinkedList();
-	private ExtendedProperties settings = new ExtendedProperties();
-	private ExecutorService executor = Executors.newFixedThreadPool(1);
 	
 	public Editor() {
 		super();
@@ -91,56 +92,103 @@ public class Editor extends JFrame {
 		setupFileDrop();
 	}
 	
-	public void importResources(Path dir) {
-		if (!closeCurrentSession()) {
-			return;
-		}
-		if (Files.isDirectory(dir, LinkOption.NOFOLLOW_LINKS)) {
-			if (resourcesDir != null) {
-				reset();				
-			}
-			resourcesDir = dir;
-		} else {
-			showError(MessageBundle.get("resources.open.error.multiple"));
-			return;
-		}
+	public void createProject(Path dir, ResourceType type) {
 		try {
-			Files.walk(resourcesDir, 1).filter(path -> ResourceFiles.isResource(path)).forEach(path -> {
-				try {
-					Resource resource = ResourceFiles.read(path);
-					setupResource(resource);
-				} catch (IOException e) {
-					showError(MessageBundle.get("resources.open.error.single", path.toString()));
-				}
-			});
+			Preconditions.checkArgument(Files.isDirectory(dir));
 			
-			Map<String,String> keys = Maps.newTreeMap();
-			resources.forEach(resource -> keys.putAll(resource.getTranslations()));
-			List<String> keyList = Lists.newArrayList(keys.keySet());
+			if (project != null) {
+				if (!closeCurrentProject()) {
+					return;
+				}
+				reset();
+			}
+			
+			project = new EditorProject(dir, type);
+			
+			if (type == ResourceType.Properties) {
+				Resource resource = Resources.create(dir, type, Optional.empty(), project.getResourceName());
+				setupResource(resource);
+				project.addResource(resource);
+			}
+			translationTree.setModel(new TranslationTreeModel(Lists.newLinkedList()));
+			
+			updateHistory();
+			updateUI();
+		} catch (IOException e) {
+			showError(MessageBundle.get("resources.import.error.single"));
+		}
+	}
+	
+	public void importProject(Path dir, boolean showEmptyProjectError) {
+		try {
+			Preconditions.checkArgument(Files.isDirectory(dir));
+			
+			if (project != null) {
+				if (!closeCurrentProject()) {
+					return;
+				}
+				reset();
+			}
+			
+			project = new EditorProject(dir);
+			restoreProjectState(project);
+			
+			Optional<ResourceType> type = Optional.ofNullable(project.getResourceType());
+			List<Resource> resourceList = Resources.get(dir, project.getResourceName(), type);
+			List<String> keyList = Lists.newLinkedList();
+			
+			if (resourceList.isEmpty()) {
+				project = null;
+				if (showEmptyProjectError) {
+					executor.execute(() -> showError(MessageBundle.get("resources.import.empty", dir)));
+				}
+			} else {
+				project.setResourceType(type.orElseGet(() -> {
+					ResourceType t = resourceList.get(0).getType();
+					resourceList.removeIf(r -> r.getType() != t);
+					return t;
+				}));
+				resourceList.forEach(resource -> {
+					try {
+						Resources.load(resource);
+						setupResource(resource);
+						project.addResource(resource);
+					} catch (IOException e) {
+						showError(MessageBundle.get("resources.import.error.single", resource.getPath().toString()));
+					}
+				});
+				Map<String,String> keys = Maps.newTreeMap();
+				project.getResources().forEach(resource -> keys.putAll(resource.getTranslations()));
+				keyList.addAll(keys.keySet());
+			}
 			translationTree.setModel(new TranslationTreeModel(keyList));
 			
 			updateHistory();
 			updateUI();
 		} catch (IOException e) {
-			showError(MessageBundle.get("resources.open.error.multiple"));
+			showError(MessageBundle.get("resources.import.error.multiple"));
 		}
 	}
 	
-	public void saveResources() {
+	public void saveProject() {
 		boolean error = false;
-		for (Resource resource : resources) {
-			try {
-				ResourceFiles.write(resource, !minifyOutput);
-			} catch (IOException e) {
-				error = true;
-				showError(MessageBundle.get("resources.write.error.single", resource.getPath().toString()));
+		if (project != null) {
+			for (Resource resource : project.getResources()) {
+				try {
+					Resources.write(resource, !project.isMinifyResources());
+				} catch (IOException e) {
+					error = true;
+					showError(MessageBundle.get("resources.write.error.single", resource.getPath().toString()));
+				}
 			}
 		}
 		setDirty(error);
 	}
 	
-	public void reloadResources() {
-		importResources(resourcesDir);
+	public void reloadProject() {
+		if (project != null) {
+			importProject(project.getPath(), true);			
+		}
 	}
 	
 	public void removeSelectedTranslation() {
@@ -167,36 +215,44 @@ public class Editor extends JFrame {
 	}
 	
 	public void addTranslationKey(String key) {
-		if (resources.isEmpty()) return;
 		TranslationTreeNode node = translationTree.getNodeByKey(key);
 		if (node != null) {
 			translationTree.setSelectedNode(node);
 		} else {
-			resources.forEach(resource -> resource.storeTranslation(key, ""));
 			translationTree.addNodeByKey(key);			
+			if (project != null) {
+				project.getResources().forEach(resource -> resource.storeTranslation(key, ""));				
+			}
 		}
 	}
 	
 	public void removeTranslationKey(String key) {
-		if (resources.isEmpty()) return;
-		resources.forEach(resource -> resource.removeTranslation(key));
 		translationTree.removeNodeByKey(key);
+		if (project != null) {
+			project.getResources().forEach(resource -> resource.removeTranslation(key));
+		}
 	}
 	
 	public void renameTranslationKey(String key, String newKey) {
-		if (resources.isEmpty() || key.equals(newKey)) return;
-		resources.forEach(resource -> resource.renameTranslation(key, newKey));
 		translationTree.renameNodeByKey(key, newKey);
+		if (project != null) {
+			project.getResources().forEach(resource -> resource.renameTranslation(key, newKey));
+		}
 	}
 	
 	public void duplicateTranslationKey(String key, String newKey) {
-		if (resources.isEmpty() || key.equals(newKey)) return;
-		resources.forEach(resource -> resource.duplicateTranslation(key, newKey));
 		translationTree.duplicateNodeByKey(key, newKey);
+		if (project != null) {
+			project.getResources().forEach(resource -> resource.duplicateTranslation(key, newKey));
+		}
 	}
 	
-	public Path getResourcesPath() {
-		return resourcesDir;
+	public EditorProject getProject() {
+		return project;
+	}
+	
+	public EditorSettings getSettings() {
+		return settings;
 	}
 	
 	public boolean isDirty() {
@@ -209,50 +265,59 @@ public class Editor extends JFrame {
 		editorMenu.setSaveable(dirty);
 	}
 	
-	public boolean isMinifyOutput() {
-		return minifyOutput;
+	public void clearHistory() {
+		settings.setHistory(Lists.newArrayList());
+		editorMenu.setRecentItems(Lists.newArrayList());
 	}
 	
-	public void setMinifyOutput(boolean minifyOutput) {
-		this.minifyOutput = minifyOutput;
-	}
-	
-	public void showImportDialog() {
-		String path = null;
-		if (resourcesDir != null) {
-			path = resourcesDir.toString();
-		}
-		JFileChooser fc = new JFileChooser(path);
-		fc.setDialogTitle(MessageBundle.get("dialogs.import.title"));
+	public void showCreateProjectDialog(ResourceType type) {
+		JFileChooser fc = new JFileChooser();
+		fc.setDialogTitle(MessageBundle.get("dialogs.project.new.title"));
 		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		int result = fc.showOpenDialog(this);
 		if (result == JFileChooser.APPROVE_OPTION) {
-			importResources(Paths.get(fc.getSelectedFile().getPath()));
+			createProject(Paths.get(fc.getSelectedFile().getPath()), type);
 		} else {
 			updateHistory();
 			updateUI();
 		}
 	}
 	
-	public void showAddLocaleDialog(ResourceType type) {
-		String locale = "";
-		while (locale != null && locale.isEmpty()) {
-			locale = Dialogs.showInputDialog(this,
+	public void showImportProjectDialog() {
+		String path = null;
+		if (project != null) {
+			path = project.getPath().toString();
+		}
+		JFileChooser fc = new JFileChooser(path);
+		fc.setDialogTitle(MessageBundle.get("dialogs.project.import.title"));
+		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		int result = fc.showOpenDialog(this);
+		if (result == JFileChooser.APPROVE_OPTION) {
+			importProject(Paths.get(fc.getSelectedFile().getPath()), true);
+		}
+	}
+	
+	public void showAddLocaleDialog() {
+		String localeString = "";
+		Path path = project.getPath();
+		ResourceType type = project.getResourceType();
+		while (localeString != null && localeString.isEmpty()) {
+			localeString = Dialogs.showInputDialog(this,
 					MessageBundle.get("dialogs.locale.add.title", type),
 					MessageBundle.get("dialogs.locale.add.text"),
 					JOptionPane.QUESTION_MESSAGE);
-			if (locale != null) {
-				locale = locale.trim();
-				Path path = Paths.get(resourcesDir.toString(), locale);
-				if (locale.isEmpty() || Files.isDirectory(path)) {
+			if (localeString != null) {
+				localeString = localeString.trim();
+				if (localeString.isEmpty()) {
 					showError(MessageBundle.get("dialogs.locale.add.error.invalid"));
 				} else {
 					try {
-						Resource resource = ResourceFiles.create(type, path);
+						Locale locale = LocaleUtils.toLocale(localeString);
+						Resource resource = Resources.create(path, type, Optional.of(locale), project.getResourceName());
 						setupResource(resource);
+						project.addResource(resource);
 						updateUI();
 					} catch (IOException e) {
-						e.printStackTrace();
 						showError(MessageBundle.get("dialogs.locale.add.error.create"));
 					}
 				}
@@ -277,7 +342,8 @@ public class Editor extends JFrame {
 						boolean isReplace = newNode.isLeaf() || oldNode.isLeaf();
 						boolean confirm = Dialogs.showConfirmDialog(this, 
 								MessageBundle.get("dialogs.translation.conflict.title"), 
-								MessageBundle.get("dialogs.translation.conflict.text." + (isReplace ? "replace" : "merge")));
+								MessageBundle.get("dialogs.translation.conflict.text." + (isReplace ? "replace" : "merge")),
+								JOptionPane.WARNING_MESSAGE);
 						if (confirm) {
 							renameTranslationKey(key, newKey);
 						}
@@ -307,7 +373,8 @@ public class Editor extends JFrame {
 						boolean isReplace = newNode.isLeaf() || oldNode.isLeaf();
 						boolean confirm = Dialogs.showConfirmDialog(this, 
 								MessageBundle.get("dialogs.translation.conflict.title"), 
-								MessageBundle.get("dialogs.translation.conflict.text." + (isReplace ? "replace" : "merge")));
+								MessageBundle.get("dialogs.translation.conflict.text." + (isReplace ? "replace" : "merge")),
+								JOptionPane.WARNING_MESSAGE);
 						if (confirm) {
 							duplicateTranslationKey(key, newKey);
 						}
@@ -370,7 +437,7 @@ public class Editor extends JFrame {
 	
 	public void showVersionDialog(boolean newVersionOnly) {
 		executor.execute(() -> {
-			GithubReleaseData data;
+			GithubRepoReleaseData data;
 			String content;
 			try {
 				data = GithubRepoUtil.getLatestRelease(GITHUB_REPO).get(30, TimeUnit.SECONDS);
@@ -392,62 +459,73 @@ public class Editor extends JFrame {
 		});
 	}
 	
-	public boolean closeCurrentSession() {
+	public boolean closeCurrentProject() {
+		int result = JOptionPane.NO_OPTION;
 		if (isDirty()) {
-			int result = JOptionPane.showConfirmDialog(this, 
+			result = JOptionPane.showConfirmDialog(this, 
 					MessageBundle.get("dialogs.save.text"), 
 					MessageBundle.get("dialogs.save.title"), 
 					JOptionPane.YES_NO_CANCEL_OPTION);
 			if (result == JOptionPane.YES_OPTION) {
-				saveResources();
+				saveProject();
 			}
-			return result != JOptionPane.CANCEL_OPTION;
 		}
-		return true;
+		if (project != null) {
+			storeProjectState();
+		}
+		return result != JOptionPane.CANCEL_OPTION;
 	}
 	
 	public void reset() {
+		translationField.clear();
 		translationTree.clear();
-		resources.clear();
 		resourceFields.clear();
 		setDirty(false);
 		updateUI();
 	}
 	
 	public void launch() {
-		settings.load(SETTINGS_PATH);
+		restoreEditorState();
 		
-		// Restore editor settings
-		minifyOutput = settings.getBooleanProperty("minify_output");
-    	
-		// Restore window bounds
-		setPreferredSize(new Dimension(settings.getIntegerProperty("window_width", 1024), settings.getIntegerProperty("window_height", 768)));
-		setLocation(settings.getIntegerProperty("window_pos_x", 0), settings.getIntegerProperty("window_pos_y", 0));
-		contentPane.setDividerLocation(settings.getIntegerProperty("divider_pos", 250));
+		setPreferredSize(new Dimension(settings.getWindowWidth(), settings.getWindowHeight()));
+		setLocation(settings.getWindowPositionX(), settings.getWindowPositionY());
+		contentPane.setDividerLocation(settings.getWindowDeviderPosition());
 		
     	pack();
     	setVisible(true);
     	
-		if (!loadResourcesFromHistory()) {
-    		showImportDialog();
-    	} else {
-    		// Restore last expanded nodes
-			List<String> expandedKeys = settings.getListProperty("last_expanded");
+		List<String> dirs = settings.getHistory();
+    	if (!dirs.isEmpty()) {
+    		String lastDir = dirs.get(dirs.size()-1);
+    		Path path = Paths.get(lastDir);
+    		if (Files.exists(path)) {
+    			importProject(path, false);
+    		}
+    	}
+    	
+    	if (project == null) {
+    		updateHistory();
+    	}
+		
+		if (project != null && project.hasResources()) {
+			// Restore last expanded nodes
+			List<String> expandedKeys = settings.getLastExpandedNodes();
 			List<TranslationTreeNode> expandedNodes = expandedKeys.stream()
-					.map(k -> translationTree.getNodeByKey(k))
+					.map(translationTree::getNodeByKey)
 					.filter(n -> n != null)
 					.collect(Collectors.toList());
 			translationTree.expand(expandedNodes);
-			
 			// Restore last selected node
-			String selectedKey = settings.getProperty("last_selected");
+			String selectedKey = settings.getLastSelectedNode();
 			TranslationTreeNode selectedNode = translationTree.getNodeByKey(selectedKey);
 			if (selectedNode != null) {
 				translationTree.setSelectedNode(selectedNode);
 			}
-    	}
+		}
 		
-    	showVersionDialog(false);
+		if (settings.isCheckVersionOnStartup()) {
+			showVersionDialog(false);			
+		}
 	}
 	
 	private void setupUI() {
@@ -456,7 +534,7 @@ public class Editor extends JFrame {
 		addWindowListener(new EditorWindowListener());
 		
 		setIconImages(Lists.newArrayList("512","256","128","64","48","32","24","20","16").stream()
-				.map(size -> getResourceImage("images/icon-" + size + ".png"))
+				.map(size -> getClasspathImage("images/icon-" + size + ".png"))
 				.collect(Collectors.toList()));
 		
 		translationsPanel = new JPanel(new BorderLayout());
@@ -476,7 +554,7 @@ public class Editor extends JFrame {
         resourcesScrollPane.setBackground(resourcesPanel.getBackground());
         
 		contentPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, translationsPanel, resourcesScrollPane);
-		editorMenu = new EditorMenu(this, translationTree);
+		editorMenu = new EditorMenuBar(this, translationTree);
 		
 		introText = new JLabel("<html><body style=\"text-align:center; padding:15px;\">" + MessageBundle.get("core.intro.text") + "</body></html>");
 		introText.setOpaque(true);
@@ -486,7 +564,10 @@ public class Editor extends JFrame {
 		introText.setHorizontalAlignment(JLabel.CENTER);
 		introText.setVerticalAlignment(JLabel.CENTER);
 		introText.setForeground(getBackground().darker());
-		introText.setIcon(new ImageIcon(getResourceImage("images/icon-intro.png")));
+		introText.setIcon(new ImageIcon(getClasspathImage("images/icon-intro.png")));
+		
+		Container container = getContentPane();
+		container.add(introText);
 		
 		setJMenuBar(editorMenu);
 	}
@@ -497,7 +578,7 @@ public class Editor extends JFrame {
 			public void filesDropped(java.io.File[] files) {
 				try {
 					Path path = Paths.get(files[0].getCanonicalPath());
-					importResources(path);
+					importProject(path, true);
                 } catch (IOException e ) {
                 	e.printStackTrace();
                 	showError(MessageBundle.get("resources.open.error.multiple"));
@@ -510,7 +591,6 @@ public class Editor extends JFrame {
 		resource.addListener(e -> setDirty(true));
 		ResourceField field = new ResourceField(resource);
 		field.addKeyListener(new ResourceFieldKeyListener());
-		resources.add(resource);
 		resourceFields.add(field);
 	}
 	
@@ -519,9 +599,10 @@ public class Editor extends JFrame {
 		
 		resourcesPanel.removeAll();
 		resourceFields.stream().sorted().forEach(field -> {
+			Locale locale = field.getResource().getLocale();
 			field.setEditable(selectedNode != null && selectedNode.isEditable());
 			resourcesPanel.add(Box.createVerticalStrut(5));
-			resourcesPanel.add(new JLabel(field.getResource().getLocale().getDisplayName()));
+			resourcesPanel.add(new JLabel(locale != null ? locale.getDisplayName() : "Default"));
 			resourcesPanel.add(Box.createVerticalStrut(5));
 			resourcesPanel.add(field);
 			resourcesPanel.add(Box.createVerticalStrut(5));
@@ -532,18 +613,22 @@ public class Editor extends JFrame {
 		}
 		
 		Container container = getContentPane();
-		if (resourcesDir != null) {
+		if (project != null) {
 			container.add(contentPane);
 			container.remove(introText);
+			List<Resource> resources = project.getResources();
+			editorMenu.setEnabled(true);
+			editorMenu.setEditable(!resources.isEmpty());
+			translationTree.setEditable(!resources.isEmpty());
+			translationField.setEditable(!resources.isEmpty());
 		} else {
 			container.add(introText);
 			container.remove(contentPane);
+			editorMenu.setEnabled(false);
+			editorMenu.setEditable(false);
+			translationTree.setEditable(false);
+			translationField.setEditable(false);
 		}
-		
-		editorMenu.setEnabled(resourcesDir != null);
-		editorMenu.setEditable(!resources.isEmpty());
-		translationTree.setEditable(!resources.isEmpty());
-		translationField.setEditable(!resources.isEmpty());
 		
 		updateTitle();
 		validate();
@@ -551,70 +636,92 @@ public class Editor extends JFrame {
 	}
 	
 	private void updateHistory() {
-		List<String> recentDirs = settings.getListProperty("history");
-		if (resourcesDir != null) {
-			String path = resourcesDir.toString();
+		List<String> recentDirs = settings.getHistory();
+		if (project != null) {
+			String path = project.getPath().toString();
 			recentDirs.remove(path);
 			recentDirs.add(path);
 			if (recentDirs.size() > 5) {
 				recentDirs.remove(0);
 			}
-			settings.setProperty("history", recentDirs);			
+			settings.setHistory(recentDirs);			
 		}
 		editorMenu.setRecentItems(Lists.reverse(recentDirs));
 	}
 	
 	private void updateTitle() {
 		String dirtyPart = dirty ? "*" : "";
-		String filePart = resourcesDir == null ? "" : resourcesDir.toString() + " - ";
-		setTitle(dirtyPart + filePart + TITLE);
-	}
-	
-	private boolean loadResourcesFromHistory() {
-		List<String> dirs = settings.getListProperty("history");
-    	if (!dirs.isEmpty()) {
-    		String lastDir = dirs.get(dirs.size()-1);
-    		Path path = Paths.get(lastDir);
-    		if (Files.exists(path)) {
-    			importResources(path);
-    			return true;
-    		}
-    	}
-    	return false;
+		String projectPart = "";
+		if (project != null) {
+			projectPart = project.getPath().toString() + " [" + project.getResourceType() + "] - ";
+		}
+		setTitle(dirtyPart + projectPart + TITLE);
 	}
 	
 	private void showError(String message) {
 		Dialogs.showErrorDialog(this, MessageBundle.get("dialogs.error.title"), message);
 	}
 	
-	private Image getResourceImage(String path) {
+	private Image getClasspathImage(String path) {
 		return new ImageIcon(getClass().getClassLoader().getResource(path)).getImage();
 	}
 	
+	private void storeProjectState() {
+		ExtendedProperties props = new ExtendedProperties();
+		props.setProperty("minify_resources", project.isMinifyResources());
+		props.setProperty("resource_name", project.getResourceName());
+		props.setProperty("resource_type", project.getResourceType().toString());
+		props.store(Paths.get(project.getPath().toString(), PROJECT_FILE));
+	}
+	
+	private void restoreProjectState(EditorProject project) {
+		ExtendedProperties props = new ExtendedProperties();
+		props.load(Paths.get(project.getPath().toString(), PROJECT_FILE));
+		project.setMinifyResources(props.getBooleanProperty("minify_resources", settings.isMinifyResources()));
+		project.setResourceName(props.getProperty("resource_name", settings.getResourceName()));
+		project.setResourceType(props.getEnumProperty("resource_type", ResourceType.class));
+	}
+	
 	private void storeEditorState() {
-		// Store editor settings
-		settings.setProperty("minify_output", minifyOutput);
-		
-		// Store window bounds
-		settings.setProperty("window_width", getWidth());
-		settings.setProperty("window_height", getHeight());
-		settings.setProperty("window_pos_x", getX());
-		settings.setProperty("window_pos_y", getY());
-		settings.setProperty("divider_pos", contentPane.getDividerLocation());
-		
-		if (!resources.isEmpty()) {
+		ExtendedProperties props = new ExtendedProperties();
+		props.setProperty("window_width", getWidth());
+		props.setProperty("window_height", getHeight());
+		props.setProperty("window_pos_x", getX());
+		props.setProperty("window_pos_y", getY());
+		props.setProperty("window_div_pos", contentPane.getDividerLocation());
+		props.setProperty("minify_resources", settings.isMinifyResources());
+		props.setProperty("resource_name", settings.getResourceName());
+		props.setProperty("check_version", settings.isCheckVersionOnStartup());
+		if (!settings.getHistory().isEmpty()) {
+			props.setProperty("history", settings.getHistory());			
+		}
+		if (project != null) {
 			// Store keys of expanded nodes
 			List<String> expandedNodeKeys = translationTree.getExpandedNodes().stream()
-					.map(n -> n.getKey())
+					.map(TranslationTreeNode::getKey)
 					.collect(Collectors.toList());
-			settings.setProperty("last_expanded", expandedNodeKeys);
-			
+			props.setProperty("last_expanded", expandedNodeKeys);
 			// Store key of selected node
 			TranslationTreeNode selectedNode = translationTree.getSelectedNode();
-			settings.setProperty("last_selected", selectedNode == null ? "" : selectedNode.getKey());
+			props.setProperty("last_selected", selectedNode == null ? "" : selectedNode.getKey());
 		}
-		
-		settings.store(SETTINGS_PATH, TITLE + " " + VERSION);
+		props.store(Paths.get(SETTINGS_DIR, SETTINGS_FILE));
+	}
+	
+	private void restoreEditorState() {
+		ExtendedProperties props = new ExtendedProperties();
+		props.load(Paths.get(SETTINGS_DIR, SETTINGS_FILE));
+		settings.setWindowWidth(props.getIntegerProperty("window_width", 1024));
+		settings.setWindowHeight(props.getIntegerProperty("window_height", 768));
+		settings.setWindowPositionX(props.getIntegerProperty("window_pos_x", 0));
+		settings.setWindowPositionY(props.getIntegerProperty("window_pos_y", 0));
+		settings.setWindowDeviderPosition(props.getIntegerProperty("window_div_pos", 250));
+		settings.setHistory(props.getListProperty("history"));
+		settings.setLastExpandedNodes(props.getListProperty("last_expanded"));
+		settings.setLastSelectedNode(props.getProperty("last_selected"));
+		settings.setMinifyResources(props.getBooleanProperty("minify_resources", false));
+		settings.setResourceName(props.getProperty("resource_name", DEFAULT_RESOURCE_NAME));
+		settings.setCheckVersionOnStartup(props.getBooleanProperty("check_version", true));
 	}
 	
 	private class TranslationTreeNodeSelectionListener implements TreeSelectionListener {
@@ -666,7 +773,7 @@ public class Editor extends JFrame {
 	private class EditorWindowListener extends WindowAdapter {
 		@Override
 		public void windowClosing(WindowEvent e) {
-			if (closeCurrentSession()) {
+			if (closeCurrentProject()) {
 				storeEditorState();
 				System.exit(0);
 			}

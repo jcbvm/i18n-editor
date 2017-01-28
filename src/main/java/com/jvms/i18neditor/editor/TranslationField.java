@@ -17,6 +17,10 @@ public class TranslationField extends JUndoableTextField {
 		setupUI();
 	}
 	
+	public void clear() {
+		setValue(null);
+	}
+	
 	public String getValue() {
 		return getText().trim();
 	}

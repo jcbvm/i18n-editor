@@ -1,5 +1,6 @@
 package com.jvms.i18neditor.util;
 
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
 /**
@@ -65,29 +67,29 @@ public class ExtendedProperties extends Properties {
 	/**
 	 * Reads a property list from the given file path.
 	 * 
+	 * <p>Any {@code IOException} will be ignored.</p>
+	 * 
 	 * @param 	path the path to the property file.
 	 */
 	public void load(Path path) {
-		if (Files.exists(path)) {
-			try (InputStream in = Files.newInputStream(path)) {
-				load(in);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		try (InputStream in = Files.newInputStream(path)) {
+			load(in);
+		} catch (IOException e) {
 		}
 	}
 	
 	/**
 	 * Writes the property list to the given file path.
 	 * 
+	 * <p>Any {@code IOException} will be ignored.</p>
+	 * 
 	 * @param 	path the path to the property file.
 	 * @param   comments the comments to add to the property file.
 	 */
-	public void store(Path path, String comments) {
-		try (OutputStream out = Files.newOutputStream(path)) {
-			store(out, comments);
+	public void store(Path path) {
+		try (OutputStream out = new OutputStreamWrapper(Files.newOutputStream(path))) {
+			store(out, null);
 		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 	
@@ -120,8 +122,19 @@ public class ExtendedProperties extends Properties {
 	 * @param 	key the key to be placed in this property list.
 	 * @param 	value the value corresponding to {@code key}.
 	 */
-	public void setProperty(String key, boolean value) {
-		setProperty(key, value ? 1 : 0);
+	public void setProperty(String key, Boolean value) {
+		setProperty(key, value == null ? null : (value ? 1 : 0));
+	}
+	
+	/**
+	 * Sets a value in the property list. The {@code Enum} value will be 
+	 * stored as a {@code String} value.
+	 * 
+	 * @param 	key the key to be placed in this property list.
+	 * @param 	value the value corresponding to {@code key}.
+	 */
+	public void setProperty(String key, Enum<?> value) {
+		setProperty(key, value.toString());
 	}
 	
 	/**
@@ -129,7 +142,8 @@ public class ExtendedProperties extends Properties {
 	 * to retrieve a value previously stored by {@link #setProperty(String, List)}.
 	 * 
 	 * @param 	key the property key.
-	 * @return 	the value in this property list with the specified key value.
+	 * @return 	the value in this property list with the specified key value or an empty list
+	 * 			if no such key exists.
 	 */
 	public List<String> getListProperty(String key) {
 		String value = getProperty(key);
@@ -141,37 +155,94 @@ public class ExtendedProperties extends Properties {
 	 * to retrieve a value previously stored by {@link #setProperty(String, Integer)}.
 	 * 
 	 * @param 	key the property key.
-	 * @return 	the value in this property list with the specified key value.
+	 * @return 	the value in this property list with the specified key value or {@code null}
+	 * 			if no such key exists or the value is not a valid {@code Integer}.
 	 */
 	public Integer getIntegerProperty(String key) {
 		String value = getProperty(key);
-		return value != null && !value.isEmpty() ? Integer.parseInt(value) : null;
-	}
-	
-	/**
-	 * Gets a value from the property list as an {@code boolean}. This method should be used 
-	 * to retrieve a value previously stored by {@link #setProperty(String, boolean)}.
-	 * 
-	 * @param 	key the property key.
-	 * @return 	the value in this property list with the specified key value or {@code false}
-	 * 			if no such key exists.
-	 */
-	public boolean getBooleanProperty(String key) {
-		Integer value = getIntegerProperty(key, 0);
-		return value == 1;
+		if (!Strings.isNullOrEmpty(value)) {
+			try {
+				return Integer.parseInt(value);
+			} catch (Exception e) {
+			}
+		}
+		return null;
 	}
 	
 	/**
 	 * See {@link #getIntegerProperty(String)}. This method returns {@code defaultValue} when
-	 * there is no value in the property list with the specified {@code key}.
+	 * there is no value in the property list with the specified {@code key} or when 
+	 * the value is not a valid {@code Integer}.
 	 * 
 	 * @param	key the property key.
 	 * @param	defaultValue the default value to return when there is no value for the specified key
-	 * @return 	the value in this property list with the specified key value or the defaultValue
-	 * 			when there is no value with the specified key value.
+	 * @return 	the value in this property list with the specified key value or {@code defaultValue}
+	 * 			if no such key exists or the value is not a valid {@code Integer}.
 	 */
 	public Integer getIntegerProperty(String key, Integer defaultValue) {
 		Integer value = getIntegerProperty(key); 
+		return value != null ? value : defaultValue;
+	}
+	
+	/**
+	 * Gets a value from the property list as an {@code Boolean}. This method should be used 
+	 * to retrieve a value previously stored by {@link #setProperty(String, Boolean)}.
+	 * 
+	 * @param 	key the property key.
+	 * @return 	the value in this property list with the specified key value or {@code null}
+	 * 			if no such key exists.
+	 */
+	public Boolean getBooleanProperty(String key) {
+		Integer value = getIntegerProperty(key);
+		return value != null ? (value != 0) : null;
+	}
+	
+	/**
+	 * See {@link #getBooleanProperty(String)}. This method returns {@code defaultValue} when
+	 * there is no value in the property list with the specified {@code key}.
+	 * 
+	 * @param 	key the property key.
+	 * @param	defaultValue the default value to return when there is no value for the specified key
+	 * @return 	the value in this property list with the specified key value or {@code defaultValue}
+	 * 			if no such key exists.
+	 */
+	public Boolean getBooleanProperty(String key, boolean defaultValue) {
+		Boolean value = getBooleanProperty(key);
+		return value != null ? value : defaultValue;
+	}
+	
+	/**
+	 * Gets a value from the property list as an {@code Enum}. This method should be used 
+	 * to retrieve a value previously stored by {@link #setProperty(String, Enum)}.
+	 * 
+	 * @param 	key the property key.
+	 * @param	defaultValue the default value to return when there is no value for the specified key
+	 * @return 	the value in this property list with the specified key value or {@code null}
+	 * 			if no such key exists or the value is not a valid enum value.
+	 */
+	public <T extends Enum<T>> T getEnumProperty(String key, Class<T> enumType) {
+		String value = getProperty(key);
+		if (!Strings.isNullOrEmpty(value)) {
+			try {
+				return T.valueOf(enumType, value);
+			} catch (Exception e) {
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * See {@link #getEnumProperty(String, Class)}. This method returns {@code defaultValue} when
+	 * there is no value in the property list with the specified {@code key} or when 
+	 * the value is not a valid enum value.
+	 * 
+	 * @param 	key the property key.
+	 * @param	defaultValue the default value to return when there is no value for the specified key
+	 * @return 	the value in this property list with the specified key value or {@code defaultValue}
+	 * 			if no such key exists or the value is not a valid enum value.
+	 */
+	public <T extends Enum<T>> T getEnumProperty(String key, Class<T> enumType, T defaultValue) {
+		T value = getEnumProperty(key, enumType);
 		return value != null ? value : defaultValue;
 	}
 	
@@ -185,4 +256,21 @@ public class ExtendedProperties extends Properties {
 	public boolean containsKeys(String... keys) {
 		return Arrays.asList(keys).stream().allMatch(k -> containsKey(k));
 	}
+	
+	private class OutputStreamWrapper extends FilterOutputStream {
+        private boolean firstlineseen = false;
+        
+        public OutputStreamWrapper(OutputStream out) {
+            super(out);
+        }
+        
+        @Override
+        public void write(int b) throws IOException {
+            if (firstlineseen) {
+                super.write(b);
+            } else if (b == '\n') {
+                firstlineseen = true;
+            }
+        }
+    }
 }

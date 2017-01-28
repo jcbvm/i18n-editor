@@ -2,6 +2,7 @@ package com.jvms.i18neditor.editor;
 
 import java.awt.Color;
 import java.awt.KeyboardFocusManager;
+import java.util.Locale;
 
 import javax.swing.BorderFactory;
 import javax.swing.border.Border;
@@ -39,9 +40,15 @@ public class ResourceField extends JUndoableTextArea implements Comparable<Resou
 	
 	@Override
 	public int compareTo(ResourceField o) {
-		String a = getResource().getLocale().getDisplayName();
-		String b = o.getResource().getLocale().getDisplayName();
-		return a.compareTo(b);
+		Locale a = getResource().getLocale();
+		Locale b = o.getResource().getLocale();
+		if (a == null) {
+			return -1;
+		}
+		if (b == null) {
+			return 1;
+		}
+		return a.getDisplayName().compareTo(b.getDisplayName());
 	}
 	
 	private void setupUI() {

@@ -30,22 +30,15 @@ import com.jvms.i18neditor.util.ResourceKeys;
 public class Resource {
 	private final Path path;
 	private final Locale locale;
-	private final SortedMap<String,String> translations;
-	private final List<ResourceListener> listeners = Lists.newLinkedList();
 	private final ResourceType type;
+	private final List<ResourceListener> listeners = Lists.newLinkedList();
+	private SortedMap<String,String> translations = Maps.newTreeMap();
 	
 	/**
-	 * An enum for defining the type of a resource.
+	 * See {@link #Resource(ResourceType, Path, Locale)}.
 	 */
-	public enum ResourceType {
-		JSON, ES6
-	}
-	
-	/**
-	 * See {@link #Resource(ResourceType, Path, Locale, SortedMap)}.
-	 */
-	public Resource(ResourceType type, Path path, Locale locale) {
-		this(type, path, locale, Maps.newTreeMap());
+	public Resource(ResourceType type, Path path) {
+		this(type, path, null);
 	}
 	
 	/**
@@ -54,11 +47,9 @@ public class Resource {
 	 * @param 	type the type of the resource.
 	 * @param 	path the path to the file on disk.
 	 * @param 	locale the locale of the translations.
-	 * @param 	translations the actual translation data.
 	 */
-	public Resource(ResourceType type, Path path, Locale locale, SortedMap<String,String> translations) {
+	public Resource(ResourceType type, Path path, Locale locale) {
 		this.path = path;
-		this.translations = translations;
 		this.locale = locale;
 		this.type = type;
 	}
@@ -84,7 +75,7 @@ public class Resource {
 	/**
 	 * Gets the locale of the translations of the resource.
 	 * 
-	 * @return 	the locale of the resource.
+	 * @return 	the locale of the resource, may be {@code null}.
 	 */
 	public Locale getLocale() {
 		return locale;
@@ -101,6 +92,10 @@ public class Resource {
 	 */
 	public SortedMap<String,String> getTranslations() {
 		return ImmutableSortedMap.copyOf(translations);
+	}
+	
+	public void setTranslations(SortedMap<String,String> translations) {
+		this.translations = translations;
 	}
 	
 	/**

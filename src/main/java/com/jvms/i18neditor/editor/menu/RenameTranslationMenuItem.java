@@ -12,8 +12,8 @@ import com.jvms.i18neditor.util.MessageBundle;
  * @author Jacob
  */
 public class RenameTranslationMenuItem extends JMenuItem {
-	private final static long serialVersionUID = 5207946396515235714L;
-	
+	private final static long serialVersionUID = 907122077814626286L;
+
 	public RenameTranslationMenuItem(Editor editor, boolean enabled) {
         super(MessageBundle.get("menu.edit.rename.title"));
         setAccelerator(KeyStroke.getKeyStroke("F2"));

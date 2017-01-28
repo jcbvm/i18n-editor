@@ -9,6 +9,10 @@ import org.apache.commons.lang3.SystemUtils;
 
 import com.jvms.i18neditor.editor.Editor;
 
+/**
+ * 
+ * @author Jacob
+ */
 public class Main {
 
 	public static void main(String[] args) throws IOException {
