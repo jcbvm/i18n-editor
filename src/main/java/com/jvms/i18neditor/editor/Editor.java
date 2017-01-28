@@ -115,6 +115,7 @@ public class Editor extends JFrame {
 			updateHistory();
 			updateUI();
 		} catch (IOException e) {
+			e.printStackTrace();
 			showError(MessageBundle.get("resources.import.error.single"));
 		}
 	}
@@ -154,6 +155,7 @@ public class Editor extends JFrame {
 						setupResource(resource);
 						project.addResource(resource);
 					} catch (IOException e) {
+						e.printStackTrace();
 						showError(MessageBundle.get("resources.import.error.single", resource.getPath().toString()));
 					}
 				});
@@ -166,6 +168,7 @@ public class Editor extends JFrame {
 			updateHistory();
 			updateUI();
 		} catch (IOException e) {
+			e.printStackTrace();
 			showError(MessageBundle.get("resources.import.error.multiple"));
 		}
 	}
@@ -177,6 +180,7 @@ public class Editor extends JFrame {
 				try {
 					Resources.write(resource, !project.isMinifyResources());
 				} catch (IOException e) {
+					e.printStackTrace();
 					error = true;
 					showError(MessageBundle.get("resources.write.error.single", resource.getPath().toString()));
 				}
@@ -318,6 +322,7 @@ public class Editor extends JFrame {
 						project.addResource(resource);
 						updateUI();
 					} catch (IOException e) {
+						e.printStackTrace();
 						showError(MessageBundle.get("dialogs.locale.add.error.create"));
 					}
 				}
@@ -506,7 +511,6 @@ public class Editor extends JFrame {
     	if (project == null) {
     		updateHistory();
     	}
-		
 		if (project != null && project.hasResources()) {
 			// Restore last expanded nodes
 			List<String> expandedKeys = settings.getLastExpandedNodes();
