@@ -37,12 +37,16 @@ import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.plaf.SplitPaneUI;
+import javax.swing.plaf.basic.BasicSplitPaneDivider;
+import javax.swing.plaf.basic.BasicSplitPaneUI;
 
 import org.apache.commons.lang3.LocaleUtils;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.jvms.i18neditor.LookAndFeel;
 import com.jvms.i18neditor.Resource;
 import com.jvms.i18neditor.ResourceType;
 import com.jvms.i18neditor.swing.JFileDrop;
@@ -433,11 +437,11 @@ public class Editor extends JFrame {
 	
 	public void showAboutDialog() {
 		Dialogs.showHtmlDialog(this, MessageBundle.get("dialogs.about.title", TITLE), 
-				"<span style=\"font-size:1.2em;\"><strong>" + TITLE + "</strong></span><br>" + 
+				"<span style=\"font-size:1.5em;\"><strong>" + TITLE + "</strong></span><br>" + 
 				VERSION + "<br><br>" +
 				"Copyright (c) 2015 - 2017<br>" +
 				"Jacob van Mourik<br>" + 
-				"MIT Licensed<br><br>");
+				"MIT Licensed");
 	}
 	
 	public void showVersionDialog(boolean newVersionOnly) {
@@ -454,7 +458,7 @@ public class Editor extends JFrame {
 						"<strong>" + data.getTagName() + "</strong><br>" + 
 						"<a href=\"" + data.getHtmlUrl() + "\">" + 
 							MessageBundle.get("dialogs.version.link") + 
-						"</a><br><br>";
+						"</a>";
 			} else if (!newVersionOnly) {
 				content = MessageBundle.get("dialogs.version.uptodate");
 			} else {
@@ -541,25 +545,45 @@ public class Editor extends JFrame {
 				.map(size -> getClasspathImage("images/icon-" + size + ".png"))
 				.collect(Collectors.toList()));
 		
-		translationsPanel = new JPanel(new BorderLayout());
         translationTree = new TranslationTree(this);
+        translationTree.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
         translationTree.addTreeSelectionListener(new TranslationTreeNodeSelectionListener());
+        
 		translationField = new TranslationField();
 		translationField.addKeyListener(new TranslationFieldKeyListener());
-		translationsPanel.add(new JScrollPane(translationTree));
+		
+		JScrollPane translationsScrollPane = new JScrollPane(translationTree);
+		translationsScrollPane.getViewport().setOpaque(false);
+		translationsScrollPane.setOpaque(false);
+		translationsScrollPane.setBorder(BorderFactory.createCompoundBorder(
+				BorderFactory.createEmptyBorder(0, 0, 5, 0),
+				BorderFactory.createLineBorder(LookAndFeel.TEXTFIELD_BORDER_COLOR)));
+		
+		translationsPanel = new JPanel(new BorderLayout());
+		translationsPanel.add(translationsScrollPane);
 		translationsPanel.add(translationField, BorderLayout.SOUTH);
+		translationsPanel.setBorder(BorderFactory.createMatteBorder(10,10,10,5,translationsPanel.getBackground()));
 		
         resourcesPanel = new JScrollablePanel(true, false);
         resourcesPanel.setLayout(new BoxLayout(resourcesPanel, BoxLayout.Y_AXIS));
-        resourcesPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+        resourcesPanel.setBorder(BorderFactory.createEmptyBorder(10,5,10,10));
         
         resourcesScrollPane = new JScrollPane(resourcesPanel);
         resourcesScrollPane.getViewport().setOpaque(false);
-        resourcesScrollPane.setBackground(resourcesPanel.getBackground());
-        
-		contentPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, translationsPanel, resourcesScrollPane);
-		editorMenu = new EditorMenuBar(this, translationTree);
+        resourcesScrollPane.setOpaque(false);
+        resourcesScrollPane.setBorder(null);
 		
+		contentPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, translationsPanel, resourcesScrollPane);
+		contentPane.setBorder(null);
+		contentPane.setDividerSize(10);
+		
+		// Style the split pane divider if possible
+		SplitPaneUI splitPaneUI = contentPane.getUI();
+	    if (splitPaneUI instanceof BasicSplitPaneUI) {
+	        BasicSplitPaneDivider divider = ((BasicSplitPaneUI)splitPaneUI).getDivider();
+	        divider.setBorder(null);
+	    }
+	    
 		introText = new JLabel("<html><body style=\"text-align:center; padding:30px;\">" + 
 				MessageBundle.get("core.intro.text") + "</body></html>");
 		introText.setOpaque(true);
@@ -574,6 +598,7 @@ public class Editor extends JFrame {
 		Container container = getContentPane();
 		container.add(introText);
 		
+		editorMenu = new EditorMenuBar(this, translationTree);
 		setJMenuBar(editorMenu);
 	}
 	
@@ -611,12 +636,8 @@ public class Editor extends JFrame {
 			resourcesPanel.add(new JLabel(label));
 			resourcesPanel.add(Box.createVerticalStrut(5));
 			resourcesPanel.add(field);
-			resourcesPanel.add(Box.createVerticalStrut(5));
+			resourcesPanel.add(Box.createVerticalStrut(10));
 		});
-		if (!resourceFields.isEmpty()) {
-			resourcesPanel.remove(0);
-			resourcesPanel.remove(resourcesPanel.getComponentCount()-1);
-		}
 		
 		Container container = getContentPane();
 		if (project != null) {

@@ -1,21 +1,24 @@
 package com.jvms.i18neditor.editor;
 
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.border.TitledBorder;
 
 import com.jvms.i18neditor.ResourceType;
-import com.jvms.i18neditor.swing.JUndoableTextField;
+import com.jvms.i18neditor.swing.JTextField;
 import com.jvms.i18neditor.util.MessageBundle;
 
-public class EditorProjectSettingsPane extends JPanel {
+/**
+ * This class represents the project settings pane.
+ * 
+ * @author Jacob
+ */
+public class EditorProjectSettingsPane extends AbstractSettingsPane {
 	private final static long serialVersionUID = 5665963334924596315L;
 	private Editor editor;
 	
@@ -29,19 +32,12 @@ public class EditorProjectSettingsPane extends JPanel {
 		EditorSettings settings = editor.getSettings();
 		EditorProject project = editor.getProject();
 		
-		GridLayout fieldsetLayout = new GridLayout(0, 1);
-		fieldsetLayout.setVgap(5);
-		
 		// General settings
-		JPanel fieldset1 = new JPanel(fieldsetLayout);
-		fieldset1.setBorder(BorderFactory.createCompoundBorder(
-				BorderFactory.createTitledBorder(null, MessageBundle.get("settings.fieldset.general"), 
-						TitledBorder.CENTER, TitledBorder.TOP), 
-				BorderFactory.createEmptyBorder(10,10,10,10)));
+		JPanel fieldset1 = createFieldset(MessageBundle.get("settings.fieldset.general"));
 		
 		JPanel resourcePanel = new JPanel(new GridLayout(0, 1));
 		JLabel resourceNameLabel = new JLabel(MessageBundle.get("settings.resourcename.title"));
-		JUndoableTextField resourceNameField = new JUndoableTextField(project.getResourceName(), 25);
+		JTextField resourceNameField = new JTextField(project.getResourceName());
 		resourceNameField.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
@@ -51,17 +47,16 @@ public class EditorProjectSettingsPane extends JPanel {
 		});
 		resourcePanel.add(resourceNameLabel);
 		resourcePanel.add(resourceNameField);
-		fieldset1.add(resourcePanel);
+		fieldset1.add(resourcePanel, createVerticalGridBagConstraints());		
 		
 		if (project.getResourceType() != ResourceType.Properties) {
-			JPanel minifyPanel = new JPanel(new GridLayout(0, 1));
 			JCheckBox minifyBox = new JCheckBox(MessageBundle.get("settings.minify.title"));
+			minifyBox.setSelected(project.isMinifyResources());
 			minifyBox.addChangeListener(e -> project.setMinifyResources(minifyBox.isSelected()));
-			minifyPanel.add(minifyBox);
-			fieldset1.add(minifyPanel);
+			fieldset1.add(minifyBox, createVerticalGridBagConstraints());
 		}
 		
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		add(fieldset1);
+		setLayout(new GridBagLayout());
+		add(fieldset1, createVerticalGridBagConstraints());
 	}
 }

@@ -2,6 +2,11 @@ package com.jvms.i18neditor.editor;
 
 import java.util.List;
 
+/**
+ * This class represents the editor settings.
+ * 
+ * @author Jacob
+ */
 public class EditorSettings {
 	private int windowPositionX;
 	private int windowPositionY;

@@ -8,6 +8,11 @@ import com.google.common.collect.Lists;
 import com.jvms.i18neditor.Resource;
 import com.jvms.i18neditor.ResourceType;
 
+/**
+ * This class represents an editor project.
+ * 
+ * @author Jacob
+ */
 public class EditorProject {
 	private Path path;
 	private String resourceName;

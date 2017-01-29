@@ -5,6 +5,7 @@ import java.awt.event.MouseEvent;
 import java.util.Enumeration;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.JTree;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
@@ -135,13 +136,18 @@ public class TranslationTree extends JTree {
 	}
 	
 	private void setupUI() {
-		DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) getCellRenderer();
-        renderer.setLeafIcon(null);
-        renderer.setClosedIcon(null);
-        renderer.setOpenIcon(null);
+		DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer)getCellRenderer();
+		renderer.setLeafIcon(null);
+		renderer.setClosedIcon(null);
+		renderer.setOpenIcon(null);
+		renderer.setBorderSelectionColor(renderer.getBackgroundSelectionColor());
+		renderer.setBorder(BorderFactory.createCompoundBorder(getBorder(),
+        		BorderFactory.createEmptyBorder(2,2,2,2)));
+		
         addMouseListener(new TranslationTreeMouseListener());
         addTreeWillExpandListener(new TranslationTreeExpandListener());
         setEditable(false);
+        
         // Remove F2 keystroke binding
         getActionMap().getParent().remove("startEditing");
 	}

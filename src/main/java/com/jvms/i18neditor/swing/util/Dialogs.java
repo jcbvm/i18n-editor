@@ -2,15 +2,17 @@ package com.jvms.i18neditor.swing.util;
 
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import com.google.common.base.Strings;
 import com.jvms.i18neditor.swing.JHtmlPane;
-import com.jvms.i18neditor.swing.JUndoableTextField;
+import com.jvms.i18neditor.swing.JTextField;
 import com.jvms.i18neditor.swing.event.RequestInitialFocusListener;
 import com.jvms.i18neditor.swing.text.BlinkCaret;
 
@@ -44,6 +46,7 @@ public final class Dialogs {
 	public static void showHtmlDialog(Component parent, String title, String body) {
 		Font font = parent.getFont();
 		JHtmlPane pane = new JHtmlPane(parent, "<html><body style=\"font-family:" + font.getFamily() + ";font-size:" + font.getSize() + "pt;text-align:center;min-width:200px;\">" + body + "</body></html>");
+		pane.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 		showComponentDialog(parent, title, pane);	
 	}
 	
@@ -52,11 +55,13 @@ public final class Dialogs {
 	}
 	
 	public static String showInputDialog(Component parent, String title, String label, int type, String initialText, boolean selectAll) {
-		JPanel panel = new JPanel(new GridLayout(0, 1));
+		JPanel content = new JPanel(new GridLayout(0, 1));
+		
 		if (!Strings.isNullOrEmpty(label)) {
-			panel.add(new JLabel(label));
+			content.add(new JLabel(label));
 		}
-		JUndoableTextField field =  new JUndoableTextField(initialText, 25);
+		
+		JTextField field =  new JTextField(initialText);
 		field.addAncestorListener(new RequestInitialFocusListener());
 		field.setCaret(new BlinkCaret());
 		if (initialText != null) {
@@ -65,8 +70,12 @@ public final class Dialogs {
 		if (selectAll) {
 			field.selectAll();
 		}
-		panel.add(field);
-		int result = JOptionPane.showConfirmDialog(parent, panel, title, JOptionPane.OK_CANCEL_OPTION, type);
+		content.add(field);
+		
+		JPanel container = new JPanel(new GridBagLayout());
+		container.add(content);
+		
+		int result = JOptionPane.showConfirmDialog(parent, container, title, JOptionPane.OK_CANCEL_OPTION, type);
 		return result == JOptionPane.OK_OPTION ? field.getText() : null;
 	}
 	
