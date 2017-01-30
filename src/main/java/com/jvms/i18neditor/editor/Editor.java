@@ -35,6 +35,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
+import javax.swing.border.CompoundBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.plaf.SplitPaneUI;
@@ -546,27 +547,29 @@ public class Editor extends JFrame {
 				.collect(Collectors.toList()));
 		
         translationTree = new TranslationTree(this);
-        translationTree.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+        translationTree.setBorder(BorderFactory.createEmptyBorder(0,5,0,5));
         translationTree.addTreeSelectionListener(new TranslationTreeNodeSelectionListener());
         
 		translationField = new TranslationField();
 		translationField.addKeyListener(new TranslationFieldKeyListener());
+		translationField.setBorder(BorderFactory.createCompoundBorder(
+				BorderFactory.createMatteBorder(1,0,0,1,LookAndFeel.TEXTFIELD_BORDER_COLOR),
+				((CompoundBorder)translationField.getBorder()).getInsideBorder()));
 		
 		JScrollPane translationsScrollPane = new JScrollPane(translationTree);
 		translationsScrollPane.getViewport().setOpaque(false);
 		translationsScrollPane.setOpaque(false);
-		translationsScrollPane.setBorder(BorderFactory.createCompoundBorder(
-				BorderFactory.createEmptyBorder(0, 0, 5, 0),
-				BorderFactory.createLineBorder(LookAndFeel.TEXTFIELD_BORDER_COLOR)));
+		translationsScrollPane.setBorder(
+				BorderFactory.createMatteBorder(0,0,0,1,LookAndFeel.TEXTFIELD_BORDER_COLOR));
 		
 		translationsPanel = new JPanel(new BorderLayout());
 		translationsPanel.add(translationsScrollPane);
 		translationsPanel.add(translationField, BorderLayout.SOUTH);
-		translationsPanel.setBorder(BorderFactory.createMatteBorder(10,10,10,5,translationsPanel.getBackground()));
 		
         resourcesPanel = new JScrollablePanel(true, false);
         resourcesPanel.setLayout(new BoxLayout(resourcesPanel, BoxLayout.Y_AXIS));
-        resourcesPanel.setBorder(BorderFactory.createEmptyBorder(10,5,10,10));
+        resourcesPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,20));
+        resourcesPanel.setOpaque(false);
         
         resourcesScrollPane = new JScrollPane(resourcesPanel);
         resourcesScrollPane.getViewport().setOpaque(false);
