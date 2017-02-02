@@ -108,7 +108,9 @@ public class Editor extends JFrame {
 				reset();
 			}
 			
-			project = new EditorProject(dir, type);
+			project = new EditorProject(dir);
+			restoreProjectState(project);
+			project.setResourceType(type);
 			
 			if (type == ResourceType.Properties) {
 				Resource resource = Resources.create(dir, type, Optional.empty(), project.getResourceName());
@@ -706,10 +708,16 @@ public class Editor extends JFrame {
 	
 	private void restoreProjectState(EditorProject project) {
 		ExtendedProperties props = new ExtendedProperties();
-		props.load(Paths.get(project.getPath().toString(), PROJECT_FILE));
-		project.setMinifyResources(props.getBooleanProperty("minify_resources", settings.isMinifyResources()));
-		project.setResourceName(props.getProperty("resource_name", settings.getResourceName()));
-		project.setResourceType(props.getEnumProperty("resource_type", ResourceType.class));
+		Path path = Paths.get(project.getPath().toString(), PROJECT_FILE);
+		if (Files.exists(path)) {
+			props.load(Paths.get(project.getPath().toString(), PROJECT_FILE));
+			project.setMinifyResources(props.getBooleanProperty("minify_resources", settings.isMinifyResources()));
+			project.setResourceName(props.getProperty("resource_name", settings.getResourceName()));
+			project.setResourceType(props.getEnumProperty("resource_type", ResourceType.class));
+		} else {
+			project.setResourceName(settings.getResourceName());
+			project.setMinifyResources(settings.isMinifyResources());
+		}
 	}
 	
 	private void storeEditorState() {

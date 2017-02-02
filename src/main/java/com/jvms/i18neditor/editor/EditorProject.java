@@ -21,12 +21,7 @@ public class EditorProject {
 	private boolean minifyResources;
 	
 	public EditorProject(Path path) {
-		this(path, null);
-	}
-	
-	public EditorProject(Path path, ResourceType resourceType) {
 		this.path = path;
-		this.resourceType = resourceType;
 	}
 
 	public Path getPath() {
