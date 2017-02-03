@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
@@ -41,6 +43,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.plaf.SplitPaneUI;
 import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
+import javax.swing.tree.TreePath;
 
 import org.apache.commons.lang3.LocaleUtils;
 
@@ -69,7 +72,7 @@ public class Editor extends JFrame {
 	private final static long serialVersionUID = 1113029729495390082L;
 	
 	public final static String TITLE = "i18n-editor";
-	public final static String VERSION = "1.0.0-beta.1";
+	public final static String VERSION = "1.0.0-beta.2";
 	public final static String GITHUB_REPO = "jcbvm/i18n-editor";
 	public final static String DEFAULT_RESOURCE_NAME = "translations";
 	public final static String PROJECT_FILE = ".i18n-editor-metadata";
@@ -101,13 +104,23 @@ public class Editor extends JFrame {
 		try {
 			Preconditions.checkArgument(Files.isDirectory(dir));
 			
-			if (project != null) {
-				if (!closeCurrentProject()) {
-					return;
-				}
-				reset();
+			if (!closeCurrentProject()) {
+				return;
 			}
 			
+			List<Resource> resourceList = Resources.get(dir, settings.getResourceName(), Optional.empty());
+			if (!resourceList.isEmpty()) {
+				boolean importProject = Dialogs.showConfirmDialog(this, 
+						MessageBundle.get("dialogs.project.new.conflict.title"),
+						MessageBundle.get("dialogs.project.new.conflict.text"),
+						JOptionPane.YES_NO_OPTION);
+				if (importProject) {
+					importProject(dir, true);
+					return;
+				}
+			}
+			
+			clearUI();
 			project = new EditorProject(dir);
 			restoreProjectState(project);
 			project.setResourceType(type);
@@ -123,7 +136,7 @@ public class Editor extends JFrame {
 			updateUI();
 		} catch (IOException e) {
 			e.printStackTrace();
-			showError(MessageBundle.get("resources.import.error.single"));
+			showError(MessageBundle.get("resources.create.error"));
 		}
 	}
 	
@@ -131,13 +144,11 @@ public class Editor extends JFrame {
 		try {
 			Preconditions.checkArgument(Files.isDirectory(dir));
 			
-			if (project != null) {
-				if (!closeCurrentProject()) {
-					return;
-				}
-				reset();
+			if (!closeCurrentProject()) {
+				return;
 			}
 			
+			clearUI();
 			project = new EditorProject(dir);
 			restoreProjectState(project);
 			
@@ -180,7 +191,7 @@ public class Editor extends JFrame {
 		}
 	}
 	
-	public void saveProject() {
+	public boolean saveProject() {
 		boolean error = false;
 		if (project != null) {
 			for (Resource resource : project.getResources()) {
@@ -194,6 +205,7 @@ public class Editor extends JFrame {
 			}
 		}
 		setDirty(error);
+		return !error;
 	}
 	
 	public void reloadProject() {
@@ -472,28 +484,23 @@ public class Editor extends JFrame {
 	}
 	
 	public boolean closeCurrentProject() {
-		int result = JOptionPane.NO_OPTION;
+		boolean result = true;
 		if (isDirty()) {
-			result = JOptionPane.showConfirmDialog(this, 
+			int confirm = JOptionPane.showConfirmDialog(this, 
 					MessageBundle.get("dialogs.save.text"), 
 					MessageBundle.get("dialogs.save.title"), 
 					JOptionPane.YES_NO_CANCEL_OPTION);
-			if (result == JOptionPane.YES_OPTION) {
-				saveProject();
+			if (confirm == JOptionPane.YES_OPTION) {
+				result = saveProject();
+			} else {
+				result = confirm != JOptionPane.CANCEL_OPTION;
 			}
 		}
-		if (project != null) {
+		if (result && project != null) {
 			storeProjectState();
+			project = null;
 		}
-		return result != JOptionPane.CANCEL_OPTION;
-	}
-	
-	public void reset() {
-		translationField.clear();
-		translationTree.clear();
-		resourceFields.clear();
-		setDirty(false);
-		updateUI();
+		return result;
 	}
 	
 	public void launch() {
@@ -539,6 +546,13 @@ public class Editor extends JFrame {
 		}
 	}
 	
+	private void clearUI() {
+		translationField.clear();
+		translationTree.clear();
+		resourceFields.clear();
+		updateUI();
+	}
+	
 	private void setupUI() {
 		setTitle(TITLE);
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -548,9 +562,10 @@ public class Editor extends JFrame {
 				.map(size -> getClasspathImage("images/icon-" + size + ".png"))
 				.collect(Collectors.toList()));
 		
-        translationTree = new TranslationTree(this);
+        translationTree = new TranslationTree();
         translationTree.setBorder(BorderFactory.createEmptyBorder(0,5,0,5));
         translationTree.addTreeSelectionListener(new TranslationTreeNodeSelectionListener());
+        translationTree.addMouseListener(new TranslationTreeMouseListener());
         
 		translationField = new TranslationField();
 		translationField.addKeyListener(new TranslationFieldKeyListener());
@@ -572,11 +587,13 @@ public class Editor extends JFrame {
         resourcesPanel.setLayout(new BoxLayout(resourcesPanel, BoxLayout.Y_AXIS));
         resourcesPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,20));
         resourcesPanel.setOpaque(false);
+        resourcesPanel.addMouseListener(new ResourcesPaneMouseListener());
         
         resourcesScrollPane = new JScrollPane(resourcesPanel);
         resourcesScrollPane.getViewport().setOpaque(false);
         resourcesScrollPane.setOpaque(false);
         resourcesScrollPane.setBorder(null);
+        resourcesScrollPane.addMouseListener(new ResourcesPaneMouseListener());
 		
 		contentPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, translationsPanel, resourcesScrollPane);
 		contentPane.setBorder(null);
@@ -762,6 +779,35 @@ public class Editor extends JFrame {
 		settings.setCheckVersionOnStartup(props.getBooleanProperty("check_version", true));
 	}
 	
+	private class TranslationTreeMouseListener extends MouseAdapter {
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			showPopupMenu(e);
+	    }
+		
+		@Override
+		public void mousePressed(MouseEvent e) {
+			showPopupMenu(e);
+	    }
+		
+		private void showPopupMenu(MouseEvent e) {
+			if (!e.isPopupTrigger() || project == null || !project.hasResources()) {
+				return;
+			}
+			TreePath path = translationTree.getPathForLocation(e.getX(), e.getY());
+	    	if (path == null) {
+	    		translationTree.setSelectionPath(null);
+	    		TranslationTreeMenu menu = new TranslationTreeMenu(Editor.this, translationTree);
+	    		menu.show(e.getComponent(), e.getX(), e.getY());
+	    	} else {
+	    		translationTree.setSelectionPath(path);
+	    		TranslationTreeNode node = translationTree.getSelectedNode();
+	    		TranslationTreeNodeMenu menu = new TranslationTreeNodeMenu(Editor.this, node);
+	    		menu.show(e.getComponent(), e.getX(), e.getY());
+	    	}
+		}
+	}
+	
 	private class TranslationTreeNodeSelectionListener implements TreeSelectionListener {
 		@Override
 		public void valueChanged(TreeSelectionEvent e) {
@@ -785,16 +831,6 @@ public class Editor extends JFrame {
 		}
 	}
 	
-	private class ResourceFieldKeyListener extends KeyAdapter {
-		@Override
-		public void keyReleased(KeyEvent e) {
-			ResourceField field = (ResourceField) e.getSource();
-			String key = translationTree.getSelectedNode().getKey();
-			String value = field.getValue();
-			field.getResource().storeTranslation(key, value);
-		}
-	}
-	
 	private class TranslationFieldKeyListener extends KeyAdapter {
 		@Override
 		public void keyReleased(KeyEvent e) {
@@ -805,6 +841,36 @@ public class Editor extends JFrame {
 					addTranslationKey(key);						
 				}
 			}
+		}
+	}
+	
+	private class ResourcesPaneMouseListener extends MouseAdapter {
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			showPopupMenu(e);
+	    }
+		
+		@Override
+		public void mousePressed(MouseEvent e) {
+			showPopupMenu(e);
+	    }
+		
+		private void showPopupMenu(MouseEvent e) {
+			if (!e.isPopupTrigger() || project == null) {
+				return;
+			}
+			ResourcesPaneMenu menu = new ResourcesPaneMenu(Editor.this);
+    		menu.show(e.getComponent(), e.getX(), e.getY());
+		}
+	}
+	
+	private class ResourceFieldKeyListener extends KeyAdapter {
+		@Override
+		public void keyReleased(KeyEvent e) {
+			ResourceField field = (ResourceField) e.getSource();
+			String key = translationTree.getSelectedNode().getKey();
+			String value = field.getValue();
+			field.getResource().storeTranslation(key, value);
 		}
 	}
 	

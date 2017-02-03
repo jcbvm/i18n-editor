@@ -1,7 +1,5 @@
 package com.jvms.i18neditor.editor;
 
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -24,11 +22,9 @@ import com.jvms.i18neditor.util.ResourceKeys;
  */
 public class TranslationTree extends JTree {
 	private final static long serialVersionUID = -2888673305196385241L;
-	private final Editor editor;
 	
-	public TranslationTree(Editor editor) {
+	public TranslationTree() {
 		super(new TranslationTreeModel());
-		this.editor = editor;
 		setupUI();
 	}
 	
@@ -144,7 +140,6 @@ public class TranslationTree extends JTree {
 		renderer.setBorder(BorderFactory.createCompoundBorder(getBorder(),
         		BorderFactory.createEmptyBorder(2,2,2,2)));
 		
-        addMouseListener(new TranslationTreeMouseListener());
         addTreeWillExpandListener(new TranslationTreeExpandListener());
         setEditable(false);
         
@@ -196,35 +191,5 @@ public class TranslationTree extends JTree {
     			throw new ExpandVetoException(e);        			
     		}
     	}
-	}
-	
-	private class TranslationTreeMouseListener extends MouseAdapter {
-		@Override
-		public void mouseReleased(MouseEvent e) {
-			if (e.isPopupTrigger() && isEditable()) {
-				showPopupMenu(e);				
-			}
-	    }
-		
-		@Override
-		public void mousePressed(MouseEvent e) {
-			if (e.isPopupTrigger() && isEditable()) {
-				showPopupMenu(e);				
-			}
-	    }
-		
-		private void showPopupMenu(MouseEvent e) {
-			TreePath path = getPathForLocation(e.getX(), e.getY());
-	    	if (path == null) {
-	    		setSelectionPath(null);
-	    		TranslationTreeMenu menu = new TranslationTreeMenu(editor, TranslationTree.this);
-	    		menu.show(e.getComponent(), e.getX(), e.getY());
-	    	} else {
-	    		setSelectionPath(path);
-	    		TranslationTreeNode node = getSelectedNode();
-	    		TranslationTreeNodeMenu menu = new TranslationTreeNodeMenu(editor, node);
-	    		menu.show(e.getComponent(), e.getX(), e.getY());
-	    	}
-		}
 	}
 }
