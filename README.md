@@ -4,6 +4,8 @@ This application lets you manage multiple translations files at once.
 
 The application supports translation files formatted in `JSON`, `ES6` (JSON wrapped in a javascript ES6 module) and `Properties` (for example java properties files to be used with a `ResourceBundle`).
 
+------
+
 <img src="https://raw.github.com/jcbvm/i18n-editor/master/screenshot-1.jpg?1" width="600">
 <img src="https://raw.github.com/jcbvm/i18n-editor/master/screenshot-2.jpg?1" width="600">
 
