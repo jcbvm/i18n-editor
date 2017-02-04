@@ -1,8 +1,8 @@
 # i18n-editor [![Build Status](https://travis-ci.org/jcbvm/i18n-editor.svg?branch=master)](https://travis-ci.org/jcbvm/i18n-editor)
 
-This application lets you manage multiple translations files at once. The application can handle both `JSON` and `ES6` formatted files (the latter is JSON wrapped in an ES6 module).
+This application lets you manage multiple translations files at once.
 
-This project was mainly designed to be used for [ember-i18n](https://github.com/jamesarosen/ember-i18n), but can also be used without it.
+The application supports translation files formatted in `JSON`, `ES6` (JSON wrapped in a javascript ES6 module) and `Properties` (for example java properties files to be used with a `ResourceBundle`).
 
 <img src="https://raw.github.com/jcbvm/i18n-editor/master/screenshot-1.jpg?1" width="600">
 <img src="https://raw.github.com/jcbvm/i18n-editor/master/screenshot-2.jpg?1" width="600">
@@ -22,7 +22,7 @@ http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.h
 
 ## Download
 
-You can download the latest release by going to [this page](https://github.com/jcbvm/ember-i18n-editor/releases/latest) and downloading the `.zip` file.<br> If you're on Windows you can install the application by running the `.exe` file. If you're on Mac you can use the application by running the `.app` file. If you're on Linux you can use the application by running the `.jar` file.<br>
+You can download the latest release by going to [this page](https://github.com/jcbvm/ember-i18n-editor/releases/latest) and downloading the `.zip` file.<br> If you're on Windows you can install the application by running the `.exe` file. If you're on Mac you can use the application by running the `.app` file. If you're on Linux you can use the application by running the `.jar` file.
 
 ## Usage
 
