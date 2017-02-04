@@ -8,7 +8,6 @@ The editor supports translation files with the following format:
 
 ###
 
-<img src="https://raw.github.com/jcbvm/i18n-editor/master/screenshot-1.jpg?1" width="600">
 <img src="https://raw.github.com/jcbvm/i18n-editor/master/screenshot-2.jpg?1" width="600">
 
 ## Features
