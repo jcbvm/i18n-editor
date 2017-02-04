@@ -30,11 +30,11 @@ You can download the latest release by going to [this page](https://github.com/j
 
 ## Usage
 
-When you open the editor for the first time, it will ask you to choose a folder, this can be any folder you want to put your translation files in (normally when using ember-i18n this will be your `app/locales/` directory). 
+To start, open the application and go to `File > New Project` to create a new project. After choosing the desired file format for your translations, you can select a root directory where you want to store your translation files in. From here you can begin adding locales by going to `Edit > Add Locale...`. Next you can start adding translations either via `Edit > Add Translation...`, via the right click menu in the left side panel or via the key field at the bottom of the left side panel. Each time you start the editor it will open the last project you was working on. You can always import an existing project by going to `File > Import Project...` and selecting the root directory of you existing project.
 
-To add a locale, go to `Edit > Add Locale` where you can choose whether you want to create a `JSON` or an `ES6` file, enter the locale you want to create the tranlations for and press OK. A new directory will be created for you named after the locale you entered, with a `translations.json` file if you chose for JSON format and a `translations.js` file if you chose for ES6 format. This is where your translations will be put in.
+By default translation files of the format `JSON` or `ES6` will be saved in locale directories with the filename `translations.json` or `translations.js` respectively. Translation files of the format `Properties` will be saved with the locale embedded in the filename, for example `translations_nl_NL.properties`. The `Properties` formatted files also differ from the other formats in that it will create a default translation file called `translations.properties`, this is the fallback translation file (which is common for a java ResourceBundle).
 
-From here you can begin adding translations (either via the top menu, via the right click menu in the left side panel or via the key field at the bottom of the left side panel).
+Via `Settings > Preferences...` you can change the filename of the translation files you want to use (by default they are named `translations`) and select whether you want to minify the files on save. This settings can also be applied on each project individually via `Settings > Project Preferences...`.
 
 ## Help translating
 
