@@ -4,7 +4,7 @@ This application lets you manage multiple translations files at once. The applic
 
 This project was mainly designed to be used for [ember-i18n](https://github.com/jamesarosen/ember-i18n), but can also be used without it.
 
-<img src="https://raw.github.com/jcbvm/i18n-editor/master/screenshot.jpg?2" width="600">
+<img src="https://raw.github.com/jcbvm/i18n-editor/master/screenshot.jpg?3" width="680">
 
 ## Features
 
