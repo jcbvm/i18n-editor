@@ -54,10 +54,11 @@ public final class Resources {
 	 */
 	public static List<Resource> get(Path rootDir, String baseName, Optional<ResourceType> type) throws IOException {
 		List<Resource> result = Lists.newLinkedList();
-		Files.walk(rootDir, 1).forEach(p -> {
+		List<Path> files = Files.walk(rootDir, 1).collect(Collectors.toList());
+		for (Path p : files) {
 			ResourceType resourceType = null;
 			for (ResourceType t : ResourceType.values()) {
-				if (isResourceType(type, t) && isResource(p, t, baseName)) {
+				if (isResourceType(type, t) && isResource(rootDir, p, t, baseName)) {
 					resourceType = t;
 					break;
 				}
@@ -80,7 +81,7 @@ public final class Resources {
 				}
 				result.add(new Resource(resourceType, path, locale));
 			}
-		});
+		};
 		return result;
 	}
 	
@@ -156,9 +157,12 @@ public final class Resources {
 		return resource;
 	}
 	
-	private static boolean isResource(Path path, ResourceType type, String baseName) {
+	private static boolean isResource(Path root, Path path, ResourceType type, String baseName) throws IOException {
 		String extension = type.getExtension();
-		if (type.isEmbedLocale()) {
+		Path parent = path.getParent();
+		if (parent == null || Files.isSameFile(root, path) || !Files.isSameFile(root, parent)) {
+			return false;
+		} else if (type.isEmbedLocale()) {
 			return Files.isRegularFile(path) &&
 					Pattern.matches("^" + baseName + "(_" + LOCALE_REGEX + ")?" + extension + "$", path.getFileName().toString());			
 		} else {
