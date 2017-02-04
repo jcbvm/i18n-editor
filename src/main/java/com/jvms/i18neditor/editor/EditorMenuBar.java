@@ -219,7 +219,7 @@ public class EditorMenuBar extends JMenuBar {
      	helpMenu.setMnemonic(MessageBundle.getMnemonic("menu.help.vk"));
      	
      	JMenuItem versionMenuItem = new JMenuItem(MessageBundle.get("menu.help.version.title"));
-     	versionMenuItem.addActionListener(e -> editor.showVersionDialog(true));
+     	versionMenuItem.addActionListener(e -> editor.showVersionDialog(false));
      	
      	JMenuItem aboutMenuItem = new JMenuItem(MessageBundle.get("menu.help.about.title", Editor.TITLE));
      	aboutMenuItem.addActionListener(e -> editor.showAboutDialog());

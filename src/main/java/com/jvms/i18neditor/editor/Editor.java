@@ -472,12 +472,10 @@ public class Editor extends JFrame {
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {
 				data = null;
 			}
-			if (data != null && !VERSION.equals(data.getTagName())) {
+			if (data != null && VERSION.compareToIgnoreCase(data.getTagName()) < 0) {
 				content = MessageBundle.get("dialogs.version.new") + " " +
 						"<strong>" + data.getTagName() + "</strong><br>" + 
-						"<a href=\"" + data.getHtmlUrl() + "\">" + 
-							MessageBundle.get("dialogs.version.link") + 
-						"</a>";
+						"<a href=\"" + data.getHtmlUrl() + "\">" + MessageBundle.get("dialogs.version.link") + "</a>";
 			} else if (!newVersionOnly) {
 				content = MessageBundle.get("dialogs.version.uptodate");
 			} else {
