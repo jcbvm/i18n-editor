@@ -636,7 +636,7 @@ public class Editor extends JFrame {
 	}
 	
 	private void setupFileDrop() {
-		new JFileDrop(this, new JFileDrop.Listener() {
+		new JFileDrop(getContentPane(), null, new JFileDrop.Listener() {
 			@Override
 			public void filesDropped(java.io.File[] files) {
 				try {
