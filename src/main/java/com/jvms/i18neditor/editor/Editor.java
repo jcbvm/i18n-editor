@@ -500,7 +500,6 @@ public class Editor extends JFrame {
 		}
 		if (result && project != null) {
 			storeProjectState();
-			project = null;
 		}
 		return result;
 	}
