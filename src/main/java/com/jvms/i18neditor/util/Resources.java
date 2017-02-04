@@ -41,7 +41,7 @@ public final class Resources {
 	 * 
 	 * <p>The {@code baseName} is the base of the filename of the resource files to look for.<br>
 	 * The base name is without extension and without any locale information.<br>
-	 * When a resource type is given, only resources of that type will be looked for.</p>
+	 * When a resource type is given, only resources of that type will returned.</p>
 	 * 
 	 * <p>This function will not load the contents of the file, only its description.<br>
 	 * If you want to load the contents, use {@link #load(Resource)} afterwards.</p>
@@ -56,20 +56,19 @@ public final class Resources {
 		List<Resource> result = Lists.newLinkedList();
 		Files.walk(rootDir, 1).forEach(p -> {
 			ResourceType resourceType = null;
-			if (isResource(p, ResourceType.ES6, baseName)) {
-				resourceType = ResourceType.ES6;
-			} else if (isResource(p, ResourceType.JSON, baseName)) {
-				resourceType = ResourceType.JSON;
-			} else if (isResource(p, ResourceType.Properties, baseName)) {
-				resourceType = ResourceType.Properties;
+			for (ResourceType t : ResourceType.values()) {
+				if (isResourceType(type, t) && isResource(p, t, baseName)) {
+					resourceType = t;
+					break;
+				}
 			}
-			if (resourceType != null && (!type.isPresent() || type.get() == resourceType)) {
+			if (resourceType != null) {
 				String fileName = p.getFileName().toString();
 				String extension = resourceType.getExtension();
 				Locale locale = null;
 				Path path = null;
 				if (resourceType.isEmbedLocale()) {
-					String pattern = "^" + baseName + "_("+LOCALE_REGEX+")" + extension + "$";
+					String pattern = "^" + baseName + "_(" + LOCALE_REGEX + ")" + extension + "$";
 					Matcher match = Pattern.compile(pattern).matcher(fileName);
 					if (match.find()) {
 						locale = LocaleUtils.toLocale(match.group(1));
@@ -161,12 +160,16 @@ public final class Resources {
 		String extension = type.getExtension();
 		if (type.isEmbedLocale()) {
 			return Files.isRegularFile(path) &&
-					Pattern.matches("^" + baseName + "(_"+LOCALE_REGEX+")?" + extension + "$", path.getFileName().toString());			
+					Pattern.matches("^" + baseName + "(_" + LOCALE_REGEX + ")?" + extension + "$", path.getFileName().toString());			
 		} else {
 			return Files.isDirectory(path) &&
 					Pattern.matches("^" + LOCALE_REGEX + "$", path.getFileName().toString()) &&
 					Files.isRegularFile(Paths.get(path.toString(), baseName + extension));
 		}
+	}
+	
+	private static boolean isResourceType(Optional<ResourceType> a, ResourceType b) {
+		return !a.isPresent() || a.get() == b;
 	}
 	
 	private static SortedMap<String,String> fromProperties(ExtendedProperties properties) {
