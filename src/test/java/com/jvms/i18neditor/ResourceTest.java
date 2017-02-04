@@ -11,6 +11,10 @@ import com.jvms.i18neditor.Resource;
 
 import static org.junit.Assert.*;
 
+/**
+ * 
+ * @author Jacob
+ */
 public class ResourceTest {
 	private Resource resource;
 	
@@ -30,26 +34,26 @@ public class ResourceTest {
 		resource.storeTranslation("a.a", "b");
 		
 		translations = resource.getTranslations();
-		assertEquals(translations.size(), 2);
-		assertEquals(translations.get("a.a"), "b");
-		assertEquals(translations.get("a.b"), "ab");
+		assertEquals(2, translations.size());
+		assertEquals("b", translations.get("a.a"));
+		assertEquals("ab", translations.get("a.b"));
 		
 		resource.storeTranslation("a.a.a", "b");
 		
 		translations = resource.getTranslations();
-		assertEquals(translations.size(), 2);
-		assertEquals(translations.get("a.a.a"), "b");
-		assertEquals(translations.get("a.a"), null);
-		assertEquals(translations.get("a.b"), "ab");
+		assertEquals(2, translations.size());
+		assertEquals("b", translations.get("a.a.a"));
+		assertNull(translations.get("a.a"));
+		assertEquals("ab", translations.get("a.b"));
 		
 		resource.storeTranslation("a", "b");
 		
 		translations = resource.getTranslations();
-		assertEquals(translations.size(), 1);
-		assertEquals(translations.get("a"), "b");
-		assertEquals(translations.get("a.a.a"), null);
-		assertEquals(translations.get("a.a"), null);
-		assertEquals(translations.get("a.b"), null);
+		assertEquals(1, translations.size());
+		assertEquals("b", translations.get("a"));
+		assertNull(translations.get("a.a.a"));
+		assertNull(translations.get("a.a"));
+		assertNull(translations.get("a.b"));
 	}
 	
 	@Test(expected=IllegalArgumentException.class)
@@ -65,10 +69,10 @@ public class ResourceTest {
 		resource.removeTranslation("a");
 		
 		translations = resource.getTranslations();
-		assertEquals(translations.size(), 1);
-		assertEquals(translations.get("b"), "b");
-		assertEquals(translations.get("a.a"), null);
-		assertEquals(translations.get("a.b"), null);
+		assertEquals(1, translations.size());
+		assertEquals("b", translations.get("b"));
+		assertNull(translations.get("a.a"));
+		assertNull(translations.get("a.b"));
 	}
 	
 	@Test
@@ -80,25 +84,25 @@ public class ResourceTest {
 		resource.renameTranslation("b", "c");
 		
 		translations = resource.getTranslations();
-		assertEquals(translations.size(), 4);
-		assertEquals(translations.get("a.a"), "aa");
-		assertEquals(translations.get("a.b"), "ab");
-		assertEquals(translations.get("b.a"), null);
-		assertEquals(translations.get("b.b"), null);
-		assertEquals(translations.get("c.a"), "ba");
-		assertEquals(translations.get("c.b"), "bb");
+		assertEquals(4, translations.size());
+		assertEquals("aa", translations.get("a.a"));
+		assertEquals("ab", translations.get("a.b"));
+		assertNull(translations.get("b.a"));
+		assertNull(translations.get("b.b"));
+		assertEquals("ba", translations.get("c.a"));
+		assertEquals("bb", translations.get("c.b"));
 		
 		resource.renameTranslation("c.a", "d");
 		
 		translations = resource.getTranslations();
-		assertEquals(translations.size(), 4);
-		assertEquals(translations.get("d"), "ba");
-		assertEquals(translations.get("a.a"), "aa");
-		assertEquals(translations.get("a.b"), "ab");
-		assertEquals(translations.get("b.a"), null);
-		assertEquals(translations.get("b.b"), null);
-		assertEquals(translations.get("c.a"), null);
-		assertEquals(translations.get("c.b"), "bb");
+		assertEquals(4, translations.size());
+		assertEquals("ba", translations.get("d"));
+		assertEquals("aa", translations.get("a.a"));
+		assertEquals("ab", translations.get("a.b"));
+		assertNull(translations.get("b.a"));
+		assertNull(translations.get("b.b"));
+		assertNull(translations.get("c.a"));
+		assertEquals("bb", translations.get("c.b"));
 	}
 	
 	@Test
@@ -112,25 +116,25 @@ public class ResourceTest {
 		resource.renameTranslation("b", "a");
 		
 		translations = resource.getTranslations();
-		assertEquals(translations.size(), 4);
-		assertEquals(translations.get("a.a"), "ba");
-		assertEquals(translations.get("a.b"), null);
-		assertEquals(translations.get("a.c"), "ac");
-		assertEquals(translations.get("a.b.a"), "bba");
-		assertEquals(translations.get("a.b.b"), "bbb");
-		assertEquals(translations.get("b.a"), null);
-		assertEquals(translations.get("b.b.a"), null);
-		assertEquals(translations.get("b.b.b"), null);
+		assertEquals(4, translations.size());
+		assertEquals("ba", translations.get("a.a"));
+		assertNull(translations.get("a.b"));
+		assertEquals("ac", translations.get("a.c"));
+		assertEquals("bba", translations.get("a.b.a"));
+		assertEquals("bbb", translations.get("a.b.b"));
+		assertNull(translations.get("b.a"));
+		assertNull(translations.get("b.b.a"));
+		assertNull(translations.get("b.b.b"));
 		
 		resource.renameTranslation("a.b", "a");
 		
 		translations = resource.getTranslations();
-		assertEquals(translations.size(), 3);
-		assertEquals(translations.get("a.a"), "bba");
-		assertEquals(translations.get("a.b"), "bbb");
-		assertEquals(translations.get("a.c"), "ac");
-		assertEquals(translations.get("a.b.a"), null);
-		assertEquals(translations.get("a.b.b"), null);
+		assertEquals(3, translations.size());
+		assertEquals("bba", translations.get("a.a"));
+		assertEquals("bbb", translations.get("a.b"));
+		assertEquals("ac", translations.get("a.c"));
+		assertNull(translations.get("a.b.a"));
+		assertNull(translations.get("a.b.b"));
 	}
 	
 	@Test(expected=IllegalArgumentException.class)
@@ -148,25 +152,25 @@ public class ResourceTest {
 		resource.duplicateTranslation("b", "c");
 		
 		translations = resource.getTranslations();
-		assertEquals(translations.size(), 6);
-		assertEquals(translations.get("a.a"), "aa");
-		assertEquals(translations.get("a.b"), "ab");
-		assertEquals(translations.get("b.a"), "ba");
-		assertEquals(translations.get("b.b"), "bb");
-		assertEquals(translations.get("c.a"), "ba");
-		assertEquals(translations.get("c.b"), "bb");
+		assertEquals(6, translations.size());
+		assertEquals("aa", translations.get("a.a"));
+		assertEquals("ab", translations.get("a.b"));
+		assertEquals("ba", translations.get("b.a"));
+		assertEquals("bb", translations.get("b.b"));
+		assertEquals("ba", translations.get("c.a"));
+		assertEquals("bb", translations.get("c.b"));
 		
 		resource.duplicateTranslation("c.a", "d");
 		
 		translations = resource.getTranslations();
-		assertEquals(translations.size(), 7);
-		assertEquals(translations.get("d"), "ba");
-		assertEquals(translations.get("a.a"), "aa");
-		assertEquals(translations.get("a.b"), "ab");
-		assertEquals(translations.get("b.a"), "ba");
-		assertEquals(translations.get("b.b"), "bb");
-		assertEquals(translations.get("c.a"), "ba");
-		assertEquals(translations.get("c.b"), "bb");
+		assertEquals(7, translations.size());
+		assertEquals("ba", translations.get("d"));
+		assertEquals("aa", translations.get("a.a"));
+		assertEquals("ab", translations.get("a.b"));
+		assertEquals("ba", translations.get("b.a"));
+		assertEquals("bb", translations.get("b.b"));
+		assertEquals("ba", translations.get("c.a"));
+		assertEquals("bb", translations.get("c.b"));
 	}
 	
 	@Test
@@ -180,28 +184,28 @@ public class ResourceTest {
 		resource.duplicateTranslation("b", "a");
 		
 		translations = resource.getTranslations();
-		assertEquals(translations.size(), 7);
-		assertEquals(translations.get("a.a"), "ba");
-		assertEquals(translations.get("a.b"), null);
-		assertEquals(translations.get("a.c"), "ac");
-		assertEquals(translations.get("a.b.a"), "bba");
-		assertEquals(translations.get("a.b.b"), "bbb");
-		assertEquals(translations.get("b.a"), "ba");
-		assertEquals(translations.get("b.b.a"), "bba");
-		assertEquals(translations.get("b.b.b"), "bbb");
+		assertEquals(7, translations.size());
+		assertEquals("ba", translations.get("a.a"));
+		assertNull(translations.get("a.b"));
+		assertEquals("ac", translations.get("a.c"));
+		assertEquals("bba", translations.get("a.b.a"));
+		assertEquals("bbb", translations.get("a.b.b"));
+		assertEquals("ba", translations.get("b.a"));
+		assertEquals("bba", translations.get("b.b.a"));
+		assertEquals("bbb", translations.get("b.b.b"));
 		
 		resource.duplicateTranslation("a.b", "a");
 		
 		translations = resource.getTranslations();
-		assertEquals(translations.size(), 6);
-		assertEquals(translations.get("a.a"), "bba");
-		assertEquals(translations.get("a.b"), "bbb");
-		assertEquals(translations.get("a.c"), "ac");
-		assertEquals(translations.get("a.b.a"), null);
-		assertEquals(translations.get("a.b.b"), null);
-		assertEquals(translations.get("b.a"), "ba");
-		assertEquals(translations.get("b.b.a"), "bba");
-		assertEquals(translations.get("b.b.b"), "bbb");
+		assertEquals(6, translations.size());
+		assertEquals("bba", translations.get("a.a"));
+		assertEquals("bbb", translations.get("a.b"));
+		assertEquals("ac", translations.get("a.c"));
+		assertNull(translations.get("a.b.a"));
+		assertNull(translations.get("a.b.b"));
+		assertEquals("ba", translations.get("b.a"));
+		assertEquals("bba", translations.get("b.b.a"));
+		assertEquals("bbb", translations.get("b.b.b"));
 	}
 	
 	@Test(expected=IllegalArgumentException.class)

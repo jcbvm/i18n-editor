@@ -3,7 +3,6 @@ package com.jvms.i18neditor.editor;
 import java.awt.Desktop;
 import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -137,13 +136,7 @@ public class EditorMenuBar extends JMenuBar {
         
         openContainingFolderMenuItem = new JMenuItem(MessageBundle.get("menu.file.folder.title"));
         openContainingFolderMenuItem.setEnabled(false);
-        openContainingFolderMenuItem.addActionListener(e -> {
-        	try {
-    			Desktop.getDesktop().open(editor.getProject().getPath().toFile());
-    		} catch (IOException ex) {
-    			ex.printStackTrace();
-    		}
-        });
+        openContainingFolderMenuItem.addActionListener(e -> editor.openProjectDirectory());
         
         openRecentMenuItem = new JMenu(MessageBundle.get("menu.file.recent.title"));
         openRecentMenuItem.setEnabled(false);

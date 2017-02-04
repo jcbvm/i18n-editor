@@ -8,6 +8,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Charsets;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.gson.Gson;
@@ -19,6 +22,7 @@ import com.google.gson.annotations.SerializedName;
  * @author Jacob
  */
 public final class GithubRepoUtil {
+	private final static Logger log = LoggerFactory.getLogger(GithubRepoUtil.class);
 	private final static Gson gson = new Gson();
 	private final static ExecutorService executor;
 	
@@ -44,6 +48,7 @@ public final class GithubRepoUtil {
 					return gson.fromJson(reader, GithubRepoReleaseData.class);
 				}
 			} catch (IOException e) {
+				log.error("Unable to retrieve latest github release data", e);
 				return null;
 			} finally {
 				if (connection != null) {

@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
@@ -26,6 +29,7 @@ import com.google.common.collect.Lists;
  */
 public class ExtendedProperties extends Properties {
 	private final static long serialVersionUID = 6042931434040718478L;
+	private final static Logger log = LoggerFactory.getLogger(ExtendedProperties.class);
 	private final String listSeparator;
 	
 	/**
@@ -75,6 +79,7 @@ public class ExtendedProperties extends Properties {
 		try (InputStream in = Files.newInputStream(path)) {
 			load(in);
 		} catch (IOException e) {
+			log.error("Unable to load properties from " + path, e);
 		}
 	}
 	
@@ -90,6 +95,7 @@ public class ExtendedProperties extends Properties {
 		try (OutputStream out = new OutputStreamWrapper(Files.newOutputStream(path))) {
 			store(out, null);
 		} catch (IOException e) {
+			log.error("Unable to store properties to " + path, e);
 		}
 	}
 	
@@ -164,6 +170,7 @@ public class ExtendedProperties extends Properties {
 			try {
 				return Integer.parseInt(value);
 			} catch (Exception e) {
+				log.warn("Unable to parse integer property value " + value);
 			}
 		}
 		return null;
@@ -226,6 +233,7 @@ public class ExtendedProperties extends Properties {
 			try {
 				return T.valueOf(enumType, value);
 			} catch (Exception e) {
+				log.warn("Unable to parse enum property value " + value);
 			}
 		}
 		return null;

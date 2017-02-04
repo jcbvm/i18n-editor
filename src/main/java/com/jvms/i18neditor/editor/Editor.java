@@ -2,6 +2,7 @@ package com.jvms.i18neditor.editor;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.event.KeyAdapter;
@@ -46,6 +47,8 @@ import javax.swing.plaf.basic.BasicSplitPaneUI;
 import javax.swing.tree.TreePath;
 
 import org.apache.commons.lang3.LocaleUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -70,6 +73,7 @@ import com.jvms.i18neditor.util.Resources;
  */
 public class Editor extends JFrame {
 	private final static long serialVersionUID = 1113029729495390082L;
+	private final static Logger log = LoggerFactory.getLogger(Editor.class);
 	
 	public final static String TITLE = "i18n-editor";
 	public final static String VERSION = "1.0.0-beta.2";
@@ -115,7 +119,7 @@ public class Editor extends JFrame {
 						MessageBundle.get("dialogs.project.new.conflict.text"),
 						JOptionPane.YES_NO_OPTION);
 				if (importProject) {
-					importProject(dir, true);
+					importProject(dir, false);
 					return;
 				}
 			}
@@ -135,7 +139,7 @@ public class Editor extends JFrame {
 			updateHistory();
 			updateUI();
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("Error creating resource files", e);
 			showError(MessageBundle.get("resources.create.error"));
 		}
 	}
@@ -173,7 +177,7 @@ public class Editor extends JFrame {
 						setupResource(resource);
 						project.addResource(resource);
 					} catch (IOException e) {
-						e.printStackTrace();
+						log.error("Error importing resource file " + resource.getPath(), e);
 						showError(MessageBundle.get("resources.import.error.single", resource.getPath().toString()));
 					}
 				});
@@ -186,7 +190,7 @@ public class Editor extends JFrame {
 			updateHistory();
 			updateUI();
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("Error importing resource files", e);
 			showError(MessageBundle.get("resources.import.error.multiple"));
 		}
 	}
@@ -198,8 +202,8 @@ public class Editor extends JFrame {
 				try {
 					Resources.write(resource, !project.isMinifyResources());
 				} catch (IOException e) {
-					e.printStackTrace();
 					error = true;
+					log.error("Error saving resource file " + resource.getPath(), e);
 					showError(MessageBundle.get("resources.write.error.single", resource.getPath().toString()));
 				}
 			}
@@ -341,7 +345,7 @@ public class Editor extends JFrame {
 						project.addResource(resource);
 						updateUI();
 					} catch (IOException e) {
-						e.printStackTrace();
+						log.error("Error creating new locale", e);
 						showError(MessageBundle.get("dialogs.locale.add.error.create"));
 					}
 				}
@@ -503,6 +507,15 @@ public class Editor extends JFrame {
 		return result;
 	}
 	
+	public void openProjectDirectory() {
+		if (project == null) return;
+		try {
+			Desktop.getDesktop().open(project.getPath().toFile());
+		} catch (IOException ex) {
+			log.error("Unable to open project directory " + project.getPath(), ex);
+		}
+	}
+	
 	public void launch() {
 		restoreEditorState();
 		
@@ -631,8 +644,8 @@ public class Editor extends JFrame {
 				try {
 					Path path = Paths.get(files[0].getCanonicalPath());
 					importProject(path, true);
-                } catch (IOException e ) {
-                	e.printStackTrace();
+                } catch (IOException e) {
+                	log.error("Error importing resources via file drop", e);
                 	showError(MessageBundle.get("resources.open.error.multiple"));
                 }
             }
