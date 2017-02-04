@@ -7,7 +7,7 @@ The application supports translation files with the following formats:
 - `ES6` (JSON wrapped in a javascript ES6 module)
 - `Properties` (java properties files, for example to be used for a `ResourceBundle`).
 
-<br>
+###
 
 <img src="https://raw.github.com/jcbvm/i18n-editor/master/screenshot-1.jpg?1" width="600">
 <img src="https://raw.github.com/jcbvm/i18n-editor/master/screenshot-2.jpg?1" width="600">
