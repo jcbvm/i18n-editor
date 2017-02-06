@@ -35,7 +35,7 @@ public class JTextComponentMenuListener extends MouseAdapter {
 		if (!e.isPopupTrigger() || !parent.isEditable()) {
 			return;
 		}
-		e.getComponent().requestFocusInWindow();
-		menu.show(e.getComponent(), e.getX(), e.getY());
+		parent.requestFocusInWindow();
+		menu.show(parent, e.getX(), e.getY());
 	}
 }

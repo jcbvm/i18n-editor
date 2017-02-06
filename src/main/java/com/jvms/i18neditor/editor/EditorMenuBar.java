@@ -12,7 +12,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
 
 import com.jvms.i18neditor.ResourceType;
 import com.jvms.i18neditor.editor.menu.AddLocaleMenuItem;
@@ -76,18 +75,15 @@ public class EditorMenuBar extends JMenuBar {
 		} else {
 			settingsMenu.add(editorSettingsMenuItem);
 		}
-		updateComponentTreeUI();
 	}
 	
 	public void setSaveable(boolean saveable) {
 		saveMenuItem.setEnabled(saveable);
-		updateComponentTreeUI();
 	}
 	
 	public void setEditable(boolean editable) {
 		addTranslationMenuItem.setEnabled(editable);
 		findTranslationMenuItem.setEnabled(editable);
-		updateComponentTreeUI();
 	}
 	
 	public void setRecentItems(List<String> items) {
@@ -237,15 +233,6 @@ public class EditorMenuBar extends JMenuBar {
 			renameTranslationMenuItem.setEnabled(enabled);
 			duplicateTranslationMenuItem.setEnabled(enabled);
 			removeTranslationMenuItem.setEnabled(enabled);
-			updateComponentTreeUI();
      	});
-	}
-	
-	/**
-	 * This method is needed for MacOS to (force) update the global menu bar
-	 * To be used when menu items change, like getting enabled/disabled
-	 */
-	private void updateComponentTreeUI() {
-		SwingUtilities.updateComponentTreeUI(this);
 	}
 }

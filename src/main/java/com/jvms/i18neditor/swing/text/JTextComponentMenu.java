@@ -70,11 +70,11 @@ public class JTextComponentMenu extends JPopupMenu {
 	
 	@Override
 	public void show(Component invoker, int x, int y) {
+		super.show(invoker, x, y);
 		boolean hasSelection = !Strings.isNullOrEmpty(parent.getSelectedText());
 		undoAction.setEnabled(undoManager.canUndo());
 		cutAction.setEnabled(hasSelection);
 		copyAction.setEnabled(hasSelection);
 		deleteAction.setEnabled(hasSelection);
-		super.show(invoker, x, y);
 	}
 }
