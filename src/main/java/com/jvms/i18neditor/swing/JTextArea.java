@@ -1,6 +1,7 @@
 package com.jvms.i18neditor.swing;
 
 import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
 
 import javax.swing.BorderFactory;
 import javax.swing.KeyStroke;
@@ -8,15 +9,17 @@ import javax.swing.border.Border;
 import javax.swing.undo.UndoManager;
 
 import com.jvms.i18neditor.LookAndFeel;
+import com.jvms.i18neditor.swing.text.JTextComponentMenuListener;
 
 /**
- * This class extends a default {@link javax.swing.JTextArea} with a default {@link UndoManager}
- * and a custom look and feel.
+ * This class extends a default {@link javax.swing.JTextArea} with a {@link UndoManager},
+ * a right click menu and a custom look and feel.
  * 
  * @author Jacob
  */
-public class JTextArea extends javax.swing.JTextArea implements JUndoableSupport {
+public class JTextArea extends javax.swing.JTextArea {
 	private final static long serialVersionUID = -5043046809426384893L;
+	protected final UndoManager undoManager = new UndoManager();
 	
 	/**
 	 * Constructs a {@link JTextArea}.
@@ -33,11 +36,14 @@ public class JTextArea extends javax.swing.JTextArea implements JUndoableSupport
 		setWrapStyleWord(true);
 		
 		// Add undo support
-		getActionMap().put("undo", new UndoAction());
-		getInputMap().put(KeyStroke.getKeyStroke('Z', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()), "undo");
+		getActionMap().put("undo", new UndoAction(undoManager));
+		getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()), "undo");
 		
 		// Add redo support
-		getActionMap().put("redo", new RedoAction());
-		getInputMap().put(KeyStroke.getKeyStroke('Y', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()), "redo");
+		getActionMap().put("redo", new RedoAction(undoManager));
+		getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()), "redo");
+		
+		// Add popup menu support
+		addMouseListener(new JTextComponentMenuListener(this, undoManager));
 	}
 }

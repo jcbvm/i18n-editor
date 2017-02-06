@@ -1,5 +1,7 @@
 package com.jvms.i18neditor.editor.menu;
 
+import java.awt.event.KeyEvent;
+
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
@@ -16,7 +18,7 @@ public class RemoveTranslationMenuItem extends JMenuItem {
 	
 	public RemoveTranslationMenuItem(Editor editor, boolean enabled) {
         super(MessageBundle.get("menu.edit.delete.title"));
-        setAccelerator(KeyStroke.getKeyStroke("DELETE"));
+        setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
 		addActionListener(e -> editor.removeSelectedTranslation());
 		setEnabled(enabled);
 	}

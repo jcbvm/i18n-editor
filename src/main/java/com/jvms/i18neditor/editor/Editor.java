@@ -414,10 +414,9 @@ public class Editor extends JFrame {
 		}
 	}
 	
-	public void showAddTranslationDialog() {
+	public void showAddTranslationDialog(TranslationTreeNode node) {
 		String key = "";
 		String newKey = "";
-		TranslationTreeNode node = translationTree.getSelectedNode();
 		if (node != null && !node.isRoot()) {
 			key = node.getKey() + ".";
 		}
@@ -595,7 +594,7 @@ public class Editor extends JFrame {
 		
         resourcesPanel = new JScrollablePanel(true, false);
         resourcesPanel.setLayout(new BoxLayout(resourcesPanel, BoxLayout.Y_AXIS));
-        resourcesPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,20));
+        resourcesPanel.setBorder(BorderFactory.createEmptyBorder(10,20,10,20));
         resourcesPanel.setOpaque(false);
         resourcesPanel.addMouseListener(new ResourcesPaneMouseListener());
         
@@ -614,6 +613,7 @@ public class Editor extends JFrame {
 	    if (splitPaneUI instanceof BasicSplitPaneUI) {
 	        BasicSplitPaneDivider divider = ((BasicSplitPaneUI)splitPaneUI).getDivider();
 	        divider.setBorder(null);
+			resourcesPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,20));
 	    }
 	    
 		introText = new JLabel("<html><body style=\"text-align:center; padding:30px;\">" + 
@@ -700,7 +700,7 @@ public class Editor extends JFrame {
 			String path = project.getPath().toString();
 			recentDirs.remove(path);
 			recentDirs.add(path);
-			if (recentDirs.size() > 5) {
+			if (recentDirs.size() > 10) {
 				recentDirs.remove(0);
 			}
 			settings.setHistory(recentDirs);			
@@ -806,7 +806,6 @@ public class Editor extends JFrame {
 			}
 			TreePath path = translationTree.getPathForLocation(e.getX(), e.getY());
 	    	if (path == null) {
-	    		translationTree.setSelectionPath(null);
 	    		TranslationTreeMenu menu = new TranslationTreeMenu(Editor.this, translationTree);
 	    		menu.show(e.getComponent(), e.getX(), e.getY());
 	    	} else {

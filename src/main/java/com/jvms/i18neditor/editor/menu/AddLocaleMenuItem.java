@@ -1,6 +1,7 @@
 package com.jvms.i18neditor.editor.menu;
 
 import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
 
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
@@ -18,7 +19,7 @@ public class AddLocaleMenuItem extends JMenuItem {
 
 	public AddLocaleMenuItem(Editor editor, boolean enabled) {
 		super(MessageBundle.get("menu.edit.add.locale.title"));
-		setAccelerator(KeyStroke.getKeyStroke('L', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         addActionListener(e -> editor.showAddLocaleDialog());
         setEnabled(enabled);
 	}

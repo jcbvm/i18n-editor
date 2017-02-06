@@ -1,5 +1,8 @@
 package com.jvms.i18neditor.editor.menu;
 
+import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
+
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
@@ -16,7 +19,7 @@ public class RenameTranslationMenuItem extends JMenuItem {
 
 	public RenameTranslationMenuItem(Editor editor, boolean enabled) {
         super(MessageBundle.get("menu.edit.rename.title"));
-        setAccelerator(KeyStroke.getKeyStroke("F2"));
+        setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 		addActionListener(e -> editor.renameSelectedTranslation());
 		setEnabled(enabled);
 	}

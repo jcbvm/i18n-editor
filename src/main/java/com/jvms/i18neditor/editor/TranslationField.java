@@ -3,7 +3,7 @@ package com.jvms.i18neditor.editor;
 import com.jvms.i18neditor.swing.JTextField;
 
 /**
- * This class represents a text field for adding a new translation key.
+ * This class represents a text field for displaying, finding and adding a translation key.
  * 
  * @author Jacob
  */

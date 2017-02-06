@@ -13,11 +13,11 @@ import com.jvms.i18neditor.editor.menu.FindTranslationMenuItem;
  * @author Jacob
  */
 public class TranslationTreeMenu extends JPopupMenu {
-	private final static long serialVersionUID = -4407236120087907574L;
+	private final static long serialVersionUID = -8450484152294368841L;
 	
 	public TranslationTreeMenu(Editor editor, TranslationTree tree) {
 		super();
-		add(new AddTranslationMenuItem(editor, true));
+		add(new AddTranslationMenuItem(editor, tree, true));
 		add(new FindTranslationMenuItem(editor, true));
 		addSeparator();
 		add(new ExpandTranslationsMenuItem(tree));

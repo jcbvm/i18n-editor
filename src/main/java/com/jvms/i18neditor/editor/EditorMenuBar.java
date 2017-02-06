@@ -2,6 +2,7 @@ package com.jvms.i18neditor.editor;
 
 import java.awt.Desktop;
 import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -55,6 +56,9 @@ public class EditorMenuBar extends JMenuBar {
 		this.editor = editor;
 		this.tree = tree;
 		setupUI();
+		setEnabled(false);
+		setSaveable(false);
+		setEditable(false);
 	}
 	
 	@Override
@@ -97,7 +101,6 @@ public class EditorMenuBar extends JMenuBar {
      			JMenuItem menuItem = new JMenuItem(n + ": " + items.get(i), Character.forDigit(i, 10));
      			Path path = Paths.get(menuItem.getText().replaceFirst("[0-9]+: ",""));
      			menuItem.addActionListener(e -> editor.importProject(path, true));
-     			menuItem.setAccelerator(KeyStroke.getKeyStroke(n.toString().charAt(0), Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
      			openRecentMenuItem.add(menuItem);
      		}
      		JMenuItem clearMenuItem = new JMenuItem(MessageBundle.get("menu.file.recent.clear.title"));
@@ -108,21 +111,23 @@ public class EditorMenuBar extends JMenuBar {
 	}
 	
 	private void setupUI() {
+		int keyMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+		
 		// File menu
      	JMenu fileMenu = new JMenu(MessageBundle.get("menu.file.title"));
      	fileMenu.setMnemonic(MessageBundle.getMnemonic("menu.file.vk"));
         
      	JMenuItem createJsonMenuItem = new JMenuItem(MessageBundle.get("menu.file.project.new.json.title"));
      	createJsonMenuItem.addActionListener(e -> editor.showCreateProjectDialog(ResourceType.JSON));
-     	createJsonMenuItem.setAccelerator(KeyStroke.getKeyStroke('J', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+     	createJsonMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_J, keyMask+KeyEvent.SHIFT_DOWN_MASK));
         
         JMenuItem createEs6MenuItem = new JMenuItem(MessageBundle.get("menu.file.project.new.es6.title"));
         createEs6MenuItem.addActionListener(e -> editor.showCreateProjectDialog(ResourceType.ES6));
-        createEs6MenuItem.setAccelerator(KeyStroke.getKeyStroke('E', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        createEs6MenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, keyMask+KeyEvent.SHIFT_DOWN_MASK));
         
         JMenuItem createPropertiesMenuItem = new JMenuItem(MessageBundle.get("menu.file.project.new.properties.title"));
         createPropertiesMenuItem.addActionListener(e -> editor.showCreateProjectDialog(ResourceType.Properties));
-        createPropertiesMenuItem.setAccelerator(KeyStroke.getKeyStroke('P', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        createPropertiesMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, keyMask+KeyEvent.SHIFT_DOWN_MASK));
         
         JMenu createMenuItem = new JMenu(MessageBundle.get("menu.file.project.new.title"));
         createMenuItem.setMnemonic(MessageBundle.getMnemonic("menu.file.project.new.vk"));
@@ -135,21 +140,16 @@ public class EditorMenuBar extends JMenuBar {
         importMenuItem.addActionListener(e -> editor.showImportProjectDialog());
         
         openContainingFolderMenuItem = new JMenuItem(MessageBundle.get("menu.file.folder.title"));
-        openContainingFolderMenuItem.setEnabled(false);
         openContainingFolderMenuItem.addActionListener(e -> editor.openProjectDirectory());
         
         openRecentMenuItem = new JMenu(MessageBundle.get("menu.file.recent.title"));
-        openRecentMenuItem.setEnabled(false);
         openRecentMenuItem.setMnemonic(MessageBundle.getMnemonic("menu.file.recent.vk"));
         
         saveMenuItem = new JMenuItem(MessageBundle.get("menu.file.save.title"), MessageBundle.getMnemonic("menu.file.save.vk"));
-        saveMenuItem.setEnabled(false);
-        saveMenuItem.setAccelerator(KeyStroke.getKeyStroke('S', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        saveMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, keyMask));
         saveMenuItem.addActionListener(e -> editor.saveProject());
         
         reloadMenuItem = new JMenuItem(MessageBundle.get("menu.file.reload.title"), MessageBundle.getMnemonic("menu.file.reload.vk"));
-        reloadMenuItem.setEnabled(false);
-        reloadMenuItem.setAccelerator(KeyStroke.getKeyStroke("F5"));
         reloadMenuItem.addActionListener(e -> editor.reloadProject());
         
         JMenuItem exitMenuItem = new JMenuItem(MessageBundle.get("menu.file.exit.title"), MessageBundle.getMnemonic("menu.file.exit.vk"));
@@ -170,9 +170,8 @@ public class EditorMenuBar extends JMenuBar {
         // Edit menu
      	editMenu = new JMenu(MessageBundle.get("menu.edit.title"));
      	editMenu.setMnemonic(MessageBundle.getMnemonic("menu.edit.vk"));
-     	editMenu.setEnabled(false);
      	
-        addTranslationMenuItem = new AddTranslationMenuItem(editor, false);
+        addTranslationMenuItem = new AddTranslationMenuItem(editor, tree, false);
         findTranslationMenuItem = new FindTranslationMenuItem(editor, false);
         removeTranslationMenuItem = new RemoveTranslationMenuItem(editor, false);
         duplicateTranslationMenuItem = new DuplicateTranslationMenuItem(editor, true);
@@ -190,7 +189,6 @@ public class EditorMenuBar extends JMenuBar {
         // View menu
         viewMenu = new JMenu(MessageBundle.get("menu.view.title"));
         viewMenu.setMnemonic(MessageBundle.getMnemonic("menu.view.vk"));
-        viewMenu.setEnabled(false);
         viewMenu.add(new ExpandTranslationsMenuItem(tree));
         viewMenu.add(new CollapseTranslationsMenuItem(tree));
         

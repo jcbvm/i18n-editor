@@ -1,6 +1,7 @@
 package com.jvms.i18neditor.editor.menu;
 
 import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
 
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
@@ -18,7 +19,7 @@ public class FindTranslationMenuItem extends JMenuItem {
 
 	public FindTranslationMenuItem(Editor editor, boolean enabled) {
 		super(MessageBundle.get("menu.edit.find.translation.title"));
-		setAccelerator(KeyStroke.getKeyStroke('F', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         addActionListener(e -> editor.showFindTranslationDialog());
         setEnabled(enabled);
 	}

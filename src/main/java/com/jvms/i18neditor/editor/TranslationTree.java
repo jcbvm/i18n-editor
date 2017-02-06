@@ -16,7 +16,7 @@ import com.google.common.collect.Lists;
 import com.jvms.i18neditor.util.ResourceKeys;
 
 /**
- * This class represents a tree view for the translation keys.
+ * This class represents a tree view for translation keys.
  * 
  * @author Jacob
  */

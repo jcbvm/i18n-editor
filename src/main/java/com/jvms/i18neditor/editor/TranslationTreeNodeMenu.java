@@ -14,10 +14,10 @@ import com.jvms.i18neditor.editor.menu.RenameTranslationMenuItem;
  */
 public class TranslationTreeNodeMenu extends JPopupMenu {
 	private final static long serialVersionUID = -8450484152294368841L;
-
+	
 	public TranslationTreeNodeMenu(Editor editor, TranslationTreeNode node) {
 		super();
-		add(new AddTranslationMenuItem(editor, true));
+		add(new AddTranslationMenuItem(editor, node, true));
 		if (!node.isRoot()) {
 			addSeparator();
 			add(new RenameTranslationMenuItem(editor, true));
