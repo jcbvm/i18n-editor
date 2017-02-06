@@ -208,7 +208,9 @@ public class Editor extends JFrame {
 				}
 			}
 		}
-		setDirty(error);
+		if (dirty) {
+			setDirty(error);			
+		}
 		return !error;
 	}
 	
@@ -486,7 +488,7 @@ public class Editor extends JFrame {
 	
 	public boolean closeCurrentProject() {
 		boolean result = true;
-		if (isDirty()) {
+		if (dirty) {
 			int confirm = JOptionPane.showConfirmDialog(this, 
 					MessageBundle.get("dialogs.save.text"), 
 					MessageBundle.get("dialogs.save.title"), 
@@ -499,6 +501,9 @@ public class Editor extends JFrame {
 		}
 		if (result && project != null) {
 			storeProjectState();
+		}
+		if (result && dirty) {
+			setDirty(false);
 		}
 		return result;
 	}
