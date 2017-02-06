@@ -551,7 +551,7 @@ public class Editor extends JFrame {
 		}
 		
 		if (settings.isCheckVersionOnStartup()) {
-			showVersionDialog(false);			
+			showVersionDialog(true);			
 		}
 	}
 	
