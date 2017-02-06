@@ -15,7 +15,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		
-		// Enable global menu on MacOS
+		// Enable global menu on IOS
 		if (SystemUtils.IS_OS_MAC) {
 			System.setProperty("apple.laf.useScreenMenuBar", "true");
 		}
