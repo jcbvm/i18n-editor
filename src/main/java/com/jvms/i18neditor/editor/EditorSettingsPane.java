@@ -8,6 +8,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
 
 import com.jvms.i18neditor.swing.JTextField;
 import com.jvms.i18neditor.util.MessageBundle;
@@ -41,7 +42,7 @@ public class EditorSettingsPane extends AbstractSettingsPane {
 		// New project settings
 		JPanel fieldset2 = createFieldset(MessageBundle.get("settings.fieldset.newprojects"));
 		
-		JPanel resourcePanel = new JPanel(new GridLayout(0, 1));
+		JPanel resourceNamePanel = new JPanel(new GridLayout(0, 1));
 		JLabel resourceNameLabel = new JLabel(MessageBundle.get("settings.resourcename.title"));
 		JTextField resourceNameField = new JTextField(settings.getResourceName());
 		resourceNameField.addKeyListener(new KeyAdapter() {
@@ -51,17 +52,40 @@ public class EditorSettingsPane extends AbstractSettingsPane {
 				settings.setResourceName(value.isEmpty() ? Editor.DEFAULT_RESOURCE_NAME : value);
 			}
 		});
-		resourcePanel.add(resourceNameLabel);
-		resourcePanel.add(resourceNameField);
-		fieldset2.add(resourcePanel, createVerticalGridBagConstraints());
+		resourceNamePanel.add(resourceNameLabel);
+		resourceNamePanel.add(resourceNameField);
+		fieldset2.add(resourceNamePanel, createVerticalGridBagConstraints());
 		
 		JCheckBox minifyBox = new JCheckBox(MessageBundle.get("settings.minify.title"));
 		minifyBox.setSelected(settings.isMinifyResources());
 		minifyBox.addChangeListener(e -> settings.setMinifyResources(minifyBox.isSelected()));		
 		fieldset2.add(minifyBox, createVerticalGridBagConstraints());
 		
+		// Editing settings
+		JPanel fieldset3 = createFieldset("Editing");
+		
+		JCheckBox keyFieldBox = new JCheckBox("Show translation key field");
+		keyFieldBox.setSelected(settings.isShowKeyField());
+		keyFieldBox.addChangeListener(e -> {
+			settings.setShowKeyField(keyFieldBox.isSelected());
+			editor.updateUI();
+		});
+		fieldset3.add(keyFieldBox, createVerticalGridBagConstraints());
+		
+		JPanel resourceHeightPanel = new JPanel(new GridLayout(0, 1));
+		JLabel resourceHeightLabel = new JLabel("Default input height");
+		JSlider resourceHeightSlider = new JSlider(JSlider.HORIZONTAL, 1, 15, settings.getInputHeight());
+		resourceHeightSlider.addChangeListener(e -> {
+			settings.setInputHeight(resourceHeightSlider.getValue());
+			editor.updateUI();
+		});
+		resourceHeightPanel.add(resourceHeightLabel);
+		resourceHeightPanel.add(resourceHeightSlider);
+		fieldset3.add(resourceHeightPanel, createVerticalGridBagConstraints());
+		
 		setLayout(new GridBagLayout());
 		add(fieldset1, createVerticalGridBagConstraints());
 		add(fieldset2, createVerticalGridBagConstraints());
+		add(fieldset3, createVerticalGridBagConstraints());
 	}
 }

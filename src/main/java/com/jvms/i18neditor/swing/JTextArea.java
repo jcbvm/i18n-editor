@@ -27,7 +27,7 @@ public class JTextArea extends javax.swing.JTextArea {
 	public JTextArea() {
 		super();
 		
-		Border border = BorderFactory.createLineBorder(LookAndFeel.TEXTFIELD_BORDER_COLOR);
+		Border border = BorderFactory.createLineBorder(LookAndFeel.BORDER_COLOR);
 		setBorder(BorderFactory.createCompoundBorder(border, BorderFactory.createEmptyBorder(6,8,6,8)));
 		getDocument().addUndoableEditListener(e -> undoManager.addEdit(e.getEdit()));
 		

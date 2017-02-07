@@ -32,9 +32,9 @@ public class JTextField extends javax.swing.JTextField {
 	 * Constructs a {@link JTextField} with an initial text.
 	 */
 	public JTextField(String text) {
-		super(text, LookAndFeel.TEXT_FIELD_COLS);
+		super(text, 25);
 		
-		Border border = BorderFactory.createLineBorder(LookAndFeel.TEXTFIELD_BORDER_COLOR);
+		Border border = BorderFactory.createLineBorder(LookAndFeel.BORDER_COLOR);
 		setBorder(BorderFactory.createCompoundBorder(border, BorderFactory.createEmptyBorder(6,8,6,8)));
 		getDocument().addUndoableEditListener(e -> undoManager.addEdit(e.getEdit()));
 		

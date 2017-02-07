@@ -1,10 +1,12 @@
 package com.jvms.i18neditor.editor;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -102,6 +104,7 @@ public class Editor extends JFrame {
 		super();
 		setupUI();
 		setupFileDrop();
+		setupGlobalKeyEventDispatcher();
 	}
 	
 	public void createProject(Path dir, ResourceType type) {
@@ -372,7 +375,7 @@ public class Editor extends JFrame {
 						boolean isReplace = newNode.isLeaf() || oldNode.isLeaf();
 						boolean confirm = Dialogs.showConfirmDialog(this, 
 								MessageBundle.get("dialogs.translation.conflict.title"), 
-								MessageBundle.get("dialogs.translation.conflict.text." + (isReplace ? "replace" : "merge")),
+								MessageBundle.get("dialogs.translation.conflict.text." + (isReplace?"replace":"merge")),
 								JOptionPane.WARNING_MESSAGE);
 						if (confirm) {
 							renameTranslationKey(key, newKey);
@@ -403,7 +406,7 @@ public class Editor extends JFrame {
 						boolean isReplace = newNode.isLeaf() || oldNode.isLeaf();
 						boolean confirm = Dialogs.showConfirmDialog(this, 
 								MessageBundle.get("dialogs.translation.conflict.title"), 
-								MessageBundle.get("dialogs.translation.conflict.text." + (isReplace ? "replace" : "merge")),
+								MessageBundle.get("dialogs.translation.conflict.text." + (isReplace?"replace":"merge")),
 								JOptionPane.WARNING_MESSAGE);
 						if (confirm) {
 							duplicateTranslationKey(key, newKey);
@@ -560,6 +563,47 @@ public class Editor extends JFrame {
 		}
 	}
 	
+	public void updateUI() {
+		TranslationTreeNode selectedNode = translationTree.getSelectedNode();
+		
+		resourcesPanel.removeAll();
+		resourceFields = resourceFields.stream().sorted().collect(Collectors.toList());
+		resourceFields.forEach(field -> {
+			Locale locale = field.getResource().getLocale();
+			String label = locale != null ? locale.getDisplayName() : MessageBundle.get("resources.locale.default");
+			field.setEnabled(selectedNode != null && selectedNode.isEditable());
+			field.setRows(settings.getInputHeight());
+			resourcesPanel.add(Box.createVerticalStrut(5));
+			resourcesPanel.add(new JLabel(label));
+			resourcesPanel.add(Box.createVerticalStrut(5));
+			resourcesPanel.add(field);
+			resourcesPanel.add(Box.createVerticalStrut(10));
+		});
+		
+		Container container = getContentPane();
+		if (project != null) {
+			container.add(contentPane);
+			container.remove(introText);
+			List<Resource> resources = project.getResources();
+			editorMenu.setEnabled(true);
+			editorMenu.setEditable(!resources.isEmpty());
+			translationTree.setEditable(!resources.isEmpty());
+			translationField.setEditable(!resources.isEmpty());
+		} else {
+			container.add(introText);
+			container.remove(contentPane);
+			editorMenu.setEnabled(false);
+			editorMenu.setEditable(false);
+			translationTree.setEditable(false);
+			translationField.setEditable(false);
+		}
+		translationField.setVisible(settings.isShowKeyField());
+		
+		updateTitle();
+		validate();
+		repaint();
+	}
+	
 	private void clearUI() {
 		translationField.clear();
 		translationTree.clear();
@@ -584,14 +628,14 @@ public class Editor extends JFrame {
 		translationField = new TranslationField();
 		translationField.addKeyListener(new TranslationFieldKeyListener());
 		translationField.setBorder(BorderFactory.createCompoundBorder(
-				BorderFactory.createMatteBorder(1,0,0,1,LookAndFeel.TEXTFIELD_BORDER_COLOR),
+				BorderFactory.createMatteBorder(1,0,0,1,LookAndFeel.BORDER_COLOR),
 				((CompoundBorder)translationField.getBorder()).getInsideBorder()));
 		
 		JScrollPane translationsScrollPane = new JScrollPane(translationTree);
 		translationsScrollPane.getViewport().setOpaque(false);
 		translationsScrollPane.setOpaque(false);
 		translationsScrollPane.setBorder(
-				BorderFactory.createMatteBorder(0,0,0,1,LookAndFeel.TEXTFIELD_BORDER_COLOR));
+				BorderFactory.createMatteBorder(0,0,0,1,LookAndFeel.BORDER_COLOR));
 		
 		translationsPanel = new JPanel(new BorderLayout());
 		translationsPanel.add(translationsScrollPane);
@@ -654,49 +698,66 @@ public class Editor extends JFrame {
         });
 	}
 	
+	private void setupGlobalKeyEventDispatcher() {
+		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(e -> {
+			if (!e.isAltDown() || e.getID() != KeyEvent.KEY_PRESSED) {
+				return false;
+			}
+			TreePath selected = translationTree.getSelectionPath();
+			if (selected == null) {
+				return false;
+			}
+			boolean result = false;
+			int row = translationTree.getRowForPath(selected);
+			switch (e.getKeyCode()) {
+			case KeyEvent.VK_RIGHT:
+				if (translationTree.isExpanded(row)) {
+					translationTree.setSelectionRow(row+1);
+				} else {
+					translationTree.expandRow(row);						
+				}
+				result = true;
+				break;
+			case KeyEvent.VK_LEFT:
+				if (translationTree.isCollapsed(row)) {
+					translationTree.setSelectionPath(selected.getParentPath());
+				} else {
+					translationTree.collapseRow(row);						
+				}
+				result = true;
+				break;
+			case KeyEvent.VK_UP:
+				translationTree.setSelectionRow(Math.max(0, row-1));
+				result = true;
+				break;
+			case KeyEvent.VK_DOWN:
+				TreePath next = translationTree.getPathForRow(row+1);
+				if (next != null) {
+					translationTree.setSelectionPath(next);						
+				}
+				result = true;
+				break;
+			}
+			if (result && !resourceFields.isEmpty()) {
+				Component comp = getFocusOwner();
+				if (comp != null && (comp instanceof ResourceField || comp.equals(this))) {
+					TranslationTreeNode current = translationTree.getSelectedNode();
+					if (!current.isLeaf() || current.isRoot()) {
+						requestFocusInWindow();
+					} else if (comp.equals(this)) {
+						resourceFields.get(0).requestFocusInWindow();						
+					}
+				}
+			}
+			return result;
+		});
+	}
+	
 	private void setupResource(Resource resource) {
 		resource.addListener(e -> setDirty(true));
 		ResourceField field = new ResourceField(resource);
 		field.addKeyListener(new ResourceFieldKeyListener());
 		resourceFields.add(field);
-	}
-	
-	private void updateUI() {
-		TranslationTreeNode selectedNode = translationTree.getSelectedNode();
-		
-		resourcesPanel.removeAll();
-		resourceFields.stream().sorted().forEach(field -> {
-			Locale locale = field.getResource().getLocale();
-			String label = locale != null ? locale.getDisplayName() : MessageBundle.get("resources.locale.default");
-			field.setEditable(selectedNode != null && selectedNode.isEditable());
-			resourcesPanel.add(Box.createVerticalStrut(5));
-			resourcesPanel.add(new JLabel(label));
-			resourcesPanel.add(Box.createVerticalStrut(5));
-			resourcesPanel.add(field);
-			resourcesPanel.add(Box.createVerticalStrut(10));
-		});
-		
-		Container container = getContentPane();
-		if (project != null) {
-			container.add(contentPane);
-			container.remove(introText);
-			List<Resource> resources = project.getResources();
-			editorMenu.setEnabled(true);
-			editorMenu.setEditable(!resources.isEmpty());
-			translationTree.setEditable(!resources.isEmpty());
-			translationField.setEditable(!resources.isEmpty());
-		} else {
-			container.add(introText);
-			container.remove(contentPane);
-			editorMenu.setEnabled(false);
-			editorMenu.setEditable(false);
-			translationTree.setEditable(false);
-			translationField.setEditable(false);
-		}
-		
-		updateTitle();
-		validate();
-		repaint();
 	}
 	
 	private void updateHistory() {
@@ -762,6 +823,8 @@ public class Editor extends JFrame {
 		props.setProperty("minify_resources", settings.isMinifyResources());
 		props.setProperty("resource_name", settings.getResourceName());
 		props.setProperty("check_version", settings.isCheckVersionOnStartup());
+		props.setProperty("input_height", settings.getInputHeight());
+		props.setProperty("key_field", settings.isShowKeyField());
 		if (!settings.getHistory().isEmpty()) {
 			props.setProperty("history", settings.getHistory());			
 		}
@@ -792,6 +855,8 @@ public class Editor extends JFrame {
 		settings.setMinifyResources(props.getBooleanProperty("minify_resources", false));
 		settings.setResourceName(props.getProperty("resource_name", DEFAULT_RESOURCE_NAME));
 		settings.setCheckVersionOnStartup(props.getBooleanProperty("check_version", true));
+		settings.setInputHeight(props.getIntegerProperty("input_height", 5));
+		settings.setShowKeyField(props.getBooleanProperty("key_field", true));
 	}
 	
 	private class TranslationTreeMouseListener extends MouseAdapter {
@@ -836,7 +901,7 @@ public class Editor extends JFrame {
 				translationField.setValue(key);
 				resourceFields.forEach(f -> {
 					f.setValue(key);
-					f.setEditable(node.isEditable());
+					f.setEnabled(node.isEditable());
 				});
 				
 				// Restore scroll position

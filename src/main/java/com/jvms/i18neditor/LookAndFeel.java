@@ -8,6 +8,6 @@ import java.awt.Color;
  * @author Jacob
  */
 public class LookAndFeel {
-	public final static int TEXT_FIELD_COLS = 25;
-	public final static Color TEXTFIELD_BORDER_COLOR = Color.LIGHT_GRAY;
+	public final static Color BORDER_COLOR = Color.LIGHT_GRAY;
+	public final static Color PRIMARY_COLOR = new Color(83, 125, 157);
 }

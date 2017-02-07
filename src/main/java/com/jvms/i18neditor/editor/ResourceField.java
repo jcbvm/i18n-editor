@@ -48,8 +48,6 @@ public class ResourceField extends JTextArea implements Comparable<ResourceField
 	}
 	
 	private void setupUI() {
-		setRows(10);
-		
 		// Add focus traversal support
 		setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, null);
 	    setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, null);

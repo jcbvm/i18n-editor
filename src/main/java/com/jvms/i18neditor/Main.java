@@ -24,7 +24,6 @@ public class Main {
 		if (!SystemUtils.IS_OS_LINUX) {
 			try {
 				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-				UIManager.put("Tree.drawDashedFocusIndicator", false);
 			} catch (Exception e) {
 				//
 			}

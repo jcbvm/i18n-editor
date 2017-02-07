@@ -19,6 +19,8 @@ public class EditorSettings {
 	private List<String> lastExpandedNodes;
 	private String lastSelectedNode;
 	private boolean checkVersionOnStartup;
+	private int inputHeight;
+	private boolean showKeyField;
 	
 	public int getWindowPositionX() {
 		return windowPositionX;
@@ -106,5 +108,21 @@ public class EditorSettings {
 
 	public void setCheckVersionOnStartup(boolean checkVersionOnStartup) {
 		this.checkVersionOnStartup = checkVersionOnStartup;
+	}
+
+	public int getInputHeight() {
+		return inputHeight;
+	}
+
+	public void setInputHeight(int rows) {
+		this.inputHeight = rows;
+	}
+
+	public boolean isShowKeyField() {
+		return showKeyField;
+	}
+
+	public void setShowKeyField(boolean showKeyField) {
+		this.showKeyField = showKeyField;
 	}
 }
