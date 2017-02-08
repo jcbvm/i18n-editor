@@ -714,9 +714,7 @@ public class Editor extends JFrame {
 			int row = translationTree.getRowForPath(selected);
 			switch (e.getKeyCode()) {
 			case KeyEvent.VK_RIGHT:
-				if (translationTree.isExpanded(row)) {
-					translationTree.setSelectionRow(row+1);
-				} else {
+				if (!translationTree.isExpanded(row)) {
 					translationTree.expandRow(row);						
 				}
 				result = true;
