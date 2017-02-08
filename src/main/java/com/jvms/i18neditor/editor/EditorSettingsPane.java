@@ -62,9 +62,9 @@ public class EditorSettingsPane extends AbstractSettingsPane {
 		fieldset2.add(minifyBox, createVerticalGridBagConstraints());
 		
 		// Editing settings
-		JPanel fieldset3 = createFieldset("Editing");
+		JPanel fieldset3 = createFieldset(MessageBundle.get("settings.fieldset.editing"));
 		
-		JCheckBox keyFieldBox = new JCheckBox("Show translation key field");
+		JCheckBox keyFieldBox = new JCheckBox(MessageBundle.get("settings.keyfield.title"));
 		keyFieldBox.setSelected(settings.isShowKeyField());
 		keyFieldBox.addChangeListener(e -> {
 			settings.setShowKeyField(keyFieldBox.isSelected());
@@ -73,7 +73,7 @@ public class EditorSettingsPane extends AbstractSettingsPane {
 		fieldset3.add(keyFieldBox, createVerticalGridBagConstraints());
 		
 		JPanel resourceHeightPanel = new JPanel(new GridLayout(0, 1));
-		JLabel resourceHeightLabel = new JLabel("Default input height");
+		JLabel resourceHeightLabel = new JLabel(MessageBundle.get("settings.inputheight.title"));
 		JSlider resourceHeightSlider = new JSlider(JSlider.HORIZONTAL, 1, 15, settings.getInputHeight());
 		resourceHeightSlider.addChangeListener(e -> {
 			settings.setInputHeight(resourceHeightSlider.getValue());

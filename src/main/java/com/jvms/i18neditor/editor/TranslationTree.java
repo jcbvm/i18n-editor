@@ -183,18 +183,18 @@ public class TranslationTree extends JTree {
 	private void setupUI() {
 		UIManager.put("Tree.repaintWholeRow", Boolean.TRUE);
 		
-        setUI(new TranslationTreeUI());
-		setCellRenderer(new TranslationTreeCellRenderer());
-		addTreeWillExpandListener(new TranslationTreeExpandListener());
-		setEditable(false);
-		setOpaque(false);
-		setToggleClickCount(1);
-		
 		// Remove all key strokes
 		InputMap inputMap = getInputMap().getParent();
 		for (KeyStroke k : getRegisteredKeyStrokes()) {
 			inputMap.remove(k);
 		}
+		
+        setUI(new TranslationTreeUI());
+		setCellRenderer(new TranslationTreeCellRenderer());
+		addTreeWillExpandListener(new TranslationTreeExpandListener());
+		setToggleClickCount(1);
+		setEditable(false);
+		setOpaque(false);
 	}
 	
 	@Override
