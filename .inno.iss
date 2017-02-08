@@ -1,5 +1,5 @@
 #define AppName "i18n-editor"
-#define AppVersion "1.0.0-beta.3"
+#define AppVersion "1.0.0-beta.4"
 #define AppPublisher "JvMs Software"
 #define AppURL "https://github.com/jcbvm/i18n-editor"
 #define AppExeName "i18n-editor.exe"
