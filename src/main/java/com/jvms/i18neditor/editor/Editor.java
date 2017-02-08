@@ -49,6 +49,7 @@ import javax.swing.plaf.basic.BasicSplitPaneUI;
 import javax.swing.tree.TreePath;
 
 import org.apache.commons.lang3.LocaleUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -700,7 +701,9 @@ public class Editor extends JFrame {
 	
 	private void setupGlobalKeyEventDispatcher() {
 		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(e -> {
-			if (!e.isAltDown() || e.getID() != KeyEvent.KEY_PRESSED) {
+			if (e.getID() != KeyEvent.KEY_PRESSED || !e.isAltDown() ||
+				(SystemUtils.IS_OS_MAC && !e.isMetaDown()) ||
+				(!SystemUtils.IS_OS_MAC && !e.isShiftDown())) {
 				return false;
 			}
 			TreePath selected = translationTree.getSelectionPath();
