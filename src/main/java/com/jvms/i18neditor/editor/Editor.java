@@ -137,6 +137,8 @@ public class Editor extends JFrame {
 				Resource resource = Resources.create(dir, type, Optional.empty(), project.getResourceName());
 				setupResource(resource);
 				project.addResource(resource);
+			} else {
+				SwingUtilities.invokeLater(() -> showAddLocaleDialog());
 			}
 			translationTree.setModel(new TranslationTreeModel(Lists.newLinkedList()));
 			
