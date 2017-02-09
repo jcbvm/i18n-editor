@@ -99,7 +99,7 @@ public class Editor extends JFrame {
 	private TranslationTree translationTree;
 	private TranslationField translationField;
 	private JPanel resourcesPanel;
-	private List<ResourceField> resourceFields = Lists.newLinkedList();
+	private List<ResourceField> resourceFields = Lists.newArrayList();
 	
 	public Editor() {
 		super();
@@ -144,6 +144,7 @@ public class Editor extends JFrame {
 			
 			updateHistory();
 			updateUI();
+			requestFocusToFirstResourceField();
 		} catch (IOException e) {
 			log.error("Error creating resource files", e);
 			showError(MessageBundle.get("resources.create.error"));
@@ -195,6 +196,7 @@ public class Editor extends JFrame {
 			
 			updateHistory();
 			updateUI();
+			requestFocusToFirstResourceField();
 		} catch (IOException e) {
 			log.error("Error importing resource files", e);
 			showError(MessageBundle.get("resources.import.error.multiple"));
@@ -254,32 +256,36 @@ public class Editor extends JFrame {
 		if (node != null) {
 			translationTree.setSelectedNode(node);
 		} else {
-			translationTree.addNodeByKey(key);			
 			if (project != null) {
 				project.getResources().forEach(resource -> resource.storeTranslation(key, ""));				
 			}
+			translationTree.addNodeByKey(key);			
 		}
+		requestFocusToFirstResourceField();
 	}
 	
 	public void removeTranslationKey(String key) {
-		translationTree.removeNodeByKey(key);
 		if (project != null) {
 			project.getResources().forEach(resource -> resource.removeTranslation(key));
 		}
+		translationTree.removeNodeByKey(key);
+		requestFocusToFirstResourceField();
 	}
 	
 	public void renameTranslationKey(String key, String newKey) {
-		translationTree.renameNodeByKey(key, newKey);
 		if (project != null) {
 			project.getResources().forEach(resource -> resource.renameTranslation(key, newKey));
 		}
+		translationTree.renameNodeByKey(key, newKey);
+		requestFocusToFirstResourceField();
 	}
 	
 	public void duplicateTranslationKey(String key, String newKey) {
-		translationTree.duplicateNodeByKey(key, newKey);
 		if (project != null) {
 			project.getResources().forEach(resource -> resource.duplicateTranslation(key, newKey));
 		}
+		translationTree.duplicateNodeByKey(key, newKey);
+		requestFocusToFirstResourceField();
 	}
 	
 	public EditorProject getProject() {
@@ -607,6 +613,12 @@ public class Editor extends JFrame {
 		repaint();
 	}
 	
+	private void requestFocusToFirstResourceField() {
+		resourceFields.stream().findFirst().ifPresent(f -> {
+			f.requestFocusInWindow();
+		});
+	}
+	
 	private void clearUI() {
 		translationField.clear();
 		translationTree.clear();
@@ -748,7 +760,7 @@ public class Editor extends JFrame {
 					if (!current.isLeaf() || current.isRoot()) {
 						requestFocusInWindow();
 					} else if (comp.equals(this)) {
-						resourceFields.get(0).requestFocusInWindow();						
+						requestFocusToFirstResourceField();
 					}
 				}
 			}

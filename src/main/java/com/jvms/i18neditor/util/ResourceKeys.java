@@ -157,6 +157,18 @@ public final class ResourceKeys {
 	}
 	
 	/**
+	 * Checks whether the given key is a parent key of the given child key.
+	 * A key is a parent of another key if the other key has the same parts at the beginning.
+	 * 
+	 * @param 	key the original key.
+	 * @param 	parentKey the possible parent key of the original key.
+	 * @return	whether the given key is a child of the given parent key.
+	 */
+	public static boolean isParentKeyOf(String key, String childKey) {
+		return childKey.startsWith(key + ".");
+	}
+	
+	/**
 	 * Gets the unique root keys of a list of keys. A root key is the first part of a key.
 	 * 
 	 * @param 	keys the keys to retrieve the unique root keys from.
