@@ -19,6 +19,7 @@ import com.jvms.i18neditor.util.ResourceKeys;
 public class TranslationTreeNode extends DefaultMutableTreeNode {
 	private final static long serialVersionUID = -7372403592538358822L;
 	private String name;
+	private boolean error;
 	
 	public TranslationTreeNode(String name, List<String> keys) {
 		super();
@@ -35,6 +36,14 @@ public class TranslationTreeNode extends DefaultMutableTreeNode {
 	
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public void setError(boolean error) {
+		this.error = error;
+	}
+	
+	public boolean hasError() {
+		return isEditable() && error;
 	}
 	
 	public boolean isEditable() {

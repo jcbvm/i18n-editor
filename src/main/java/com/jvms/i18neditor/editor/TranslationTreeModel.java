@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.swing.tree.DefaultTreeModel;
 
+import com.google.common.collect.Lists;
 import com.jvms.i18neditor.util.MessageBundle;
 import com.jvms.i18neditor.util.ResourceKeys;
 
@@ -17,7 +18,7 @@ public class TranslationTreeModel extends DefaultTreeModel {
 	private final static long serialVersionUID = 3261808274177599488L;
 	
 	public TranslationTreeModel() {
-		super(null);
+		super(new TranslationTreeNode(MessageBundle.get("tree.root.name"), Lists.newArrayList()));
 	}
 	
 	public TranslationTreeModel(List<String> keys) {
@@ -35,6 +36,18 @@ public class TranslationTreeModel extends DefaultTreeModel {
 	        }
 	    }
 	    return null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public boolean hasErrorChildNode(TranslationTreeNode node) {
+		Enumeration<TranslationTreeNode> e = node.depthFirstEnumeration();
+    	while (e.hasMoreElements()) {
+    		TranslationTreeNode n = e.nextElement();
+    		if (n.hasError()) {
+    			return true;
+    		}
+    	}
+    	return false;
 	}
 	
 	public TranslationTreeNode getClosestParentNodeByKey(String key) {
@@ -70,6 +83,13 @@ public class TranslationTreeModel extends DefaultTreeModel {
 				insertNodeInto(child, target);
 			}
 		});
+	}
+	
+	public void nodeWithParentsChanged(TranslationTreeNode node) {
+		while (node != null) {
+			nodeChanged(node);
+			node = (TranslationTreeNode) node.getParent();
+		}
 	}
 	
 	private int getNewChildIndex(TranslationTreeNode newChild, TranslationTreeNode parent) {

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.SortedMap;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -98,11 +99,15 @@ public class Resource {
 		this.translations = translations;
 	}
 	
+	public boolean hasTranslation(String key) {
+		return !Strings.isNullOrEmpty(translations.get(key));
+	}
+	
 	/**
 	 * Gets a translation from the resource's translations.
 	 * 
 	 * @param	key the key of the translation to get.
-	 * @return 	value of the translation or <code>null</code> if there is no translation for the given key.
+	 * @return 	value of the translation or {@code null} if there is no translation for the given key.
 	 */
 	public String getTranslation(String key) {
 		return translations.get(key);
@@ -112,7 +117,7 @@ public class Resource {
 	 * Stores a translation to the resource's translations.
 	 * 
 	 * <ul>
-	 * <li>If the given key does not exists yet, a new translation will be added to the map.</li>
+	 * <li>If the given key does not exists yet and is not empty, a new translation will be added to the map.</li>
 	 * <li>If the given key already exists, the existing value will be overwritten with the given value.</li>
 	 * <li>If the given key is a parent key of any existing keys, the existing child keys will be removed.</li>
 	 * <li>If the given key is a child key of any existing keys, the existing parent keys will be removed.</li>
@@ -124,7 +129,10 @@ public class Resource {
 	public void storeTranslation(String key, String value) {
 		checkKey(key);
 		String existing = translations.get(key);
-		if (existing != null && existing.equals(value)) return;
+		if (existing == null && value.isEmpty() || 
+			existing != null && existing.equals(value)) {
+			return;
+		}
 		removeParents(key);
 		removeChildren(key);
 		if (value.isEmpty()) {

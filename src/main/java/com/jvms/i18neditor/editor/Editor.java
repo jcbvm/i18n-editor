@@ -88,7 +88,7 @@ public class Editor extends JFrame {
 	
 	private EditorProject project;
 	private EditorSettings settings = new EditorSettings();
-	private ExecutorService executor = Executors.newCachedThreadPool();
+	private ExecutorService executor = Executors.newFixedThreadPool(1);
 	private boolean dirty;
 	
 	private EditorMenuBar editorMenu;
@@ -140,7 +140,7 @@ public class Editor extends JFrame {
 			} else {
 				SwingUtilities.invokeLater(() -> showAddLocaleDialog());
 			}
-			translationTree.setModel(new TranslationTreeModel(Lists.newLinkedList()));
+			translationTree.setModel(new TranslationTreeModel());
 			
 			updateHistory();
 			updateUI();
@@ -189,10 +189,11 @@ public class Editor extends JFrame {
 					}
 				});
 				Map<String,String> keys = Maps.newTreeMap();
-				project.getResources().forEach(resource -> keys.putAll(resource.getTranslations()));
+				project.getResources().forEach(r -> keys.putAll(r.getTranslations()));
 				keyList.addAll(keys.keySet());
 			}
 			translationTree.setModel(new TranslationTreeModel(keyList));
+			executor.execute(() -> updateTreeNodeStatuses(keyList));
 			
 			updateHistory();
 			updateUI();
@@ -806,6 +807,13 @@ public class Editor extends JFrame {
 		return new ImageIcon(getClass().getClassLoader().getResource(path)).getImage();
 	}
 	
+	private void updateTreeNodeStatuses(List<String> keys) {
+		keys.forEach(key -> {
+			boolean hasEmpty = project.getResources().stream().anyMatch(r -> !r.hasTranslation(key));
+			translationTree.toggleErrorNodeByKey(key, hasEmpty);
+		});
+	}
+	
 	private void storeProjectState() {
 		ExtendedProperties props = new ExtendedProperties();
 		props.setProperty("minify_resources", project.isMinifyResources());
@@ -965,6 +973,7 @@ public class Editor extends JFrame {
 			String key = translationTree.getSelectedNode().getKey();
 			String value = field.getValue();
 			field.getResource().storeTranslation(key, value);
+			executor.execute(() -> updateTreeNodeStatuses(Lists.newArrayList(key)));
 		}
 	}
 	

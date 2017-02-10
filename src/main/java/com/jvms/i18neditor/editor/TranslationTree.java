@@ -3,12 +3,16 @@ package com.jvms.i18neditor.editor;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.util.Enumeration;
 import java.util.List;
 
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -72,6 +76,15 @@ public class TranslationTree extends JTree {
 	
 	public void collapse(List<TranslationTreeNode> nodes) {
 		nodes.forEach(n -> collapsePath(new TreePath(n.getPath())));
+	}
+	
+	public void toggleErrorNodeByKey(String key, boolean error) {
+		TranslationTreeNode node = getNodeByKey(key);
+		if (node != null) {
+			node.setError(error);
+			TranslationTreeModel model = (TranslationTreeModel) getModel();
+			model.nodeWithParentsChanged(node);
+		}
 	}
 	
 	public TranslationTreeNode addNodeByKey(String key) {
@@ -147,6 +160,36 @@ public class TranslationTree extends JTree {
 		setModel(new TranslationTreeModel());
 	}
 	
+	@Override
+	protected void paintComponent(Graphics g) {
+		Rectangle r;
+        g.setColor(getBackground());
+        g.fillRect(0, 0, getWidth(), getHeight());
+        g.setColor(LookAndFeel.TREE_SELECTION_BACKGROUND);
+        for (int i : getSelectionRows()) {
+            r = getRowBounds(i);
+            g.fillRect(0, r.y, getWidth(), r.height);
+        }
+        super.paintComponent(g);        
+    }
+	
+	private void setupUI() {
+		UIManager.put("Tree.repaintWholeRow", Boolean.TRUE);
+		
+		// Remove all key strokes
+		InputMap inputMap = getInputMap().getParent();
+		for (KeyStroke k : getRegisteredKeyStrokes()) {
+			inputMap.remove(k);
+		}
+		
+        setUI(new TranslationTreeUI());
+		setCellRenderer(new TranslationTreeCellRenderer());
+		addTreeWillExpandListener(new TranslationTreeExpandListener());
+		setToggleClickCount(1);
+		setEditable(false);
+		setOpaque(false);
+	}
+	
 	private void duplicateNodeByKey(String key, String newKey, boolean keepOld) {
 		TranslationTreeModel model = (TranslationTreeModel) getModel();
 		TranslationTreeNode node = model.getNodeByKey(key);
@@ -180,35 +223,9 @@ public class TranslationTree extends JTree {
 		setSelectedNode(node);
 	}
 	
-	private void setupUI() {
-		UIManager.put("Tree.repaintWholeRow", Boolean.TRUE);
-		
-		// Remove all key strokes
-		InputMap inputMap = getInputMap().getParent();
-		for (KeyStroke k : getRegisteredKeyStrokes()) {
-			inputMap.remove(k);
-		}
-		
-        setUI(new TranslationTreeUI());
-		setCellRenderer(new TranslationTreeCellRenderer());
-		addTreeWillExpandListener(new TranslationTreeExpandListener());
-		setToggleClickCount(1);
-		setEditable(false);
-		setOpaque(false);
+	private Image getClasspathImage(String path) {
+		return new ImageIcon(getClass().getClassLoader().getResource(path)).getImage();
 	}
-	
-	@Override
-	protected void paintComponent(Graphics g) {
-		Rectangle r;
-        g.setColor(getBackground());
-        g.fillRect(0, 0, getWidth(), getHeight());
-        g.setColor(LookAndFeel.PRIMARY_COLOR);
-        for (int i : getSelectionRows()) {
-            r = getRowBounds(i);
-            g.fillRect(0, r.y, getWidth(), r.height);
-        }
-        super.paintComponent(g);        
-    }
 	
 	private class TranslationTreeCellRenderer extends DefaultTreeCellRenderer {
 		private final static long serialVersionUID = 3511394180407171920L;
@@ -224,12 +241,23 @@ public class TranslationTree extends JTree {
 		@Override 
 		public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, 
 				boolean leaf, int row, boolean hasFocus) {
+			TranslationTreeNode node = (TranslationTreeNode) value;
+			TranslationTreeModel model = (TranslationTreeModel) getModel();
             JLabel l = (JLabel) super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
-            if (selected) {
-            	l.setForeground(Color.WHITE);
-            }
-           	l.setBackground(selected ? LookAndFeel.PRIMARY_COLOR : tree.getBackground());            	
             l.setOpaque(true);
+            l.setBackground(tree.getBackground());            	
+            if (!node.isRoot() && (node.hasError() || model.hasErrorChildNode(node))) {
+            	l.setIcon(new TranslationTreeStatusIcon(TranslationTreeStatusIcon.Type.Warning));
+            }
+            if (node.isRoot()) {
+            	l.setIcon(new ImageIcon(getClasspathImage("images/icon-folder.png")));
+            }
+            if (selected) {
+            	l.setForeground(LookAndFeel.TREE_SELECTION_FOREGROUND);
+            	// Create new color because of issue with colors from UIManager
+            	Color bg = LookAndFeel.TREE_SELECTION_BACKGROUND;
+            	l.setBackground(new Color(bg.getRed(), bg.getGreen(), bg.getBlue()));
+            }
             return l;
         }
     }
@@ -291,6 +319,42 @@ public class TranslationTree extends JTree {
     			throw new ExpandVetoException(e);        			
     		}
     	}
+	}
+	
+	private static class TranslationTreeStatusIcon implements Icon {
+	    private final static int SIZE = 7;
+	    private final Type type;
+	    
+	    public enum Type {
+	    	Warning
+	    }
+	    
+	    public TranslationTreeStatusIcon(Type type) {
+	        this.type = type;
+	    }
+	    
+	    @Override
+	    public void paintIcon(Component c, Graphics g, int x, int y) {
+	    	Graphics2D g2 = (Graphics2D) g.create();
+    	    g2.setRenderingHints(new RenderingHints(
+    	    		RenderingHints.KEY_ANTIALIASING,
+	    	        RenderingHints.VALUE_ANTIALIAS_ON));
+	    	if (type == Type.Warning) {
+	    		g2.setColor(LookAndFeel.TREE_WARNING_STATUS_COLOR);
+	    	}
+	    	g2.fillOval(x, y, SIZE, SIZE);
+	    	g2.dispose();
+	    }
+	    
+	    @Override
+	    public int getIconWidth() {
+	        return SIZE;
+	    }
+	    
+	    @Override
+	    public int getIconHeight() {
+	        return SIZE;
+	    }
 	}
 	
 	private static class TranslationTreeToggleIcon implements Icon {
