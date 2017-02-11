@@ -15,8 +15,8 @@ The editor supports translation files with the following format:
 - Editing multiple translation files at once.
 - Creating new translations/locales or editing existing ones.
 - Renaming, duplicating, creating or deleting individual translations.
-- Drag&Drop directories for editing.
-- Minifying output.
+- Detecting missing translations.
+- Minifying translations on save.
 
 ## Requirements
 
