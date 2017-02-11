@@ -80,7 +80,7 @@ public class Editor extends JFrame {
 	private final static Logger log = LoggerFactory.getLogger(Editor.class);
 	
 	public final static String TITLE = "i18n-editor";
-	public final static String VERSION = "1.0.0-beta.4";
+	public final static String VERSION = "1.0.0";
 	public final static String GITHUB_REPO = "jcbvm/i18n-editor";
 	public final static String DEFAULT_RESOURCE_NAME = "translations";
 	public final static String PROJECT_FILE = ".i18n-editor-metadata";
@@ -89,7 +89,7 @@ public class Editor extends JFrame {
 	
 	private EditorProject project;
 	private EditorSettings settings = new EditorSettings();
-	private ExecutorService executor = Executors.newFixedThreadPool(1);
+	private ExecutorService executor = Executors.newFixedThreadPool(2);
 	private boolean dirty;
 	
 	private EditorMenuBar editorMenu;
