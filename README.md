@@ -30,13 +30,16 @@ You can download the latest release by going to [this page](https://github.com/j
 ## Usage
 
 #### Getting started
-To start, open the application and go to `File > New Project` to create a new project. After choosing the desired file format for your translations, you can select a root directory where you want to store your translation files in. From here you can begin adding locales by going to `Edit > Add Locale...`. Next you can start adding translations either via `Edit > Add Translation...`, via the right click menu in the left side panel or via the key field at the bottom of the left side panel. Each time you start the editor it will open the last project you was working on. You can always import an existing project by going to `File > Import Project...` and selecting the root directory of your existing project.
+To start, open the application and go to `File > New Project` to create a new project. After choosing the desired file format for your translations, select the root directory where you want to store your translation files. After selecting the root directory you'll be asked to add your first locale. From here you can add more locales by going to `Edit > Add Locale...` or start adding translations either via `Edit > Add Translation...`, via the right click menu in the left side panel or via the key field at the bottom of the left side panel. Each time you start the editor it will open the last project you was working on. You can always import an existing project by going to `File > Import Project...` and selecting the root directory of your existing project.
 
 #### Translation files
 By default translation files of the format `JSON` or `ES6` will be saved in locale directories with the filename `translations.json` or `translations.js` respectively. Translation files of the format `Properties` will be saved with the locale embedded in the filename, for example `translations_nl_NL.properties`. The `Properties` formatted files also differ from the other formats in that it will create a default translation file called `translations.properties`, this is the fallback translation file (which is common for a java ResourceBundle).
 
+#### Translation status
+In the tree on the left side of the editor translations with missing values will be marked with a yellow icon in front of them.
+
 #### Settings
-Via `Settings > Preferences...` you can change the filename of the translation files you want to use (by default they are named `translations`) and select whether you want to minify the files on save. This settings can also be applied on each project individually via `Settings > Project Preferences...`.
+You can access the settings of the editor by going to `Settings > Preferences...`. Here you can change the filename of the translation files you want to use (by default they are named `translations`), select whether you want to minify the files on save and change interface related properties. Some of this settings can also be applied on each project individually via `Settings > Project Preferences...`.
 
 ## Help translating
 
