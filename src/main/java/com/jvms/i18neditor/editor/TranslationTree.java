@@ -69,15 +69,13 @@ public class TranslationTree extends JTree {
 		if (node == null) {
 			TranslationTreeNode parent = (TranslationTreeNode) model.getClosestParentNodeByKey(key);
 			String newKey = ResourceKeys.childKey(key, parent.getKey());
-			String restKey = ResourceKeys.create(ResourceKeys.subParts(newKey, 1));
-			String name = ResourceKeys.firstPart(newKey);
-			List<String> keys = restKey.isEmpty() ? Lists.newArrayList() : Lists.newArrayList(restKey);
-			node = new TranslationTreeNode(name, keys);
-			model.insertNodeInto(node, parent);
-			setSelectedNode((TranslationTreeNode) node.getFirstLeaf());
-		} else {
-			setSelectedNode(node);
+			String firstPart = ResourceKeys.firstPart(newKey);
+			String lastPart = ResourceKeys.withoutFirstPart(newKey);
+			model.insertNodeInto(new TranslationTreeNode(firstPart, 
+					lastPart.isEmpty() ? Lists.newArrayList() : Lists.newArrayList(lastPart)), parent);
+			node = model.getNodeByKey(key);
 		}
+		setSelectedNode(node);
 		return node;
 	}
 	
