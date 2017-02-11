@@ -34,7 +34,7 @@ public class EditorSettingsPane extends AbstractSettingsPane {
 		// General settings
 		JPanel fieldset1 = createFieldset(MessageBundle.get("settings.fieldset.general"));
 		
-		JCheckBox versionBox = new JCheckBox(MessageBundle.get("settings.version.title"));
+		JCheckBox versionBox = new JCheckBox(MessageBundle.get("settings.checkversion.title"));
 		versionBox.setSelected(settings.isCheckVersionOnStartup());
 		versionBox.addChangeListener(e -> settings.setCheckVersionOnStartup(versionBox.isSelected()));
 		fieldset1.add(versionBox, createVerticalGridBagConstraints());
@@ -65,18 +65,26 @@ public class EditorSettingsPane extends AbstractSettingsPane {
 		JPanel fieldset3 = createFieldset(MessageBundle.get("settings.fieldset.editing"));
 		
 		JCheckBox keyFieldBox = new JCheckBox(MessageBundle.get("settings.keyfield.title"));
-		keyFieldBox.setSelected(settings.isShowKeyField());
+		keyFieldBox.setSelected(settings.isKeyFieldEnabled());
 		keyFieldBox.addChangeListener(e -> {
-			settings.setShowKeyField(keyFieldBox.isSelected());
+			settings.setKeyFieldEnabled(keyFieldBox.isSelected());
 			editor.updateUI();
 		});
 		fieldset3.add(keyFieldBox, createVerticalGridBagConstraints());
 		
+		JCheckBox keyNodeClickBox = new JCheckBox(MessageBundle.get("settings.treetogglemode.title"));
+		keyNodeClickBox.setSelected(settings.isDoubleClickTreeToggling());
+		keyNodeClickBox.addChangeListener(e -> {
+			settings.setDoubleClickTreeToggling(keyNodeClickBox.isSelected());
+			editor.updateUI();
+		});
+		fieldset3.add(keyNodeClickBox, createVerticalGridBagConstraints());
+		
 		JPanel resourceHeightPanel = new JPanel(new GridLayout(0, 1));
 		JLabel resourceHeightLabel = new JLabel(MessageBundle.get("settings.inputheight.title"));
-		JSlider resourceHeightSlider = new JSlider(JSlider.HORIZONTAL, 1, 15, settings.getInputHeight());
+		JSlider resourceHeightSlider = new JSlider(JSlider.HORIZONTAL, 1, 15, settings.getDefaultInputHeight());
 		resourceHeightSlider.addChangeListener(e -> {
-			settings.setInputHeight(resourceHeightSlider.getValue());
+			settings.setDefaultInputHeight(resourceHeightSlider.getValue());
 			editor.updateUI();
 		});
 		resourceHeightPanel.add(resourceHeightLabel);

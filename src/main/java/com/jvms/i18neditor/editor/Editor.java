@@ -1,11 +1,11 @@
 package com.jvms.i18neditor.editor;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.Dimension;
-import java.awt.Image;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -40,6 +39,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.border.CompoundBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -56,15 +56,16 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.jvms.i18neditor.LookAndFeel;
 import com.jvms.i18neditor.Resource;
 import com.jvms.i18neditor.ResourceType;
 import com.jvms.i18neditor.swing.JFileDrop;
 import com.jvms.i18neditor.swing.JScrollablePanel;
 import com.jvms.i18neditor.swing.util.Dialogs;
+import com.jvms.i18neditor.util.Colors;
 import com.jvms.i18neditor.util.ExtendedProperties;
 import com.jvms.i18neditor.util.GithubRepoUtil;
 import com.jvms.i18neditor.util.GithubRepoUtil.GithubRepoReleaseData;
+import com.jvms.i18neditor.util.Images;
 import com.jvms.i18neditor.util.MessageBundle;
 import com.jvms.i18neditor.util.ResourceKeys;
 import com.jvms.i18neditor.util.Resources;
@@ -582,7 +583,7 @@ public class Editor extends JFrame {
 			Locale locale = field.getResource().getLocale();
 			String label = locale != null ? locale.getDisplayName() : MessageBundle.get("resources.locale.default");
 			field.setEnabled(selectedNode != null && selectedNode.isEditable());
-			field.setRows(settings.getInputHeight());
+			field.setRows(settings.getDefaultInputHeight());
 			resourcesPanel.add(Box.createVerticalStrut(5));
 			resourcesPanel.add(new JLabel(label));
 			resourcesPanel.add(Box.createVerticalStrut(5));
@@ -597,17 +598,17 @@ public class Editor extends JFrame {
 			List<Resource> resources = project.getResources();
 			editorMenu.setEnabled(true);
 			editorMenu.setEditable(!resources.isEmpty());
-			translationTree.setEditable(!resources.isEmpty());
 			translationField.setEditable(!resources.isEmpty());
 		} else {
 			container.add(introText);
 			container.remove(contentPane);
 			editorMenu.setEnabled(false);
 			editorMenu.setEditable(false);
-			translationTree.setEditable(false);
 			translationField.setEditable(false);
 		}
-		translationField.setVisible(settings.isShowKeyField());
+		
+		translationField.setVisible(settings.isKeyFieldEnabled());
+		translationTree.setToggleClickCount(settings.isDoubleClickTreeToggling() ? 2 : 1);
 		
 		updateTitle();
 		validate();
@@ -628,12 +629,14 @@ public class Editor extends JFrame {
 	}
 	
 	private void setupUI() {
+		Color borderColor = Colors.scale(UIManager.getColor("Panel.background"), .8f);
+		
 		setTitle(TITLE);
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		addWindowListener(new EditorWindowListener());
 		
 		setIconImages(Lists.newArrayList("512","256","128","64","48","32","24","20","16").stream()
-				.map(size -> getClasspathImage("images/icon-" + size + ".png"))
+				.map(size -> Images.getFromClasspath("images/icon-" + size + ".png").getImage())
 				.collect(Collectors.toList()));
 		
         translationTree = new TranslationTree();
@@ -644,14 +647,14 @@ public class Editor extends JFrame {
 		translationField = new TranslationField();
 		translationField.addKeyListener(new TranslationFieldKeyListener());
 		translationField.setBorder(BorderFactory.createCompoundBorder(
-				BorderFactory.createMatteBorder(1,0,0,1,LookAndFeel.BORDER_COLOR),
+				BorderFactory.createMatteBorder(1,0,0,1,borderColor),
 				((CompoundBorder)translationField.getBorder()).getInsideBorder()));
 		
 		JScrollPane translationsScrollPane = new JScrollPane(translationTree);
 		translationsScrollPane.getViewport().setOpaque(false);
 		translationsScrollPane.setOpaque(false);
 		translationsScrollPane.setBorder(
-				BorderFactory.createMatteBorder(0,0,0,1,LookAndFeel.BORDER_COLOR));
+				BorderFactory.createMatteBorder(0,0,0,1,borderColor));
 		
 		translationsPanel = new JPanel(new BorderLayout());
 		translationsPanel.add(translationsScrollPane);
@@ -690,7 +693,7 @@ public class Editor extends JFrame {
 		introText.setHorizontalAlignment(JLabel.CENTER);
 		introText.setVerticalAlignment(JLabel.CENTER);
 		introText.setForeground(getBackground().darker());
-		introText.setIcon(new ImageIcon(getClasspathImage("images/icon-intro.png")));
+		introText.setIcon(Images.getFromClasspath("images/icon-intro.png"));
 		
 		Container container = getContentPane();
 		container.add(introText);
@@ -803,10 +806,6 @@ public class Editor extends JFrame {
 		Dialogs.showErrorDialog(this, MessageBundle.get("dialogs.error.title"), message);
 	}
 	
-	private Image getClasspathImage(String path) {
-		return new ImageIcon(getClass().getClassLoader().getResource(path)).getImage();
-	}
-	
 	private void updateTreeNodeStatuses(List<String> keys) {
 		keys.forEach(key -> {
 			boolean hasEmpty = project.getResources().stream().anyMatch(r -> !r.hasTranslation(key));
@@ -846,10 +845,11 @@ public class Editor extends JFrame {
 		props.setProperty("minify_resources", settings.isMinifyResources());
 		props.setProperty("resource_name", settings.getResourceName());
 		props.setProperty("check_version", settings.isCheckVersionOnStartup());
-		props.setProperty("input_height", settings.getInputHeight());
-		props.setProperty("key_field", settings.isShowKeyField());
+		props.setProperty("default_input_height", settings.getDefaultInputHeight());
+		props.setProperty("key_field_enabled", settings.isKeyFieldEnabled());
+		props.setProperty("double_click_tree_toggling", settings.isDoubleClickTreeToggling());
 		if (!settings.getHistory().isEmpty()) {
-			props.setProperty("history", settings.getHistory());			
+			props.setProperty("history", settings.getHistory());
 		}
 		if (project != null) {
 			// Store keys of expanded nodes
@@ -878,8 +878,9 @@ public class Editor extends JFrame {
 		settings.setMinifyResources(props.getBooleanProperty("minify_resources", false));
 		settings.setResourceName(props.getProperty("resource_name", DEFAULT_RESOURCE_NAME));
 		settings.setCheckVersionOnStartup(props.getBooleanProperty("check_version", true));
-		settings.setInputHeight(props.getIntegerProperty("input_height", 5));
-		settings.setShowKeyField(props.getBooleanProperty("key_field", true));
+		settings.setDefaultInputHeight(props.getIntegerProperty("default_input_height", 5));
+		settings.setKeyFieldEnabled(props.getBooleanProperty("key_field_enabled", true));
+		settings.setDoubleClickTreeToggling(props.getBooleanProperty("double_click_tree_toggling", false));
 	}
 	
 	private class TranslationTreeMouseListener extends MouseAdapter {
@@ -927,7 +928,7 @@ public class Editor extends JFrame {
 					f.setEnabled(node.isEditable());
 				});
 				
-				// Restore scroll position
+				// Restore scroll position and foc
 				SwingUtilities.invokeLater(() -> resourcesScrollPane.getVerticalScrollBar().setValue(scrollValue));
 			}
 		}

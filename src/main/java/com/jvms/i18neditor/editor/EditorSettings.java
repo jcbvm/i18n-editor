@@ -19,8 +19,9 @@ public class EditorSettings {
 	private List<String> lastExpandedNodes;
 	private String lastSelectedNode;
 	private boolean checkVersionOnStartup;
-	private int inputHeight;
-	private boolean showKeyField;
+	private int defaultInputHeight;
+	private boolean keyFieldEnabled;
+	private boolean doubleClickTreeToggling;
 	
 	public int getWindowPositionX() {
 		return windowPositionX;
@@ -110,19 +111,27 @@ public class EditorSettings {
 		this.checkVersionOnStartup = checkVersionOnStartup;
 	}
 
-	public int getInputHeight() {
-		return inputHeight;
+	public int getDefaultInputHeight() {
+		return defaultInputHeight;
 	}
 
-	public void setInputHeight(int rows) {
-		this.inputHeight = rows;
+	public void setDefaultInputHeight(int rows) {
+		this.defaultInputHeight = rows;
 	}
 
-	public boolean isShowKeyField() {
-		return showKeyField;
+	public boolean isKeyFieldEnabled() {
+		return keyFieldEnabled;
 	}
 
-	public void setShowKeyField(boolean showKeyField) {
-		this.showKeyField = showKeyField;
+	public void setKeyFieldEnabled(boolean keyFieldEnabled) {
+		this.keyFieldEnabled = keyFieldEnabled;
+	}
+
+	public boolean isDoubleClickTreeToggling() {
+		return doubleClickTreeToggling;
+	}
+
+	public void setDoubleClickTreeToggling(boolean doubleClickTreeToggling) {
+		this.doubleClickTreeToggling = doubleClickTreeToggling;
 	}
 }

@@ -45,7 +45,7 @@ public final class Dialogs {
 	
 	public static void showHtmlDialog(Component parent, String title, String body) {
 		Font font = parent.getFont();
-		JHtmlPane pane = new JHtmlPane(parent, "<html><body style=\"font-family:" + font.getFamily() + ";font-size:" + font.getSize() + "pt;text-align:center;min-width:200px;\">" + body + "</body></html>");
+		JHtmlPane pane = new JHtmlPane(parent, "<html><body style=\"font-family:" + font.getFamily() + ";text-align:center;min-width:200px;\">" + body + "</body></html>");
 		pane.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 		showComponentDialog(parent, title, pane);	
 	}

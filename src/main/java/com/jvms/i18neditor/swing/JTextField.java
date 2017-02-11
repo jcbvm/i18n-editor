@@ -5,11 +5,12 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.BorderFactory;
 import javax.swing.KeyStroke;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.undo.UndoManager;
 
-import com.jvms.i18neditor.LookAndFeel;
 import com.jvms.i18neditor.swing.text.JTextComponentMenuListener;
+import com.jvms.i18neditor.util.Colors;
 
 /**
  * This class extends a default {@link javax.swing.JTextField} with a {@link UndoManager},
@@ -28,13 +29,19 @@ public class JTextField extends javax.swing.JTextField {
 		this(null);
 	}
 	
+	@Override
+	public void setEnabled(boolean enabled) {
+		super.setEnabled(enabled);
+		setOpaque(enabled);
+	}
+	
 	/**
 	 * Constructs a {@link JTextField} with an initial text.
 	 */
 	public JTextField(String text) {
 		super(text, 25);
 		
-		Border border = BorderFactory.createLineBorder(LookAndFeel.BORDER_COLOR);
+		Border border = BorderFactory.createLineBorder(Colors.scale(UIManager.getColor("Panel.background"), .8f));
 		setBorder(BorderFactory.createCompoundBorder(border, BorderFactory.createEmptyBorder(6,8,6,8)));
 		getDocument().addUndoableEditListener(e -> undoManager.addEdit(e.getEdit()));
 		

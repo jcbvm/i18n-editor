@@ -1,34 +1,24 @@
 package com.jvms.i18neditor.editor;
 
 import java.awt.Color;
-import java.awt.Component;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Insets;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Enumeration;
 import java.util.List;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.InputMap;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JTree;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
-import javax.swing.plaf.basic.BasicTreeUI;
-import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.ExpandVetoException;
-import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
 import com.google.common.collect.Lists;
-import com.jvms.i18neditor.LookAndFeel;
 import com.jvms.i18neditor.util.ResourceKeys;
 
 /**
@@ -42,20 +32,6 @@ public class TranslationTree extends JTree {
 	public TranslationTree() {
 		super(new TranslationTreeModel());
 		setupUI();
-	}
-	
-	@Override
-	public void setModel(TreeModel model) {
-		super.setModel(model);
-		Object root = model.getRoot();
-		if (root != null) {
-			setSelectedNode((TranslationTreeNode) root);
-		}
-	}
-	
-	@Override
-	public void setEditable(boolean editable) {
-		this.editable = editable;
 	}
 	
 	public void collapseAll() {
@@ -162,15 +138,22 @@ public class TranslationTree extends JTree {
 	
 	@Override
 	protected void paintComponent(Graphics g) {
-		Rectangle r;
-        g.setColor(getBackground());
+		TranslationTreeCellRenderer renderer = (TranslationTreeCellRenderer) getCellRenderer();
+		Color c1 = renderer.getSelectionColor();
+		
+		FontMetrics metrics = g.getFontMetrics(getFont());
+		setRowHeight(metrics.getHeight() + 8);
+		
+		g.setColor(getBackground());
         g.fillRect(0, 0, getWidth(), getHeight());
-        g.setColor(LookAndFeel.TREE_SELECTION_BACKGROUND);
+        
         for (int i : getSelectionRows()) {
-            r = getRowBounds(i);
+        	Rectangle r = getRowBounds(i);
+        	g.setColor(c1);
             g.fillRect(0, r.y, getWidth(), r.height);
         }
-        super.paintComponent(g);        
+        
+        super.paintComponent(g);
     }
 	
 	private void setupUI() {
@@ -185,7 +168,7 @@ public class TranslationTree extends JTree {
         setUI(new TranslationTreeUI());
 		setCellRenderer(new TranslationTreeCellRenderer());
 		addTreeWillExpandListener(new TranslationTreeExpandListener());
-		setToggleClickCount(1);
+		addMouseListener(new TranslationTreeMouseListener());
 		setEditable(false);
 		setOpaque(false);
 	}
@@ -223,89 +206,18 @@ public class TranslationTree extends JTree {
 		setSelectedNode(node);
 	}
 	
-	private Image getClasspathImage(String path) {
-		return new ImageIcon(getClass().getClassLoader().getResource(path)).getImage();
-	}
-	
-	private class TranslationTreeCellRenderer extends DefaultTreeCellRenderer {
-		private final static long serialVersionUID = 3511394180407171920L;
-		
-		public TranslationTreeCellRenderer() {
-			super();
-			setLeafIcon(null);
-			setClosedIcon(null);
-			setOpenIcon(null);
-			setRowHeight(Math.max(getRowHeight() + 6, 22));
+	private class TranslationTreeMouseListener extends MouseAdapter {
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			if (e.getClickCount() == getToggleClickCount()) {
+				int row = getRowForLocation(e.getX(), e.getY());
+				if (isCollapsed(row)) {
+					expandRow(row);
+				} else {
+					collapseRow(row);
+				}
+			}
 		}
-		
-		@Override 
-		public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, 
-				boolean leaf, int row, boolean hasFocus) {
-			TranslationTreeNode node = (TranslationTreeNode) value;
-			TranslationTreeModel model = (TranslationTreeModel) getModel();
-            JLabel l = (JLabel) super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
-            l.setOpaque(true);
-            l.setBackground(tree.getBackground());            	
-            if (!node.isRoot() && (node.hasError() || model.hasErrorChildNode(node))) {
-            	l.setIcon(new TranslationTreeStatusIcon(TranslationTreeStatusIcon.Type.Warning));
-            }
-            if (node.isRoot()) {
-            	l.setIcon(new ImageIcon(getClasspathImage("images/icon-folder.png")));
-            }
-            if (selected) {
-            	l.setForeground(LookAndFeel.TREE_SELECTION_FOREGROUND);
-            	// Create new color because of issue with colors from UIManager
-            	Color bg = LookAndFeel.TREE_SELECTION_BACKGROUND;
-            	l.setBackground(new Color(bg.getRed(), bg.getGreen(), bg.getBlue()));
-            }
-            return l;
-        }
-    }
-	
-	private class TranslationTreeUI extends BasicTreeUI {
-		private TranslationTreeToggleIcon expandedIcon = new TranslationTreeToggleIcon(TranslationTreeToggleIcon.Type.Expanded);
-		private TranslationTreeToggleIcon collapsedIcon = new TranslationTreeToggleIcon(TranslationTreeToggleIcon.Type.Collapsed);
-		
-		@Override
-        protected void paintVerticalLine(Graphics g, JComponent c, int y, int left, int right) {}
-		
-		@Override
-        protected void paintHorizontalLine(Graphics g, JComponent c, int y, int left, int right) {}
-		
-        @Override
-        protected void paintVerticalPartOfLeg(Graphics g, Rectangle clipBounds, Insets insets, TreePath path) {}
-        
-        @Override
-        protected void paintHorizontalPartOfLeg(Graphics g, Rectangle clipBounds, Insets insets, Rectangle bounds, 
-        		TreePath path, int row, boolean expanded, boolean hasBeenExpanded, boolean leaf) {}
-        
-		@Override
-	    public Rectangle getPathBounds(JTree tree, TreePath path) {
-	        if (tree != null && treeState != null) {
-	            return getPathBounds(path, tree.getInsets(), new Rectangle());
-	        }
-	        return null;
-	    }
-		
-		@Override
-	    public Icon getCollapsedIcon() {
-	        return collapsedIcon;
-	    }
-		
-	    @Override
-	    public Icon getExpandedIcon() {
-	        return expandedIcon;
-	    }
-		
-	    private Rectangle getPathBounds(TreePath path, Insets insets, Rectangle bounds) {
-	        bounds = treeState.getBounds(path, bounds);
-	        if (bounds != null) {
-	        	bounds.x = 0;
-	            bounds.y += insets.top;
-	            bounds.width = tree.getWidth();
-	        }
-	        return bounds;
-	    }
 	}
 	
 	private class TranslationTreeExpandListener implements TreeWillExpandListener {
@@ -319,77 +231,5 @@ public class TranslationTree extends JTree {
     			throw new ExpandVetoException(e);        			
     		}
     	}
-	}
-	
-	private static class TranslationTreeStatusIcon implements Icon {
-	    private final static int SIZE = 7;
-	    private final Type type;
-	    
-	    public enum Type {
-	    	Warning
-	    }
-	    
-	    public TranslationTreeStatusIcon(Type type) {
-	        this.type = type;
-	    }
-	    
-	    @Override
-	    public void paintIcon(Component c, Graphics g, int x, int y) {
-	    	Graphics2D g2 = (Graphics2D) g.create();
-    	    g2.setRenderingHints(new RenderingHints(
-    	    		RenderingHints.KEY_ANTIALIASING,
-	    	        RenderingHints.VALUE_ANTIALIAS_ON));
-	    	if (type == Type.Warning) {
-	    		g2.setColor(LookAndFeel.TREE_WARNING_STATUS_COLOR);
-	    	}
-	    	g2.fillOval(x, y, SIZE, SIZE);
-	    	g2.dispose();
-	    }
-	    
-	    @Override
-	    public int getIconWidth() {
-	        return SIZE;
-	    }
-	    
-	    @Override
-	    public int getIconHeight() {
-	        return SIZE;
-	    }
-	}
-	
-	private static class TranslationTreeToggleIcon implements Icon {
-	    private final static int SIZE = 10;
-	    private final Type type;
-	    
-	    public enum Type {
-	    	Collapsed, Expanded
-	    }
-	    
-	    public TranslationTreeToggleIcon(Type type) {
-	        this.type = type;
-	    }
-	    
-	    @Override
-	    public void paintIcon(Component c, Graphics g, int x, int y) {
-	    	g.setColor(UIManager.getColor("Tree.background"));
-	    	g.fillRect(x, y, SIZE, SIZE);
-	    	g.setColor(UIManager.getColor("Tree.hash").darker());
-	    	g.drawRect(x, y, SIZE, SIZE);
-	    	g.setColor(UIManager.getColor("Tree.foreground"));
-	    	g.drawLine(x + 2, y + SIZE/2, x + SIZE - 2, y + SIZE/2);
-	        if (type == Type.Collapsed) {
-	        	g.drawLine(x + SIZE/2, y + 2, x + SIZE/2, y + SIZE - 2);
-	    	}
-	    }
-	    
-	    @Override
-	    public int getIconWidth() {
-	        return SIZE;
-	    }
-	    
-	    @Override
-	    public int getIconHeight() {
-	        return SIZE;
-	    }
 	}
 }
