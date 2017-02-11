@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,6 +57,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.jvms.i18neditor.Resource;
 import com.jvms.i18neditor.ResourceType;
 import com.jvms.i18neditor.swing.JFileDrop;
@@ -166,7 +168,7 @@ public class Editor extends JFrame {
 			
 			Optional<ResourceType> type = Optional.ofNullable(project.getResourceType());
 			List<Resource> resourceList = Resources.get(dir, project.getResourceName(), type);
-			List<String> keyList = Lists.newLinkedList();
+			Map<String,String> keys = Maps.newTreeMap();
 			
 			if (resourceList.isEmpty()) {
 				project = null;
@@ -189,12 +191,10 @@ public class Editor extends JFrame {
 						showError(MessageBundle.get("resources.import.error.single", resource.getPath().toString()));
 					}
 				});
-				Map<String,String> keys = Maps.newTreeMap();
 				project.getResources().forEach(r -> keys.putAll(r.getTranslations()));
-				keyList.addAll(keys.keySet());
 			}
-			translationTree.setModel(new TranslationTreeModel(keyList));
-			executor.execute(() -> updateTreeNodeStatuses(keyList));
+			translationTree.setModel(new TranslationTreeModel(Lists.newArrayList(keys.keySet())));
+			executor.execute(() -> updateTreeNodeStatuses(keys.keySet()));
 			
 			updateHistory();
 			updateUI();
@@ -290,6 +290,17 @@ public class Editor extends JFrame {
 		requestFocusToFirstResourceField();
 	}
 	
+	public void addResource(Resource resource) {
+		setupResource(resource);
+		updateUI();
+		if (project != null) {
+			project.addResource(resource);
+			Map<String,String> keys = Maps.newTreeMap();
+			project.getResources().forEach(r -> keys.putAll(r.getTranslations()));
+			executor.execute(() -> updateTreeNodeStatuses(keys.keySet()));
+		}
+	}
+	
 	public EditorProject getProject() {
 		return project;
 	}
@@ -357,9 +368,7 @@ public class Editor extends JFrame {
 					try {
 						Locale locale = LocaleUtils.toLocale(localeString);
 						Resource resource = Resources.create(path, type, Optional.of(locale), project.getResourceName());
-						setupResource(resource);
-						project.addResource(resource);
-						updateUI();
+						addResource(resource);
 					} catch (IOException e) {
 						log.error("Error creating new locale", e);
 						showError(MessageBundle.get("dialogs.locale.add.error.create"));
@@ -806,7 +815,7 @@ public class Editor extends JFrame {
 		Dialogs.showErrorDialog(this, MessageBundle.get("dialogs.error.title"), message);
 	}
 	
-	private void updateTreeNodeStatuses(List<String> keys) {
+	private void updateTreeNodeStatuses(Set<String> keys) {
 		keys.forEach(key -> {
 			boolean hasEmpty = project.getResources().stream().anyMatch(r -> !r.hasTranslation(key));
 			translationTree.toggleErrorNodeByKey(key, hasEmpty);
@@ -974,7 +983,7 @@ public class Editor extends JFrame {
 			String key = translationTree.getSelectedNode().getKey();
 			String value = field.getValue();
 			field.getResource().storeTranslation(key, value);
-			executor.execute(() -> updateTreeNodeStatuses(Lists.newArrayList(key)));
+			executor.execute(() -> updateTreeNodeStatuses(Sets.newHashSet(key)));
 		}
 	}
 	
