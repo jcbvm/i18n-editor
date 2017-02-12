@@ -12,7 +12,7 @@ import com.jvms.i18neditor.util.ResourceKeys;
 /**
  * This class represents a model for the translation tree.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class TranslationTreeModel extends DefaultTreeModel {
 	private final static long serialVersionUID = 3261808274177599488L;

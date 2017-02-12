@@ -9,7 +9,7 @@ import javax.swing.Scrollable;
 /**
  * This class extends a default {@link JPanel} with {@link Scrollable} capabilities.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class JScrollablePanel extends JPanel implements Scrollable {
 	private final static long serialVersionUID = -7947570506111556197L;

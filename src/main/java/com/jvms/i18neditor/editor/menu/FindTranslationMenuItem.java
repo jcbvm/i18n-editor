@@ -12,7 +12,7 @@ import com.jvms.i18neditor.util.MessageBundle;
 /**
  * This class represents a menu item for searching a translation key.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class FindTranslationMenuItem extends JMenuItem {
 	private final static long serialVersionUID = -1298283182450978961L;

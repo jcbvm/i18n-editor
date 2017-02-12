@@ -8,7 +8,7 @@ import javax.swing.undo.UndoManager;
 /**
  * An action implementation useful for undoing an edit.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class UndoAction extends AbstractAction {
 	private final static long serialVersionUID = -3051499148079684354L;

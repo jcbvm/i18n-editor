@@ -6,7 +6,7 @@ import javax.swing.text.DefaultCaret;
 /**
  * This class extends the {@link DefaultCaret} with a default blink rate set.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class BlinkCaret extends DefaultCaret {
 	private final static long serialVersionUID = -3365578081904749196L;

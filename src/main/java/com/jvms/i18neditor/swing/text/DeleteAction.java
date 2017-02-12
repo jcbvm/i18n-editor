@@ -8,7 +8,7 @@ import javax.swing.text.TextAction;
 /**
  * An action implementation useful for deleting text.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class DeleteAction extends TextAction {
 	private final static long serialVersionUID = -7933405670677160997L;

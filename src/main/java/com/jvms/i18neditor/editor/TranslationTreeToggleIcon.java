@@ -11,7 +11,7 @@ import com.jvms.i18neditor.util.Colors;
 /**
  * This class represents a toggle icon for a translation tree cell.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class TranslationTreeToggleIcon implements Icon {
     private final static int SIZE = 10;

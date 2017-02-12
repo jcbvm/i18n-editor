@@ -24,7 +24,7 @@ import com.jvms.i18neditor.util.ResourceKeys;
 /**
  * This class represents a tree view for translation keys.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class TranslationTree extends JTree {
 	private final static long serialVersionUID = -2888673305196385241L;

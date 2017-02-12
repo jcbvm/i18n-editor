@@ -30,7 +30,7 @@ import com.jvms.i18neditor.ResourceType;
 /**
  * This class provides utility functions for a {@link Resource}.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public final class Resources {
 	private final static Charset UTF8_ENCODING = Charset.forName("UTF-8");

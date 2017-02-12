@@ -4,6 +4,8 @@ package com.jvms.i18neditor;
  * An enum describing the type of a {@link Resource}.
  * 
  * <p>A resource type additionally holds information about the filename representation.</p>
+ * 
+ * @author Jacob van Mourik
  */
 public enum ResourceType {
 	JSON(".json", false), 

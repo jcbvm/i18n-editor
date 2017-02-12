@@ -12,7 +12,7 @@ import com.jvms.i18neditor.util.MessageBundle;
 /**
  * This class represents a menu item for adding a new locale.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class AddLocaleMenuItem extends JMenuItem {
 	private final static long serialVersionUID = -5108677891532028898L;

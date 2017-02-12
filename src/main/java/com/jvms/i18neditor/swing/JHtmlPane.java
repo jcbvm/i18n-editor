@@ -9,7 +9,7 @@ import javax.swing.event.HyperlinkEvent;
 /**
  * This class extends a default {@link JEditorPane} with default settings for HTML content.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class JHtmlPane extends JEditorPane {
 	private final static long serialVersionUID = 2873290055720408299L;

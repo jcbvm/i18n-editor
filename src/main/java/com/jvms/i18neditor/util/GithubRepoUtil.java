@@ -19,7 +19,7 @@ import com.google.gson.annotations.SerializedName;
 /**
  * This class provides utility functions for retrieving Github Repository data.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public final class GithubRepoUtil {
 	private final static Logger log = LoggerFactory.getLogger(GithubRepoUtil.class);

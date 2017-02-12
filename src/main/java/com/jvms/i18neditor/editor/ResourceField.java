@@ -1,7 +1,12 @@
 package com.jvms.i18neditor.editor;
 
 import java.awt.KeyboardFocusManager;
+import java.awt.Rectangle;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.util.Locale;
+
+import javax.swing.JComponent;
 
 import com.jvms.i18neditor.Resource;
 import com.jvms.i18neditor.swing.JTextArea;
@@ -9,7 +14,7 @@ import com.jvms.i18neditor.swing.JTextArea;
 /**
  * This class represents a text area to edit the value of a translation.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class ResourceField extends JTextArea implements Comparable<ResourceField> {
 	private final static long serialVersionUID = 2034814490878477055L;
@@ -51,5 +56,17 @@ public class ResourceField extends JTextArea implements Comparable<ResourceField
 		// Add focus traversal support
 		setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, null);
 	    setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, null);
+	    addFocusListener(new ResourceFieldFocusListener());
+	}
+	
+	private class ResourceFieldFocusListener extends FocusAdapter {
+		@Override
+		public void focusGained(FocusEvent e) {
+			JComponent parent = (JComponent)getParent();
+			Rectangle bounds = new Rectangle(getBounds());
+			bounds.y -= 35; // add fixed space at the top
+			bounds.height += 70; // add fixed space at the bottom
+			parent.scrollRectToVisible(bounds);
+		}
 	}
 }

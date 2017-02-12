@@ -13,7 +13,7 @@ import com.jvms.i18neditor.Resource;
  * <p>A translation key is a {@code String} consisting of one or more parts separated by a dot.<br>
  * A key starting or ending with a dot or a key containing white spaces is considered to be invalid.<p> 
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public final class ResourceKeys {
 	

@@ -19,7 +19,7 @@ import com.jvms.i18neditor.swing.text.BlinkCaret;
 /**
  * This class provides utility functions for dialogs using {@link JOptionPane}.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public final class Dialogs {
 	
@@ -45,8 +45,9 @@ public final class Dialogs {
 	
 	public static void showHtmlDialog(Component parent, String title, String body) {
 		Font font = parent.getFont();
-		JHtmlPane pane = new JHtmlPane(parent, "<html><body style=\"font-family:" + font.getFamily() + ";text-align:center;min-width:200px;\">" + body + "</body></html>");
-		pane.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+		JHtmlPane pane = new JHtmlPane(parent, "<html><body style=\"font-family:" + 
+				font.getFamily() + ";text-align:center;\">" + body + "</body></html>");
+		pane.setBorder(BorderFactory.createEmptyBorder(15,15,15,15));
 		showComponentDialog(parent, title, pane);	
 	}
 	

@@ -7,40 +7,38 @@ import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 import com.jvms.i18neditor.editor.Editor;
 
 /**
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class Main {
-
+	private final static Logger log = LoggerFactory.getLogger(Main.class);
+	
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(() -> {
-			// For MAC OS enable global menu
+			// Enable global menu on MAC OS
 			if (SystemUtils.IS_OS_MAC) {
 				System.setProperty("apple.laf.useScreenMenuBar", "true");
 			}
-			// For non Linux use native look an feel
-			if (!SystemUtils.IS_OS_LINUX) {
-				try {
-					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-				} catch (Exception e) {
-					//
+			try {
+				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+				// For windows use menu font for entire UI
+				if (SystemUtils.IS_OS_WINDOWS) {
+					setUIFont(UIManager.getFont("Menu.font"));				
 				}
+			} catch (Exception e) {
+				log.warn("Unable to use native look and feel");
 			}
-			// For windows use menu font for entire UI
-			if (SystemUtils.IS_OS_WINDOWS) {
-				Font menuFont = UIManager.getFont("Menu.font");
-				setUIFont(menuFont);				
-			}
-			// Launch the editor
 			new Editor().launch();
 		});
 	}
-
+	
 	private static void setUIFont(Font font) {
 		UIDefaults defaults = UIManager.getDefaults();
 		Sets.newHashSet(

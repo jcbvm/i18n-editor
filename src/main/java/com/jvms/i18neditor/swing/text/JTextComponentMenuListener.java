@@ -9,7 +9,7 @@ import javax.swing.undo.UndoManager;
 /**
  * Mouse listener for showing a {@link JTextComponentMenu}.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class JTextComponentMenuListener extends MouseAdapter {
 	private final JTextComponent parent;

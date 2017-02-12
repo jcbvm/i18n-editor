@@ -10,7 +10,7 @@ import java.util.ResourceBundle;
  * 
  * <p>The locale used is the current value of the default locale for this instance of the Java Virtual Machine.</p>
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public final class MessageBundle {
 	private final static String RESOURCES_PATH = "bundles/messages";

@@ -11,7 +11,7 @@ import com.jvms.i18neditor.ResourceType;
 /**
  * This class represents an editor project.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class EditorProject {
 	private Path path;

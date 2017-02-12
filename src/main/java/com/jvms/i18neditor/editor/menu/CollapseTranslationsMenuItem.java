@@ -8,7 +8,7 @@ import com.jvms.i18neditor.util.MessageBundle;
 /**
  * This class represents a menu item for collapsing all keys of the translation tree.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class CollapseTranslationsMenuItem extends JMenuItem {
 	private final static long serialVersionUID = 7885728865417192564L;

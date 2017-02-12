@@ -10,7 +10,7 @@ import com.jvms.i18neditor.editor.menu.FindTranslationMenuItem;
 /**
  * This class represents a right click menu for the translation tree.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class TranslationTreeMenu extends JPopupMenu {
 	private final static long serialVersionUID = -8450484152294368841L;

@@ -10,7 +10,7 @@ import javax.swing.JPanel;
 /**
  * This class represents an abstract base class for all setting panes.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public abstract class AbstractSettingsPane extends JPanel {
 	private GridBagConstraints vGridBagConstraints;
@@ -18,7 +18,7 @@ public abstract class AbstractSettingsPane extends JPanel {
 	protected AbstractSettingsPane() {
 		super();
 		vGridBagConstraints = new GridBagConstraints();
-		vGridBagConstraints.insets = new Insets(5,5,5,5);
+		vGridBagConstraints.insets = new Insets(2,2,2,2);
 		vGridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		vGridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		vGridBagConstraints.weightx = 1;

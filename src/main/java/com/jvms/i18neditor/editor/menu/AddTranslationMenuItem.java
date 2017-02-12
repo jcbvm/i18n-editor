@@ -15,7 +15,7 @@ import com.jvms.i18neditor.util.MessageBundle;
 /**
  * This class represents a menu item for adding a new translation.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class AddTranslationMenuItem extends JMenuItem {
 	private final static long serialVersionUID = -2673278052970076105L;

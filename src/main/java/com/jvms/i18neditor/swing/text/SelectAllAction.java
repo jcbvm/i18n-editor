@@ -8,7 +8,7 @@ import javax.swing.text.TextAction;
 /**
  * An action implementation useful for selecting all text.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class SelectAllAction extends TextAction {
 	private final static long serialVersionUID = -4913270947629733919L;

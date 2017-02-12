@@ -16,7 +16,7 @@ import com.jvms.i18neditor.util.MessageBundle;
 /**
  * This class represents the project settings pane.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class EditorProjectSettingsPane extends AbstractSettingsPane {
 	private final static long serialVersionUID = 5665963334924596315L;
@@ -35,6 +35,13 @@ public class EditorProjectSettingsPane extends AbstractSettingsPane {
 		// General settings
 		JPanel fieldset1 = createFieldset(MessageBundle.get("settings.fieldset.general"));
 		
+		if (project.getResourceType() != ResourceType.Properties) {
+			JCheckBox minifyBox = new JCheckBox(MessageBundle.get("settings.minify.title"));
+			minifyBox.setSelected(project.isMinifyResources());
+			minifyBox.addChangeListener(e -> project.setMinifyResources(minifyBox.isSelected()));
+			fieldset1.add(minifyBox, createVerticalGridBagConstraints());
+		}
+		
 		JPanel resourcePanel = new JPanel(new GridLayout(0, 1));
 		JLabel resourceNameLabel = new JLabel(MessageBundle.get("settings.resourcename.title"));
 		JTextField resourceNameField = new JTextField(project.getResourceName());
@@ -48,13 +55,6 @@ public class EditorProjectSettingsPane extends AbstractSettingsPane {
 		resourcePanel.add(resourceNameLabel);
 		resourcePanel.add(resourceNameField);
 		fieldset1.add(resourcePanel, createVerticalGridBagConstraints());		
-		
-		if (project.getResourceType() != ResourceType.Properties) {
-			JCheckBox minifyBox = new JCheckBox(MessageBundle.get("settings.minify.title"));
-			minifyBox.setSelected(project.isMinifyResources());
-			minifyBox.addChangeListener(e -> project.setMinifyResources(minifyBox.isSelected()));
-			fieldset1.add(minifyBox, createVerticalGridBagConstraints());
-		}
 		
 		setLayout(new GridBagLayout());
 		add(fieldset1, createVerticalGridBagConstraints());

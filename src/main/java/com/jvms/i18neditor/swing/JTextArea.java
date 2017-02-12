@@ -16,7 +16,7 @@ import com.jvms.i18neditor.util.Colors;
  * This class extends a default {@link javax.swing.JTextArea} with a {@link UndoManager},
  * a right click menu and a custom look and feel.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class JTextArea extends javax.swing.JTextArea {
 	private final static long serialVersionUID = -5043046809426384893L;

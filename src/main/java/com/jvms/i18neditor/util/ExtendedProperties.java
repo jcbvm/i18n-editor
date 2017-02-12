@@ -25,7 +25,7 @@ import com.google.common.collect.Lists;
  * 
  * <p>This implementation also adds extended functionality like {@link #containsKeys(String...)}.</p>
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class ExtendedProperties extends Properties {
 	private final static long serialVersionUID = 6042931434040718478L;

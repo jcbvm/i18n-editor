@@ -14,7 +14,7 @@ import com.jvms.i18neditor.util.ResourceKeys;
 /**
  * This class represents a single node of the translation tree.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class TranslationTreeNode extends DefaultMutableTreeNode {
 	private final static long serialVersionUID = -7372403592538358822L;

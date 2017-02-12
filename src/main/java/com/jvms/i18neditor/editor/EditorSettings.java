@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * This class represents the editor settings.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class EditorSettings {
 	private int windowPositionX;

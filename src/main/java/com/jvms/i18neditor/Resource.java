@@ -26,7 +26,7 @@ import com.jvms.i18neditor.util.ResourceKeys;
  * <p>Objects can listen to a resource by adding a {@link ResourceListener} which 
  * will be called when any change is made to the {@code translations}.</p>
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class Resource {
 	private final Path path;

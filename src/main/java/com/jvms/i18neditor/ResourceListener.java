@@ -5,7 +5,7 @@ import java.util.EventListener;
 /**
  * Defines an object which listens for {@link ResourceEvent}s.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public interface ResourceListener extends EventListener {
 

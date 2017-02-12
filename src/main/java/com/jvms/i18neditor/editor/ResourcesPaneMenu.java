@@ -7,7 +7,7 @@ import com.jvms.i18neditor.editor.menu.AddLocaleMenuItem;
 /**
  * This class represents a right click menu for the resource pane.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class ResourcesPaneMenu extends JPopupMenu {
 	private final static long serialVersionUID = 2259323824622576156L;

@@ -11,7 +11,7 @@ import javax.swing.Icon;
 /**
  * This class represents a status icon for a translation tree cell.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class TranslationTreeStatusIcon implements Icon {
     private final static int SIZE = 7;

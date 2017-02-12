@@ -15,11 +15,11 @@ import com.jvms.i18neditor.util.Images;
 /**
  * This class represents a default cell renderer for the translation tree.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class TranslationTreeCellRenderer extends DefaultTreeCellRenderer {
 	private final static long serialVersionUID = 3511394180407171920L;
-	private final static ImageIcon ROOT_ICON = Images.getFromClasspath("images/icon-folder.png");
+	private final static ImageIcon ROOT_ICON = Images.loadFromClasspath("images/icon-folder.png");
 	private final Color selectionColor;
 	
 	public TranslationTreeCellRenderer() {

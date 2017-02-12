@@ -75,7 +75,7 @@ import com.jvms.i18neditor.util.Resources;
 /**
  * This class represents the main class of the editor.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class Editor extends JFrame {
 	private final static long serialVersionUID = 1113029729495390082L;
@@ -147,7 +147,7 @@ public class Editor extends JFrame {
 			
 			updateHistory();
 			updateUI();
-			requestFocusToFirstResourceField();
+			requestFocusInFirstResourceField();
 		} catch (IOException e) {
 			log.error("Error creating resource files", e);
 			showError(MessageBundle.get("resources.create.error"));
@@ -198,7 +198,7 @@ public class Editor extends JFrame {
 			
 			updateHistory();
 			updateUI();
-			requestFocusToFirstResourceField();
+			requestFocusInFirstResourceField();
 		} catch (IOException e) {
 			log.error("Error importing resource files", e);
 			showError(MessageBundle.get("resources.import.error.multiple"));
@@ -263,7 +263,7 @@ public class Editor extends JFrame {
 			}
 			translationTree.addNodeByKey(key);			
 		}
-		requestFocusToFirstResourceField();
+		requestFocusInFirstResourceField();
 	}
 	
 	public void removeTranslationKey(String key) {
@@ -271,7 +271,7 @@ public class Editor extends JFrame {
 			project.getResources().forEach(resource -> resource.removeTranslation(key));
 		}
 		translationTree.removeNodeByKey(key);
-		requestFocusToFirstResourceField();
+		requestFocusInFirstResourceField();
 	}
 	
 	public void renameTranslationKey(String key, String newKey) {
@@ -279,7 +279,7 @@ public class Editor extends JFrame {
 			project.getResources().forEach(resource -> resource.renameTranslation(key, newKey));
 		}
 		translationTree.renameNodeByKey(key, newKey);
-		requestFocusToFirstResourceField();
+		requestFocusInFirstResourceField();
 	}
 	
 	public void duplicateTranslationKey(String key, String newKey) {
@@ -287,7 +287,7 @@ public class Editor extends JFrame {
 			project.getResources().forEach(resource -> resource.duplicateTranslation(key, newKey));
 		}
 		translationTree.duplicateNodeByKey(key, newKey);
-		requestFocusToFirstResourceField();
+		requestFocusInFirstResourceField();
 	}
 	
 	public void addResource(Resource resource) {
@@ -480,7 +480,8 @@ public class Editor extends JFrame {
 	
 	public void showAboutDialog() {
 		Dialogs.showHtmlDialog(this, MessageBundle.get("dialogs.about.title", TITLE), 
-				"<span style=\"font-size:1.5em;\"><strong>" + TITLE + "</strong></span><br>" + 
+				"<img src=\"" + Images.getClasspathURL("images/icon-48.png") + "\"><br>" +
+				"<span style=\"font-size:1.4em;\"><strong>" + TITLE + "</strong></span><br>" + 
 				VERSION + "<br><br>" +
 				"Copyright (c) 2015 - 2017<br>" +
 				"Jacob van Mourik<br>" + 
@@ -624,7 +625,7 @@ public class Editor extends JFrame {
 		repaint();
 	}
 	
-	private void requestFocusToFirstResourceField() {
+	private void requestFocusInFirstResourceField() {
 		resourceFields.stream().findFirst().ifPresent(f -> {
 			f.requestFocusInWindow();
 		});
@@ -645,7 +646,7 @@ public class Editor extends JFrame {
 		addWindowListener(new EditorWindowListener());
 		
 		setIconImages(Lists.newArrayList("512","256","128","64","48","32","24","20","16").stream()
-				.map(size -> Images.getFromClasspath("images/icon-" + size + ".png").getImage())
+				.map(size -> Images.loadFromClasspath("images/icon-" + size + ".png").getImage())
 				.collect(Collectors.toList()));
 		
         translationTree = new TranslationTree();
@@ -662,8 +663,7 @@ public class Editor extends JFrame {
 		JScrollPane translationsScrollPane = new JScrollPane(translationTree);
 		translationsScrollPane.getViewport().setOpaque(false);
 		translationsScrollPane.setOpaque(false);
-		translationsScrollPane.setBorder(
-				BorderFactory.createMatteBorder(0,0,0,1,borderColor));
+		translationsScrollPane.setBorder(BorderFactory.createMatteBorder(0,0,0,1,borderColor));
 		
 		translationsPanel = new JPanel(new BorderLayout());
 		translationsPanel.add(translationsScrollPane);
@@ -702,7 +702,7 @@ public class Editor extends JFrame {
 		introText.setHorizontalAlignment(JLabel.CENTER);
 		introText.setVerticalAlignment(JLabel.CENTER);
 		introText.setForeground(getBackground().darker());
-		introText.setIcon(Images.getFromClasspath("images/icon-intro.png"));
+		introText.setIcon(Images.loadFromClasspath("images/icon-intro.png"));
 		
 		Container container = getContentPane();
 		container.add(introText);
@@ -755,13 +755,18 @@ public class Editor extends JFrame {
 				result = true;
 				break;
 			case KeyEvent.VK_UP:
-				translationTree.setSelectionRow(Math.max(0, row-1));
+				TreePath prev = translationTree.getPathForRow(Math.max(0, row-1));
+				if (prev != null) {
+					translationTree.setSelectionPath(prev);
+					translationTree.scrollPathToVisible(prev);
+				}
 				result = true;
 				break;
 			case KeyEvent.VK_DOWN:
 				TreePath next = translationTree.getPathForRow(row+1);
 				if (next != null) {
-					translationTree.setSelectionPath(next);						
+					translationTree.setSelectionPath(next);
+					translationTree.scrollPathToVisible(next);
 				}
 				result = true;
 				break;
@@ -773,7 +778,7 @@ public class Editor extends JFrame {
 					if (!current.isLeaf() || current.isRoot()) {
 						requestFocusInWindow();
 					} else if (comp.equals(this)) {
-						requestFocusToFirstResourceField();
+						requestFocusInFirstResourceField();
 					}
 				}
 			}

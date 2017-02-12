@@ -9,7 +9,7 @@ import javax.swing.event.*;
  * <p>When the component is added to an active ancestor the component will request focus immediately.<br>
  * When the component is added to a non active ancestor, the focus request will be made once the ancestor is active.</p>
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class RequestInitialFocusListener implements AncestorListener {
 	

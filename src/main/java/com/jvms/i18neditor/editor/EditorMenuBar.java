@@ -29,7 +29,7 @@ import com.jvms.i18neditor.util.MessageBundle;
 /**
  * This class represents the top bar menu of the editor.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class EditorMenuBar extends JMenuBar {
 	private final static long serialVersionUID = -101788804096708514L;

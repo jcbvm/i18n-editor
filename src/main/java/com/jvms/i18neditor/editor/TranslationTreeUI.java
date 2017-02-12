@@ -13,7 +13,7 @@ import javax.swing.tree.TreePath;
 /**
  * This class represents a default UI for the translation tree.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class TranslationTreeUI extends BasicTreeUI {
 	private TranslationTreeToggleIcon expandedIcon = new TranslationTreeToggleIcon(TranslationTreeToggleIcon.Type.Expanded);

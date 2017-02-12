@@ -3,7 +3,7 @@ package com.jvms.i18neditor;
 /**
  * An event wrapper for a {@link Resource}.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class ResourceEvent {
 	private final Resource resource;

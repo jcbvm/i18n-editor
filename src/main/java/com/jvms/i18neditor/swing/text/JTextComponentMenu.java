@@ -18,7 +18,7 @@ import com.jvms.i18neditor.util.MessageBundle;
 /**
  * A popup menu implementation useful as a edit menu for a {@link JTextComponent}.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class JTextComponentMenu extends JPopupMenu {
 	private final static long serialVersionUID = 5967213965940023534L;

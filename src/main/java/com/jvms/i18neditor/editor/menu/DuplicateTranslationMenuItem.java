@@ -12,7 +12,7 @@ import com.jvms.i18neditor.util.MessageBundle;
 /**
  * This class represents a menu item for duplicating a translation key.
  * 
- * @author Jacob
+ * @author Jacob van Mourik
  */
 public class DuplicateTranslationMenuItem extends JMenuItem {
 	private final static long serialVersionUID = 5207946396515235714L;
