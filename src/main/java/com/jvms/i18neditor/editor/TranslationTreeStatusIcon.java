@@ -15,9 +15,9 @@ import javax.swing.Icon;
  */
 public class TranslationTreeStatusIcon implements Icon {
     private final static int SIZE = 7;
-    private final Type type;
+    private final StatusIconType type;
     
-	public enum Type {
+	public enum StatusIconType {
     	Warning(new Color(220,160,0));
     	
     	private Color color;
@@ -26,12 +26,12 @@ public class TranslationTreeStatusIcon implements Icon {
     		return color;
     	}
     	
-    	private Type(Color color) {
+    	private StatusIconType(Color color) {
     		this.color = color;
     	}
     }
     
-    public TranslationTreeStatusIcon(Type type) {
+    public TranslationTreeStatusIcon(StatusIconType type) {
         this.type = type;
     }
     

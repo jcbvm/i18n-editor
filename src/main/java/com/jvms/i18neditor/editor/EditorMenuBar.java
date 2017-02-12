@@ -231,7 +231,7 @@ public class EditorMenuBar extends JMenuBar {
      	add(helpMenu);
      	
      	tree.addTreeSelectionListener(e -> {
-     		TranslationTreeNode node = tree.getSelectedNode();
+     		TranslationTreeNode node = tree.getSelectionNode();
      		boolean enabled = node != null && !node.isRoot();
 			renameTranslationMenuItem.setEnabled(enabled);
 			duplicateTranslationMenuItem.setEnabled(enabled);

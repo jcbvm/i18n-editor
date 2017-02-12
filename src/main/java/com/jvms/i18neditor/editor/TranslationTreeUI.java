@@ -10,14 +10,16 @@ import javax.swing.JTree;
 import javax.swing.plaf.basic.BasicTreeUI;
 import javax.swing.tree.TreePath;
 
+import com.jvms.i18neditor.editor.TranslationTreeToggleIcon.ToggleIconType;
+
 /**
  * This class represents a default UI for the translation tree.
  * 
  * @author Jacob van Mourik
  */
 public class TranslationTreeUI extends BasicTreeUI {
-	private TranslationTreeToggleIcon expandedIcon = new TranslationTreeToggleIcon(TranslationTreeToggleIcon.Type.Expanded);
-	private TranslationTreeToggleIcon collapsedIcon = new TranslationTreeToggleIcon(TranslationTreeToggleIcon.Type.Collapsed);
+	private TranslationTreeToggleIcon expandedIcon = new TranslationTreeToggleIcon(ToggleIconType.Expanded);
+	private TranslationTreeToggleIcon collapsedIcon = new TranslationTreeToggleIcon(ToggleIconType.Collapsed);
 	
 	@Override
 	protected void toggleExpandState(TreePath path) {

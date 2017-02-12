@@ -231,23 +231,23 @@ public class Editor extends JFrame {
 	}
 	
 	public void removeSelectedTranslation() {
-		TranslationTreeNode node = translationTree.getSelectedNode();
+		TranslationTreeNode node = translationTree.getSelectionNode();
 		if (node != null && !node.isRoot()) {
 			TranslationTreeNode parent = (TranslationTreeNode) node.getParent();
 			removeTranslationKey(node.getKey());
-			translationTree.setSelectedNode(parent);
+			translationTree.setSelectionNode(parent);
 		}
 	}
 	
 	public void renameSelectedTranslation() {
-		TranslationTreeNode node = translationTree.getSelectedNode();
+		TranslationTreeNode node = translationTree.getSelectionNode();
 		if (node != null && !node.isRoot()) {
 			showRenameTranslationDialog(node.getKey());
 		}
 	}
 	
 	public void duplicateSelectedTranslation() {
-		TranslationTreeNode node = translationTree.getSelectedNode();
+		TranslationTreeNode node = translationTree.getSelectionNode();
 		if (node != null && !node.isRoot()) {
 			showDuplicateTranslationDialog(node.getKey());
 		}
@@ -256,7 +256,7 @@ public class Editor extends JFrame {
 	public void addTranslationKey(String key) {
 		TranslationTreeNode node = translationTree.getNodeByKey(key);
 		if (node != null) {
-			translationTree.setSelectedNode(node);
+			translationTree.setSelectionNode(node);
 		} else {
 			if (project != null) {
 				project.getResources().forEach(resource -> resource.storeTranslation(key, ""));				
@@ -473,7 +473,7 @@ public class Editor extends JFrame {
 						MessageBundle.get("dialogs.translation.find.title"), 
 						MessageBundle.get("dialogs.translation.find.error"));
 			} else {
-				translationTree.setSelectedNode(node);
+				translationTree.setSelectionNode(node);
 			}
 		}
 	}
@@ -575,7 +575,7 @@ public class Editor extends JFrame {
 			String selectedKey = settings.getLastSelectedNode();
 			TranslationTreeNode selectedNode = translationTree.getNodeByKey(selectedKey);
 			if (selectedNode != null) {
-				translationTree.setSelectedNode(selectedNode);
+				translationTree.setSelectionNode(selectedNode);
 			}
 		}
 		
@@ -585,7 +585,7 @@ public class Editor extends JFrame {
 	}
 	
 	public void updateUI() {
-		TranslationTreeNode selectedNode = translationTree.getSelectedNode();
+		TranslationTreeNode selectedNode = translationTree.getSelectionNode();
 		
 		resourcesPanel.removeAll();
 		resourceFields = resourceFields.stream().sorted().collect(Collectors.toList());
@@ -758,7 +758,6 @@ public class Editor extends JFrame {
 				TreePath prev = translationTree.getPathForRow(Math.max(0, row-1));
 				if (prev != null) {
 					translationTree.setSelectionPath(prev);
-					translationTree.scrollPathToVisible(prev);
 				}
 				result = true;
 				break;
@@ -766,7 +765,6 @@ public class Editor extends JFrame {
 				TreePath next = translationTree.getPathForRow(row+1);
 				if (next != null) {
 					translationTree.setSelectionPath(next);
-					translationTree.scrollPathToVisible(next);
 				}
 				result = true;
 				break;
@@ -774,7 +772,7 @@ public class Editor extends JFrame {
 			if (result && !resourceFields.isEmpty()) {
 				Component comp = getFocusOwner();
 				if (comp != null && (comp instanceof ResourceField || comp.equals(this))) {
-					TranslationTreeNode current = translationTree.getSelectedNode();
+					TranslationTreeNode current = translationTree.getSelectionNode();
 					if (!current.isLeaf() || current.isRoot()) {
 						requestFocusInWindow();
 					} else if (comp.equals(this)) {
@@ -872,7 +870,7 @@ public class Editor extends JFrame {
 					.collect(Collectors.toList());
 			props.setProperty("last_expanded", expandedNodeKeys);
 			// Store key of selected node
-			TranslationTreeNode selectedNode = translationTree.getSelectedNode();
+			TranslationTreeNode selectedNode = translationTree.getSelectionNode();
 			props.setProperty("last_selected", selectedNode == null ? "" : selectedNode.getKey());
 		}
 		props.store(Paths.get(SETTINGS_DIR, SETTINGS_FILE));
@@ -918,7 +916,7 @@ public class Editor extends JFrame {
 	    		menu.show(e.getComponent(), e.getX(), e.getY());
 	    	} else {
 	    		translationTree.setSelectionPath(path);
-	    		TranslationTreeNode node = translationTree.getSelectedNode();
+	    		TranslationTreeNode node = translationTree.getSelectionNode();
 	    		TranslationTreeNodeMenu menu = new TranslationTreeNodeMenu(Editor.this, node);
 	    		menu.show(e.getComponent(), e.getX(), e.getY());
 	    	}
@@ -928,7 +926,7 @@ public class Editor extends JFrame {
 	private class TranslationTreeNodeSelectionListener implements TreeSelectionListener {
 		@Override
 		public void valueChanged(TreeSelectionEvent e) {
-			TranslationTreeNode node = translationTree.getSelectedNode();
+			TranslationTreeNode node = translationTree.getSelectionNode();
 			
 			if (node != null) {
 				// Store scroll position
@@ -985,7 +983,7 @@ public class Editor extends JFrame {
 		@Override
 		public void keyReleased(KeyEvent e) {
 			ResourceField field = (ResourceField) e.getSource();
-			String key = translationTree.getSelectedNode().getKey();
+			String key = translationTree.getSelectionNode().getKey();
 			String value = field.getValue();
 			field.getResource().storeTranslation(key, value);
 			executor.execute(() -> updateTreeNodeStatuses(Sets.newHashSet(key)));

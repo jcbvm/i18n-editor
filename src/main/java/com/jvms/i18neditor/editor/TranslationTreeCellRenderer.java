@@ -10,6 +10,7 @@ import javax.swing.JTree;
 import javax.swing.UIManager;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
+import com.jvms.i18neditor.editor.TranslationTreeStatusIcon.StatusIconType;
 import com.jvms.i18neditor.util.Images;
 
 /**
@@ -20,12 +21,12 @@ import com.jvms.i18neditor.util.Images;
 public class TranslationTreeCellRenderer extends DefaultTreeCellRenderer {
 	private final static long serialVersionUID = 3511394180407171920L;
 	private final static ImageIcon ROOT_ICON = Images.loadFromClasspath("images/icon-folder.png");
-	private final Color selectionColor;
+	private final Color selectionBackground;
 	
 	public TranslationTreeCellRenderer() {
 		super();
 		Color bg = UIManager.getColor("Panel.background");
-		selectionColor = new Color(bg.getRed(), bg.getGreen(), bg.getBlue());
+		selectionBackground = new Color(bg.getRed(), bg.getGreen(), bg.getBlue());
 		setLeafIcon(null);
 		setClosedIcon(null);
 		setOpenIcon(null);
@@ -34,8 +35,8 @@ public class TranslationTreeCellRenderer extends DefaultTreeCellRenderer {
 		}
 	}
 	
-	public Color getSelectionColor() {
-		return selectionColor;
+	public Color getSelectionBackground() {
+		return selectionBackground;
 	}
 	
 	@Override 
@@ -48,13 +49,13 @@ public class TranslationTreeCellRenderer extends DefaultTreeCellRenderer {
         l.setForeground(tree.getForeground());
         l.setBackground(tree.getBackground());            	
         if (!node.isRoot() && (node.hasError() || model.hasErrorChildNode(node))) {
-        	l.setIcon(new TranslationTreeStatusIcon(TranslationTreeStatusIcon.Type.Warning));
+        	l.setIcon(new TranslationTreeStatusIcon(StatusIconType.Warning));
         }
         if (node.isRoot()) {
         	l.setIcon(ROOT_ICON);
         }
         if (selected) {
-        	l.setBackground(selectionColor);
+        	l.setBackground(selectionBackground);
         }
         return l;
     }

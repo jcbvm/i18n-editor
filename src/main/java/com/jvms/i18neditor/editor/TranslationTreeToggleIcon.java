@@ -15,13 +15,13 @@ import com.jvms.i18neditor.util.Colors;
  */
 public class TranslationTreeToggleIcon implements Icon {
     private final static int SIZE = 10;
-    private final Type type;
+    private final ToggleIconType type;
     
-    public enum Type {
+    public enum ToggleIconType {
     	Collapsed, Expanded
     }
     
-    public TranslationTreeToggleIcon(Type type) {
+    public TranslationTreeToggleIcon(ToggleIconType type) {
         this.type = type;
     }
     
@@ -33,7 +33,7 @@ public class TranslationTreeToggleIcon implements Icon {
     	g.drawRect(x, y, SIZE, SIZE);
     	g.setColor(UIManager.getColor("Tree.foreground"));
     	g.drawLine(x + 2, y + SIZE/2, x + SIZE - 2, y + SIZE/2);
-        if (type == Type.Collapsed) {
+        if (type == ToggleIconType.Collapsed) {
         	g.drawLine(x + SIZE/2, y + 2, x + SIZE/2, y + SIZE - 2);
     	}
     }

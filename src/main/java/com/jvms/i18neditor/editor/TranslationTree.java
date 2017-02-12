@@ -75,7 +75,7 @@ public class TranslationTree extends JTree {
 					lastPart.isEmpty() ? Lists.newArrayList() : Lists.newArrayList(lastPart)), parent);
 			node = model.getNodeByKey(key);
 		}
-		setSelectedNode(node);
+		setSelectionNode(node);
 		return node;
 	}
 	
@@ -120,14 +120,25 @@ public class TranslationTree extends JTree {
 		duplicateNodeByKey(key, newKey, true);
 	}
 	
-	public TranslationTreeNode getSelectedNode() {
+	public TranslationTreeNode getSelectionNode() {
 		return (TranslationTreeNode) getLastSelectedPathComponent();
 	}
 	
-	public void setSelectedNode(TranslationTreeNode node) {
+	@Override
+	public void setSelectionPath(TreePath path) {
+		super.setSelectionPath(path);
+		scrollPathToVisible(path);
+	}
+	
+	@Override
+	public void setSelectionRow(int row) {
+		TreePath path = getPathForRow(row);
+		setSelectionPath(path);
+	}
+	
+	public void setSelectionNode(TranslationTreeNode node) {
 		TreePath path = new TreePath(node.getPath());
 		setSelectionPath(path);
-		scrollPathToVisible(path);
 	}
 	
 	public void clear() {
@@ -137,7 +148,7 @@ public class TranslationTree extends JTree {
 	@Override
 	protected void paintComponent(Graphics g) {
 		TranslationTreeCellRenderer renderer = (TranslationTreeCellRenderer) getCellRenderer();
-		Color c1 = renderer.getSelectionColor();
+		Color c1 = renderer.getSelectionBackground();
 		
 		FontMetrics metrics = g.getFontMetrics(getFont());
 		setRowHeight(metrics.getHeight() + 8);
@@ -201,7 +212,7 @@ public class TranslationTree extends JTree {
 			expand(expandedNodes);
 		}
 		
-		setSelectedNode(node);
+		setSelectionNode(node);
 	}
 	
 	private class TranslationTreeMouseListener extends MouseAdapter {

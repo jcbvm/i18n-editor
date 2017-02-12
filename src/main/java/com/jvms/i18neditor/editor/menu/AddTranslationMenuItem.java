@@ -25,7 +25,7 @@ public class AddTranslationMenuItem extends JMenuItem {
 	}
 	
 	public AddTranslationMenuItem(Editor editor, TranslationTree tree, boolean enabled) {
-		this(editor, enabled, e -> editor.showAddTranslationDialog(tree.getSelectedNode()));
+		this(editor, enabled, e -> editor.showAddTranslationDialog(tree.getSelectionNode()));
 	}
 	
 	private AddTranslationMenuItem(Editor editor, boolean enabled, ActionListener action) {
