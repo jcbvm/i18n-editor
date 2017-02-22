@@ -8,6 +8,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.InputMap;
 import javax.swing.JTree;
@@ -54,13 +55,21 @@ public class TranslationTree extends JTree {
 		nodes.forEach(n -> collapsePath(new TreePath(n.getPath())));
 	}
 	
-	public void toggleErrorNodeByKey(String key, boolean error) {
-		TranslationTreeNode node = getNodeByKey(key);
-		if (node != null) {
-			node.setError(error);
-			TranslationTreeModel model = (TranslationTreeModel) getModel();
-			model.nodeWithParentsChanged(node);
-		}
+	public void updateNodes(Set<String> errorKeys) {
+		TranslationTreeModel model = (TranslationTreeModel) getModel();
+		Enumeration<TranslationTreeNode> e = model.getEnumeration();
+		while (e.hasMoreElements()) {
+	    	TranslationTreeNode n = e.nextElement();
+	    	n.setError(errorKeys.contains(n.getKey()));
+	        model.nodeChanged(n);
+	    }
+	}
+	
+	public void updateNode(String key, boolean error) {
+		TranslationTreeModel model = (TranslationTreeModel) getModel();
+		TranslationTreeNode node = model.getNodeByKey(key);
+		node.setError(error);
+		model.nodeWithParentsChanged(node);
 	}
 	
 	public TranslationTreeNode addNodeByKey(String key) {
@@ -216,9 +225,16 @@ public class TranslationTree extends JTree {
 	}
 	
 	private class TranslationTreeMouseListener extends MouseAdapter {
+		private boolean isPopupTrigger;
+		
 		@Override
-		public void mouseClicked(MouseEvent e) {
-			if (e.getClickCount() == getToggleClickCount()) {
+		public void mousePressed(MouseEvent e) {
+			isPopupTrigger = e.isPopupTrigger();
+		}
+		
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			if (!isPopupTrigger && !e.isPopupTrigger() && e.getClickCount() == getToggleClickCount()) {
 				int row = getRowForLocation(e.getX(), e.getY());
 				if (isCollapsed(row)) {
 					expandRow(row);

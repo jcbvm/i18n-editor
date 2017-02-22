@@ -26,9 +26,12 @@ public class TranslationTreeModel extends DefaultTreeModel {
 	}
 	
 	@SuppressWarnings("unchecked")
+	public Enumeration<TranslationTreeNode> getEnumeration() {
+		return ((TranslationTreeNode)getRoot()).depthFirstEnumeration();
+	}
+	
 	public TranslationTreeNode getNodeByKey(String key) {
-		TranslationTreeNode node = (TranslationTreeNode) getRoot();
-		Enumeration<TranslationTreeNode> e = node.depthFirstEnumeration();
+		Enumeration<TranslationTreeNode> e = getEnumeration();
 	    while (e.hasMoreElements()) {
 	    	TranslationTreeNode n = e.nextElement();
 	        if (n.getKey().equals(key)) {
@@ -38,9 +41,8 @@ public class TranslationTreeModel extends DefaultTreeModel {
 	    return null;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public boolean hasErrorChildNode(TranslationTreeNode node) {
-		Enumeration<TranslationTreeNode> e = node.depthFirstEnumeration();
+		Enumeration<TranslationTreeNode> e = getEnumeration();
     	while (e.hasMoreElements()) {
     		TranslationTreeNode n = e.nextElement();
     		if (n.hasError()) {

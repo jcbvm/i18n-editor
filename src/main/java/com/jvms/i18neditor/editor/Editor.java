@@ -57,7 +57,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.jvms.i18neditor.Resource;
 import com.jvms.i18neditor.ResourceType;
 import com.jvms.i18neditor.swing.JFileDrop;
@@ -194,8 +193,8 @@ public class Editor extends JFrame {
 				project.getResources().forEach(r -> keys.putAll(r.getTranslations()));
 			}
 			translationTree.setModel(new TranslationTreeModel(Lists.newArrayList(keys.keySet())));
-			executor.execute(() -> updateTreeNodeStatuses(keys.keySet()));
 			
+			updateTreeNodeStatuses();
 			updateHistory();
 			updateUI();
 			requestFocusInFirstResourceField();
@@ -295,9 +294,7 @@ public class Editor extends JFrame {
 		updateUI();
 		if (project != null) {
 			project.addResource(resource);
-			Map<String,String> keys = Maps.newTreeMap();
-			project.getResources().forEach(r -> keys.putAll(r.getTranslations()));
-			executor.execute(() -> updateTreeNodeStatuses(keys.keySet()));
+			updateTreeNodeStatuses();
 		}
 	}
 	
@@ -481,7 +478,7 @@ public class Editor extends JFrame {
 	public void showAboutDialog() {
 		Dialogs.showHtmlDialog(this, MessageBundle.get("dialogs.about.title", TITLE), 
 				"<img src=\"" + Images.getClasspathURL("images/icon-48.png") + "\"><br>" +
-				"<span style=\"font-size:1.4em;\"><strong>" + TITLE + "</strong></span><br>" + 
+				"<span style=\"font-size:1.3em;\"><strong>" + TITLE + "</strong></span><br>" + 
 				VERSION + "<br><br>" +
 				"Copyright (c) 2015 - 2017<br>" +
 				"Jacob van Mourik<br>" + 
@@ -818,11 +815,17 @@ public class Editor extends JFrame {
 		Dialogs.showErrorDialog(this, MessageBundle.get("dialogs.error.title"), message);
 	}
 	
-	private void updateTreeNodeStatuses(Set<String> keys) {
-		keys.forEach(key -> {
-			boolean hasEmpty = project.getResources().stream().anyMatch(r -> !r.hasTranslation(key));
-			translationTree.toggleErrorNodeByKey(key, hasEmpty);
-		});
+	private void updateTreeNodeStatuses() {
+		Set<String> keys = project.getResources().stream()
+				.flatMap(r -> r.getTranslations().keySet().stream())
+				.filter(key -> project.getResources().stream().anyMatch(r -> !r.hasTranslation(key)))
+				.collect(Collectors.toSet());
+		translationTree.updateNodes(keys);
+	}
+	
+	private void updateTreeNodeStatus(String key) {
+		boolean hasError = project.getResources().stream().anyMatch(r -> !r.hasTranslation(key));
+		translationTree.updateNode(key, hasError);
 	}
 	
 	private void storeProjectState() {
@@ -897,12 +900,12 @@ public class Editor extends JFrame {
 	
 	private class TranslationTreeMouseListener extends MouseAdapter {
 		@Override
-		public void mouseReleased(MouseEvent e) {
+		public void mousePressed(MouseEvent e) {
 			showPopupMenu(e);
-	    }
+		}
 		
 		@Override
-		public void mousePressed(MouseEvent e) {
+		public void mouseReleased(MouseEvent e) {
 			showPopupMenu(e);
 	    }
 		
@@ -920,7 +923,7 @@ public class Editor extends JFrame {
 	    		TranslationTreeNodeMenu menu = new TranslationTreeNodeMenu(Editor.this, node);
 	    		menu.show(e.getComponent(), e.getX(), e.getY());
 	    	}
-		}
+	    }
 	}
 	
 	private class TranslationTreeNodeSelectionListener implements TreeSelectionListener {
@@ -961,12 +964,12 @@ public class Editor extends JFrame {
 	
 	private class ResourcesPaneMouseListener extends MouseAdapter {
 		@Override
-		public void mouseReleased(MouseEvent e) {
+		public void mousePressed(MouseEvent e) {
 			showPopupMenu(e);
-	    }
+		}
 		
 		@Override
-		public void mousePressed(MouseEvent e) {
+		public void mouseReleased(MouseEvent e) {
 			showPopupMenu(e);
 	    }
 		
@@ -976,17 +979,18 @@ public class Editor extends JFrame {
 			}
 			ResourcesPaneMenu menu = new ResourcesPaneMenu(Editor.this);
     		menu.show(e.getComponent(), e.getX(), e.getY());
-		}
+	    }
 	}
 	
 	private class ResourceFieldKeyListener extends KeyAdapter {
 		@Override
 		public void keyReleased(KeyEvent e) {
+			TranslationTreeNode node = translationTree.getSelectionNode();
 			ResourceField field = (ResourceField) e.getSource();
-			String key = translationTree.getSelectionNode().getKey();
+			String key = node.getKey();
 			String value = field.getValue();
 			field.getResource().storeTranslation(key, value);
-			executor.execute(() -> updateTreeNodeStatuses(Sets.newHashSet(key)));
+			updateTreeNodeStatus(key);
 		}
 	}
 	
