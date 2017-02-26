@@ -25,9 +25,13 @@ public class TranslationTreeModel extends DefaultTreeModel {
 		super(new TranslationTreeNode(MessageBundle.get("tree.root.name"), keys));
 	}
 	
-	@SuppressWarnings("unchecked")
 	public Enumeration<TranslationTreeNode> getEnumeration() {
-		return ((TranslationTreeNode)getRoot()).depthFirstEnumeration();
+		return getEnumeration((TranslationTreeNode) getRoot());
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Enumeration<TranslationTreeNode> getEnumeration(TranslationTreeNode node) {
+		return node.depthFirstEnumeration();
 	}
 	
 	public TranslationTreeNode getNodeByKey(String key) {
@@ -42,7 +46,7 @@ public class TranslationTreeModel extends DefaultTreeModel {
 	}
 	
 	public boolean hasErrorChildNode(TranslationTreeNode node) {
-		Enumeration<TranslationTreeNode> e = getEnumeration();
+		Enumeration<TranslationTreeNode> e = getEnumeration(node);
     	while (e.hasMoreElements()) {
     		TranslationTreeNode n = e.nextElement();
     		if (n.hasError()) {
