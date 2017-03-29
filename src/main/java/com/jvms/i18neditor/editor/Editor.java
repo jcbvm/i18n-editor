@@ -66,7 +66,6 @@ import com.jvms.i18neditor.util.Colors;
 import com.jvms.i18neditor.util.ExtendedProperties;
 import com.jvms.i18neditor.util.GithubRepoUtil;
 import com.jvms.i18neditor.util.GithubRepoUtil.GithubRepoReleaseData;
-import com.sun.org.apache.xpath.internal.functions.Function;
 import com.jvms.i18neditor.util.Images;
 import com.jvms.i18neditor.util.MessageBundle;
 import com.jvms.i18neditor.util.ResourceKeys;
