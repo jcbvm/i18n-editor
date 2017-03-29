@@ -230,8 +230,7 @@ public class Editor extends JFrame {
 	}
 	
 	public void removeSelectedTranslation() {
-		TranslationTreeNode node = translationTree.getSelectionNode();
-		if (node != null && !node.isRoot()) {
+		if (selectionNodeIsntTheRootNode) {
 			TranslationTreeNode parent = (TranslationTreeNode) node.getParent();
 			removeTranslationKey(node.getKey());
 			translationTree.setSelectionNode(parent);
@@ -239,17 +238,21 @@ public class Editor extends JFrame {
 	}
 	
 	public void renameSelectedTranslation() {
-		TranslationTreeNode node = translationTree.getSelectionNode();
-		if (node != null && !node.isRoot()) {
+		if (selectionNodeIsntTheRootNode) {
 			showRenameTranslationDialog(node.getKey());
 		}
 	}
 	
-	public void duplicateSelectedTranslation() {
-		TranslationTreeNode node = translationTree.getSelectionNode();
-		if (node != null && !node.isRoot()) {
+	public void duplicateSelectedTranslation() {		
+		if (selectionNodeIsntTheRootNode) {
 			showDuplicateTranslationDialog(node.getKey());
 		}
+	}
+
+	private boolean selectionNodeIsntTheRootNode()
+	{
+		TranslationTreeNode node = translationTree.getSelectionNode();
+		return node != null && !node.isRoot();
 	}
 	
 	public void addTranslationKey(String key) {
@@ -322,11 +325,8 @@ public class Editor extends JFrame {
 	}
 	
 	public void showCreateProjectDialog(ResourceType type) {
-		JFileChooser fc = new JFileChooser();
-		fc.setDialogTitle(MessageBundle.get("dialogs.project.new.title"));
-		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		int result = fc.showOpenDialog(this);
-		if (result == JFileChooser.APPROVE_OPTION) {
+		int dialogResult = createProjectDialogWithTitle("dialogs.project.new.title");
+		if (dialogResult == JFileChooser.APPROVE_OPTION) {
 			createProject(Paths.get(fc.getSelectedFile().getPath()), type);
 		} else {
 			updateHistory();
@@ -339,101 +339,89 @@ public class Editor extends JFrame {
 		if (project != null) {
 			path = project.getPath().toString();
 		}
-		JFileChooser fc = new JFileChooser(path);
-		fc.setDialogTitle(MessageBundle.get("dialogs.project.import.title"));
-		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		int result = fc.showOpenDialog(this);
-		if (result == JFileChooser.APPROVE_OPTION) {
+		int dialogResult = createProjectDialogWithTitle("dialogs.project.import.title");		
+		if (dialogResult == JFileChooser.APPROVE_OPTION) {
 			importProject(Paths.get(fc.getSelectedFile().getPath()), true);
 		}
+	}
+
+	private int createProjectDialogWithTitle(String dialogTitle)
+	{
+		JFileChooser fc = new JFileChooser(path);
+		fc.setDialogTitle(MessageBundle.get(dialogTitle));
+		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		return fc.showOpenDialog(this);
 	}
 	
 	public void showAddLocaleDialog() {
 		String localeString = "";
 		Path path = project.getPath();
 		ResourceType type = project.getResourceType();
-		while (localeString != null && localeString.isEmpty()) {
+		while (localeString.isEmpty()) {
 			localeString = Dialogs.showInputDialog(this,
 					MessageBundle.get("dialogs.locale.add.title", type),
 					MessageBundle.get("dialogs.locale.add.text"),
 					JOptionPane.QUESTION_MESSAGE);
-			if (localeString != null) {
-				localeString = localeString.trim();
-				if (localeString.isEmpty()) {
-					showError(MessageBundle.get("dialogs.locale.add.error.invalid"));
-				} else {
-					try {
-						Locale locale = LocaleUtils.toLocale(localeString);
-						Resource resource = Resources.create(path, type, Optional.of(locale), project.getResourceName());
-						addResource(resource);
-					} catch (IOException e) {
-						log.error("Error creating new locale", e);
-						showError(MessageBundle.get("dialogs.locale.add.error.create"));
-					}
+					
+			if (localeString == null)
+				break;
+			
+			localeString = localeString.trim();
+			if (localeString.isEmpty()) {
+				showError(MessageBundle.get("dialogs.locale.add.error.invalid"));
+			} else {
+				try {
+					Locale locale = LocaleUtils.toLocale(localeString);
+					Resource resource = Resources.create(path, type, Optional.of(locale), project.getResourceName());
+					addResource(resource);
+				} catch (IOException e) {
+					log.error("Error creating new locale", e);
+					showError(MessageBundle.get("dialogs.locale.add.error.create"));
 				}
-			}
+			}			
 		}
 	}
 	
 	public void showRenameTranslationDialog(String key) {
-		String newKey = "";
-		while (newKey != null && newKey.isEmpty()) {
-			newKey = Dialogs.showInputDialog(this,
-					MessageBundle.get("dialogs.translation.rename.title"),
-					MessageBundle.get("dialogs.translation.rename.text"),
-					JOptionPane.QUESTION_MESSAGE, key, true);
-			if (newKey != null) {
-				if (!ResourceKeys.isValid(newKey)) {
-					showError(MessageBundle.get("dialogs.translation.rename.error"));
-				} else {
-					TranslationTreeNode newNode = translationTree.getNodeByKey(newKey);
-					TranslationTreeNode oldNode = translationTree.getNodeByKey(key);
-					if (newNode != null) {
-						boolean isReplace = newNode.isLeaf() || oldNode.isLeaf();
-						boolean confirm = Dialogs.showConfirmDialog(this, 
-								MessageBundle.get("dialogs.translation.conflict.title"), 
-								MessageBundle.get("dialogs.translation.conflict.text." + (isReplace?"replace":"merge")),
-								JOptionPane.WARNING_MESSAGE);
-						if (confirm) {
-							renameTranslationKey(key, newKey);
-						}
-					} else {
-						renameTranslationKey(key, newKey);
-					}
-				}
-			}
-		}
+		showTranslateDialogAndExecuteFunction(key, renameTranslationKey);		
 	}
 	
 	public void showDuplicateTranslationDialog(String key) {
+		showTranslateDialogAndExecuteFunction(key, duplicateTranslationKey);		
+	}
+
+	private boolean showTranslateDialogAndExecuteFunction(String key, BiConsumer<T,U> function)
+	{
 		String newKey = "";
-		while (newKey != null && newKey.isEmpty()) {
+		while (newKey.isEmpty()) {
 			newKey = Dialogs.showInputDialog(this,
 					MessageBundle.get("dialogs.translation.duplicate.title"),
 					MessageBundle.get("dialogs.translation.duplicate.text"),
 					JOptionPane.QUESTION_MESSAGE, key, true);
-			if (newKey != null) {
-				newKey = newKey.trim();
-				if (!ResourceKeys.isValid(newKey)) {
-					showError(MessageBundle.get("dialogs.translation.duplicate.error"));
-				} else {
-					TranslationTreeNode newNode = translationTree.getNodeByKey(newKey);
-					TranslationTreeNode oldNode = translationTree.getNodeByKey(key);
-					if (newNode != null) {
-						boolean isReplace = newNode.isLeaf() || oldNode.isLeaf();
-						boolean confirm = Dialogs.showConfirmDialog(this, 
-								MessageBundle.get("dialogs.translation.conflict.title"), 
-								MessageBundle.get("dialogs.translation.conflict.text." + (isReplace?"replace":"merge")),
-								JOptionPane.WARNING_MESSAGE);
-						if (confirm) {
-							duplicateTranslationKey(key, newKey);
-						}
-					} else {
-						duplicateTranslationKey(key, newKey);
+			
+			if (newKey == null)
+				break;
+			
+			newKey = newKey.trim();
+			if (!ResourceKeys.isValid(newKey)) {
+				showError(MessageBundle.get("dialogs.translation.duplicate.error"));
+			} else {
+				TranslationTreeNode newNode = translationTree.getNodeByKey(newKey);
+				TranslationTreeNode oldNode = translationTree.getNodeByKey(key);
+				if (newNode != null) {
+					boolean isReplace = newNode.isLeaf() || oldNode.isLeaf();
+					boolean confirm = Dialogs.showConfirmDialog(this, 
+							MessageBundle.get("dialogs.translation.conflict.title"), 
+							MessageBundle.get("dialogs.translation.conflict.text." + (isReplace?"replace":"merge")),
+							JOptionPane.WARNING_MESSAGE);
+					if (confirm) {
+						function(key, newKey);						
 					}
+				} else {					
+					function(key, newKey);
 				}
-			}
-		}
+			}			
+		}		
 	}
 	
 	public void showAddTranslationDialog(TranslationTreeNode node) {
@@ -442,19 +430,21 @@ public class Editor extends JFrame {
 		if (node != null && !node.isRoot()) {
 			key = node.getKey() + ".";
 		}
-		while (newKey != null && newKey.isEmpty()) {
+		while (newKey.isEmpty()) {
 			newKey = Dialogs.showInputDialog(this,
 					MessageBundle.get("dialogs.translation.add.title"),
 					MessageBundle.get("dialogs.translation.add.text"),
 					JOptionPane.QUESTION_MESSAGE, key, false);
-			if (newKey != null) {
-				newKey = newKey.trim();
-				if (!ResourceKeys.isValid(newKey)) {
-					showError(MessageBundle.get("dialogs.translation.add.error"));
-				} else {
-					addTranslationKey(newKey);
-				}
-			}
+			
+			if (newKey == null)
+				break;
+			
+			newKey = newKey.trim();
+			if (!ResourceKeys.isValid(newKey)) {
+				showError(MessageBundle.get("dialogs.translation.add.error"));
+			} else {
+				addTranslationKey(newKey);
+			}			
 		}
 	}
 	
