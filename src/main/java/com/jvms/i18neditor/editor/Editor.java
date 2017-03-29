@@ -325,11 +325,8 @@ public class Editor extends JFrame {
 	}
 	
 	public void showCreateProjectDialog(ResourceType type) {
-		JFileChooser fc = new JFileChooser();
-		fc.setDialogTitle(MessageBundle.get("dialogs.project.new.title"));
-		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		int result = fc.showOpenDialog(this);
-		if (result == JFileChooser.APPROVE_OPTION) {
+		int dialogResult = createProjectDialogWithTitle("dialogs.project.new.title");
+		if (dialogResult == JFileChooser.APPROVE_OPTION) {
 			createProject(Paths.get(fc.getSelectedFile().getPath()), type);
 		} else {
 			updateHistory();
@@ -342,13 +339,18 @@ public class Editor extends JFrame {
 		if (project != null) {
 			path = project.getPath().toString();
 		}
-		JFileChooser fc = new JFileChooser(path);
-		fc.setDialogTitle(MessageBundle.get("dialogs.project.import.title"));
-		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		int result = fc.showOpenDialog(this);
-		if (result == JFileChooser.APPROVE_OPTION) {
+		int dialogResult = createProjectDialogWithTitle("dialogs.project.import.title");		
+		if (dialogResult == JFileChooser.APPROVE_OPTION) {
 			importProject(Paths.get(fc.getSelectedFile().getPath()), true);
 		}
+	}
+
+	private int createProjectDialogWithTitle(String dialogTitle)
+	{
+		JFileChooser fc = new JFileChooser(path);
+		fc.setDialogTitle(MessageBundle.get(dialogTitle));
+		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		return fc.showOpenDialog(this);
 	}
 	
 	public void showAddLocaleDialog() {
