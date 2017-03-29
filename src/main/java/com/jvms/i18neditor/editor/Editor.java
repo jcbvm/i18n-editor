@@ -230,8 +230,7 @@ public class Editor extends JFrame {
 	}
 	
 	public void removeSelectedTranslation() {
-		TranslationTreeNode node = translationTree.getSelectionNode();
-		if (node != null && !node.isRoot()) {
+		if (selectionNodeIsntTheRootNode) {
 			TranslationTreeNode parent = (TranslationTreeNode) node.getParent();
 			removeTranslationKey(node.getKey());
 			translationTree.setSelectionNode(parent);
@@ -239,17 +238,21 @@ public class Editor extends JFrame {
 	}
 	
 	public void renameSelectedTranslation() {
-		TranslationTreeNode node = translationTree.getSelectionNode();
-		if (node != null && !node.isRoot()) {
+		if (selectionNodeIsntTheRootNode) {
 			showRenameTranslationDialog(node.getKey());
 		}
 	}
 	
-	public void duplicateSelectedTranslation() {
-		TranslationTreeNode node = translationTree.getSelectionNode();
-		if (node != null && !node.isRoot()) {
+	public void duplicateSelectedTranslation() {		
+		if (selectionNodeIsntTheRootNode) {
 			showDuplicateTranslationDialog(node.getKey());
 		}
+	}
+
+	private boolean selectionNodeIsntTheRootNode()
+	{
+		TranslationTreeNode node = translationTree.getSelectionNode();
+		return node != null && !node.isRoot();
 	}
 	
 	public void addTranslationKey(String key) {
