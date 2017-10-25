@@ -31,7 +31,7 @@ public final class ResourceKeys {
 	 * @return 	the created key.
 	 */
 	public static String create(List<String> parts) {
-		return parts.stream().filter(p -> p != null && !p.isEmpty()).collect(Collectors.joining("."));
+		return parts.stream().filter(p -> p != null && !p.isEmpty()).collect(Collectors.joining("_"));
 	}
 	
 	/**
@@ -42,7 +42,7 @@ public final class ResourceKeys {
 	 * @return	whether the key is valid or not.
 	 */
 	public static boolean isValid(String key) {
-		return !key.isEmpty() && !key.startsWith(".") && !key.endsWith(".") && key.matches("[^\\s]+");
+		return !key.isEmpty() && !key.startsWith("_") && !key.endsWith("_") && key.matches("[^\\s]+");
 	}
 	
 	/**
@@ -63,7 +63,7 @@ public final class ResourceKeys {
 	 * @return	the parts of the key.
 	 */
 	public static String[] parts(String key) {
-		return key.split("\\.");
+		return key.split("_");
 	}
 	
 	/**
@@ -109,7 +109,7 @@ public final class ResourceKeys {
 	 */
 	public static String withoutFirstPart(String key) {
 		if (size(key) == 1) return "";
-		return key.replaceAll("^[^.]+\\.", "");
+		return key.replaceAll("^[^.]+_", "");
 	}
 	
 	/**
@@ -121,7 +121,7 @@ public final class ResourceKeys {
 	 */
 	public static String withoutLastPart(String key) {
 		if (size(key) == 1) return "";
-		return key.replaceAll("\\.[^.]+$", "");
+		return key.replaceAll("_[^.]+$", "");
 	}
 	
 	/**
@@ -139,7 +139,7 @@ public final class ResourceKeys {
 	public static String childKey(String key, String parentKey) {
 		if (key == null || key.isEmpty()) return "";
 		if (parentKey == null || parentKey.isEmpty()) return key;
-		String result = key.replaceFirst(parentKey + "\\.", "");
+		String result = key.replaceFirst(parentKey + "_", "");
 		if (result.equals(key)) return "";
 		return result;
 	}
@@ -153,7 +153,7 @@ public final class ResourceKeys {
 	 * @return	whether the given key is a child of the given parent key.
 	 */
 	public static boolean isChildKeyOf(String key, String parentKey) {
-		return key.startsWith(parentKey + ".");
+		return key.startsWith(parentKey + "_");
 	}
 	
 	/**

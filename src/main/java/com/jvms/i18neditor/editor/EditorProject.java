@@ -57,7 +57,7 @@ public class EditorProject {
 	}
 
 	public String getResourceName() {
-		return resourceName;
+		return "fr";
 	}
 
 	public void setResourceName(String resourceFilename) {

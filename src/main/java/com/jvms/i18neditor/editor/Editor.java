@@ -80,10 +80,12 @@ public class Editor extends JFrame {
 	private final static long serialVersionUID = 1113029729495390082L;
 	private final static Logger log = LoggerFactory.getLogger(Editor.class);
 	
-	public final static String TITLE = "i18n-editor";
+	public final static String TITLE = "i18n-Editor";
 	public final static String VERSION = "1.0.0";
 	public final static String GITHUB_REPO = "jcbvm/i18n-editor";
-	public final static String DEFAULT_RESOURCE_NAME = "translations";
+	// 寻找目录下面的文件
+	public final static String DEFAULT_RESOURCE_NAME = "fr";
+
 	public final static String PROJECT_FILE = ".i18n-editor-metadata";
 	public final static String SETTINGS_FILE = ".i18n-editor";
 	public final static String SETTINGS_DIR = System.getProperty("user.home");
@@ -152,7 +154,8 @@ public class Editor extends JFrame {
 			showError(MessageBundle.get("resources.create.error"));
 		}
 	}
-	
+
+	// 导入文件
 	public void importProject(Path dir, boolean showEmptyProjectError) {
 		try {
 			Preconditions.checkArgument(Files.isDirectory(dir));
@@ -183,6 +186,8 @@ public class Editor extends JFrame {
 				resourceList.forEach(resource -> {
 					try {
 						Resources.load(resource);
+//						System.err.println(resource.getLocale());
+//						System.err.println(resource.getPath());
 						setupResource(resource);
 						project.addResource(resource);
 					} catch (IOException e) {
@@ -347,7 +352,8 @@ public class Editor extends JFrame {
 			importProject(Paths.get(fc.getSelectedFile().getPath()), true);
 		}
 	}
-	
+//--
+	//  创建对应语言的文件夹(写)
 	public void showAddLocaleDialog() {
 		String localeString = "";
 		Path path = project.getPath();
@@ -363,8 +369,11 @@ public class Editor extends JFrame {
 					showError(MessageBundle.get("dialogs.locale.add.error.invalid"));
 				} else {
 					try {
+//  核心业务
+//	project.getResourceName()  这个目前是写死了的
 						Locale locale = LocaleUtils.toLocale(localeString);
-						Resource resource = Resources.create(path, type, Optional.of(locale), project.getResourceName());
+//						Resource resource = Resources.create(path, type, Optional.of(locale), project.getResourceName());
+						Resource resource = Resources.create(path, type, Optional.of(locale), localeString);
 						addResource(resource);
 					} catch (IOException e) {
 						log.error("Error creating new locale", e);
@@ -480,7 +489,7 @@ public class Editor extends JFrame {
 				"<img src=\"" + Images.getClasspathURL("images/icon-48.png") + "\"><br>" +
 				"<span style=\"font-size:1.3em;\"><strong>" + TITLE + "</strong></span><br>" + 
 				VERSION + "<br><br>" +
-				"Copyright (c) 2015 - 2017<br>" +
+				"Copyright (c) 2017 - 2018<br>" +
 				"Jacob van Mourik<br>" + 
 				"MIT Licensed");
 	}
@@ -588,7 +597,7 @@ public class Editor extends JFrame {
 		resourceFields = resourceFields.stream().sorted().collect(Collectors.toList());
 		resourceFields.forEach(field -> {
 			Locale locale = field.getResource().getLocale();
-			String label = locale != null ? locale.getDisplayName() : MessageBundle.get("resources.locale.default");
+			String label = locale != null ? locale.getDisplayName(): MessageBundle.get("resources.locale.default");
 			field.setEnabled(selectedNode != null && selectedNode.isEditable());
 			field.setRows(settings.getDefaultInputHeight());
 			resourcesPanel.add(Box.createVerticalStrut(5));
