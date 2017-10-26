@@ -76,8 +76,8 @@ public final class Resources {
 					}
 					path = Paths.get(rootDir.toString(), baseName + (locale == null ? "" : "_" + locale.toString()) + extension);				
 				} else {
-					locale = LocaleUtils.toLocale(fileName);
-					path = Paths.get(rootDir.toString(), locale.toString(), baseName + extension);			
+//					locale = LocaleUtils.toLocale(fileName);
+					path = Paths.get(rootDir.toString(), baseName + extension);
 				}
 				result.add(new Resource(resourceType, path, locale));
 			}
@@ -137,7 +137,7 @@ public final class Resources {
 	/**
 	 * Creates a new {@link Resource} with the given {@link ResourceType} in the given directory path.
 	 * This function should be used to create new resources. For creating an instance of an
-	 * existing resource on disk, see {@link #read(Path)}.
+	 * existing resource on disk, see
 	 * 
 	 * @param 	type the type of the resource to create.
 	 * @param 	root the root directory to write the resource to.
@@ -150,7 +150,7 @@ public final class Resources {
 		if (type.isEmbedLocale()) {
 			path = Paths.get(root.toString(), baseName + (locale.isPresent() ? "_" + locale.get().toString() : "") + extension);				
 		} else {
-			path = Paths.get(root.toString(), locale.get().toString(), baseName + extension);			
+			path = Paths.get(root.toString(),  baseName + extension);
 		}
 		Resource resource = new Resource(type, path, locale.orElse(null));
 		write(resource, false);
@@ -159,15 +159,12 @@ public final class Resources {
 	
 	private static boolean isResource(Path root, Path path, ResourceType type, String baseName) throws IOException {
 		String extension = type.getExtension();
-		Path parent = path.getParent();
-		if (parent == null || Files.isSameFile(root, path) || !Files.isSameFile(root, parent)) {
-			return false;
-		} else if (type.isEmbedLocale()) {
+        if (type.isEmbedLocale()) {
 			return Files.isRegularFile(path) &&
-					Pattern.matches("^" + baseName + "(_" + LOCALE_REGEX + ")?" + extension + "$", path.getFileName().toString());			
+					Pattern.matches("^" + baseName + "(_" + LOCALE_REGEX + ")?" + extension + "$", path.getFileName().toString());
 		} else {
 			return Files.isDirectory(path) &&
-					Pattern.matches("^" + LOCALE_REGEX + "$", path.getFileName().toString()) &&
+					Pattern.matches("^" + LOCALE_REGEX + "$", baseName) &&
 					Files.isRegularFile(Paths.get(path.toString(), baseName + extension));
 		}
 	}

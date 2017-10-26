@@ -36,8 +36,8 @@ public class ResourceKeysTest {
 	public void partsTest() {
 		assertArrayEquals(new String[]{""}, ResourceKeys.parts(""));
 		assertArrayEquals(new String[]{"a"}, ResourceKeys.parts("a"));
-		assertArrayEquals(new String[]{"a","b"}, ResourceKeys.parts("a.b"));
-		assertArrayEquals(new String[]{"a","b","c"}, ResourceKeys.parts("a.b.c"));
+		assertArrayEquals(new String[]{"a.b"}, ResourceKeys.parts("a.b"));
+		assertArrayEquals(new String[]{"a.b.c"}, ResourceKeys.parts("a.b.c"));
 	}
 	
 	@Test
@@ -46,9 +46,9 @@ public class ResourceKeysTest {
 		assertArrayEquals(new String[]{}, ResourceKeys.subParts("",1));
 		assertArrayEquals(new String[]{"a"}, ResourceKeys.subParts("a",0));
 		assertArrayEquals(new String[]{}, ResourceKeys.subParts("a",1));
-		assertArrayEquals(new String[]{"a","b"}, ResourceKeys.subParts("a.b",0));
-		assertArrayEquals(new String[]{"b"}, ResourceKeys.subParts("a.b",1));
-		assertArrayEquals(new String[]{}, ResourceKeys.subParts("a.b",2));
+		assertArrayEquals(new String[]{"a.b"}, ResourceKeys.subParts("a.b",0));
+		assertArrayEquals(new String[]{"a.b"}, ResourceKeys.subParts("a.b",1));
+		assertArrayEquals(new String[]{"a.b"}, ResourceKeys.subParts("a.b",2));
 		assertArrayEquals(new String[]{"a","b","c"}, ResourceKeys.subParts("a.b.c",0));
 		assertArrayEquals(new String[]{"b","c"}, ResourceKeys.subParts("a.b.c",1));
 		assertArrayEquals(new String[]{"c"}, ResourceKeys.subParts("a.b.c",2));
