@@ -31,7 +31,7 @@ public class TranslationTreeModel extends DefaultTreeModel {
 	
 	@SuppressWarnings("unchecked")
 	public Enumeration<TranslationTreeNode> getEnumeration(TranslationTreeNode node) {
-		return node.depthFirstEnumeration();
+		return (Enumeration) node.depthFirstEnumeration();
 	}
 	
 	public TranslationTreeNode getNodeByKey(String key) {
