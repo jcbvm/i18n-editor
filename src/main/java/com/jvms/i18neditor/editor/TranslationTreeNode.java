@@ -61,7 +61,7 @@ public class TranslationTreeNode extends DefaultMutableTreeNode {
 	
 	@SuppressWarnings("unchecked")
 	public List<TranslationTreeNode> getChildren() {
-		return Collections.list(children());
+		return (List) Collections.list(children());
 	}
 	
 	public TranslationTreeNode getChild(String name) {
