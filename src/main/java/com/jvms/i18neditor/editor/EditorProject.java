@@ -19,6 +19,7 @@ public class EditorProject {
 	private ResourceType resourceType;
 	private List<Resource> resources = Lists.newLinkedList();
 	private boolean minifyResources;
+	private boolean plainJSON;
 	
 	public EditorProject(Path path) {
 		this.path = path;
@@ -70,5 +71,13 @@ public class EditorProject {
 
 	public void setMinifyResources(boolean minifyResources) {
 		this.minifyResources = minifyResources;
+	}
+
+	public boolean isPlainJSON() {
+		return plainJSON;
+	}
+
+	public void setPlainJSON(boolean plainJSON) {
+		this.plainJSON = plainJSON;
 	}
 }
