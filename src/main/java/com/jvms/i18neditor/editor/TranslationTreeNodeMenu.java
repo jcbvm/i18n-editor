@@ -3,6 +3,7 @@ package com.jvms.i18neditor.editor;
 import javax.swing.JPopupMenu;
 
 import com.jvms.i18neditor.editor.menu.AddTranslationMenuItem;
+import com.jvms.i18neditor.editor.menu.CopyTranslationKeyToClipboardMenuItem;
 import com.jvms.i18neditor.editor.menu.DuplicateTranslationMenuItem;
 import com.jvms.i18neditor.editor.menu.RemoveTranslationMenuItem;
 import com.jvms.i18neditor.editor.menu.RenameTranslationMenuItem;
@@ -21,6 +22,7 @@ public class TranslationTreeNodeMenu extends JPopupMenu {
 		if (!node.isRoot()) {
 			addSeparator();
 			add(new RenameTranslationMenuItem(editor, true));
+			add(new CopyTranslationKeyToClipboardMenuItem(editor, true));
 			add(new DuplicateTranslationMenuItem(editor, true));
 			add(new RemoveTranslationMenuItem(editor, true));
 		}

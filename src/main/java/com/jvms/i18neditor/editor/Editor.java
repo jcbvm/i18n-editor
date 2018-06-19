@@ -7,6 +7,9 @@ import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.KeyboardFocusManager;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -242,6 +245,16 @@ public class Editor extends JFrame {
 		TranslationTreeNode node = translationTree.getSelectionNode();
 		if (node != null && !node.isRoot()) {
 			showRenameTranslationDialog(node.getKey());
+		}
+	}
+	
+	public void copySelectedTranslationKey() {
+		TranslationTreeNode node = translationTree.getSelectionNode();
+		if (node != null && !node.isRoot()) {
+			String key = node.getKey();
+			StringSelection selection = new StringSelection(key);
+			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+			clipboard.setContents(selection, selection);
 		}
 	}
 	
