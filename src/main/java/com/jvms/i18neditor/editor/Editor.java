@@ -209,7 +209,7 @@ public class Editor extends JFrame {
 		if (project != null) {
 			for (Resource resource : project.getResources()) {
 				try {
-					Resources.write(resource, !project.isMinifyResources());
+					Resources.write(resource, !project.isMinifyResources(), project.isPlainJSON());
 				} catch (IOException e) {
 					error = true;
 					log.error("Error saving resource file " + resource.getPath(), e);
@@ -831,6 +831,7 @@ public class Editor extends JFrame {
 	private void storeProjectState() {
 		ExtendedProperties props = new ExtendedProperties();
 		props.setProperty("minify_resources", project.isMinifyResources());
+		props.setProperty("plain_json", project.isPlainJSON());
 		props.setProperty("resource_name", project.getResourceName());
 		props.setProperty("resource_type", project.getResourceType().toString());
 		props.store(Paths.get(project.getPath().toString(), PROJECT_FILE));
@@ -842,6 +843,7 @@ public class Editor extends JFrame {
 		if (Files.exists(path)) {
 			props.load(Paths.get(project.getPath().toString(), PROJECT_FILE));
 			project.setMinifyResources(props.getBooleanProperty("minify_resources", settings.isMinifyResources()));
+			project.setPlainJSON(props.getBooleanProperty("plain_json", settings.isPlainJSON()));
 			project.setResourceName(props.getProperty("resource_name", settings.getResourceName()));
 			project.setResourceType(props.getEnumProperty("resource_type", ResourceType.class));
 		} else {
@@ -858,6 +860,7 @@ public class Editor extends JFrame {
 		props.setProperty("window_pos_y", getY());
 		props.setProperty("window_div_pos", contentPane.getDividerLocation());
 		props.setProperty("minify_resources", settings.isMinifyResources());
+		props.setProperty("plain_json", settings.isPlainJSON());
 		props.setProperty("resource_name", settings.getResourceName());
 		props.setProperty("check_version", settings.isCheckVersionOnStartup());
 		props.setProperty("default_input_height", settings.getDefaultInputHeight());
@@ -891,6 +894,7 @@ public class Editor extends JFrame {
 		settings.setLastExpandedNodes(props.getListProperty("last_expanded"));
 		settings.setLastSelectedNode(props.getProperty("last_selected"));
 		settings.setMinifyResources(props.getBooleanProperty("minify_resources", false));
+		settings.setPlainJSON(props.getBooleanProperty("plain_json", false));
 		settings.setResourceName(props.getProperty("resource_name", DEFAULT_RESOURCE_NAME));
 		settings.setCheckVersionOnStartup(props.getBooleanProperty("check_version", true));
 		settings.setDefaultInputHeight(props.getIntegerProperty("default_input_height", 5));

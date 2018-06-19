@@ -41,7 +41,12 @@ public class EditorProjectSettingsPane extends AbstractSettingsPane {
 			minifyBox.addChangeListener(e -> project.setMinifyResources(minifyBox.isSelected()));
 			fieldset1.add(minifyBox, createVerticalGridBagConstraints());
 		}
-		
+		if (project.getResourceType().equals(ResourceType.JSON)) {
+			JCheckBox plainJSONBox = new JCheckBox(MessageBundle.get("settings.plainJSON.title"));
+			plainJSONBox.setSelected(project.isPlainJSON());
+			plainJSONBox.addChangeListener(e -> project.setPlainJSON(plainJSONBox.isSelected()));
+			fieldset1.add(plainJSONBox, createVerticalGridBagConstraints());
+		}
 		JPanel resourcePanel = new JPanel(new GridLayout(0, 1));
 		JLabel resourceNameLabel = new JLabel(MessageBundle.get("settings.resourcename.title"));
 		JTextField resourceNameField = new JTextField(project.getResourceName());

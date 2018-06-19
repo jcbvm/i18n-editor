@@ -15,6 +15,7 @@ public class EditorSettings {
 	private int windowHeight;
 	private String resourceName;
 	private boolean minifyResources;
+	private boolean plainJSON;
 	private List<String> history;
 	private List<String> lastExpandedNodes;
 	private String lastSelectedNode;
@@ -133,5 +134,13 @@ public class EditorSettings {
 
 	public void setDoubleClickTreeToggling(boolean doubleClickTreeToggling) {
 		this.doubleClickTreeToggling = doubleClickTreeToggling;
+	}
+
+	public boolean isPlainJSON() {
+		return plainJSON;
+	}
+
+	public void setPlainJSON(boolean plainJSON) {
+		this.plainJSON = plainJSON;
 	}
 }

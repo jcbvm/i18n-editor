@@ -114,15 +114,16 @@ public final class Resources {
 	 * 
 	 * @param 	resource the resource to write.
 	 * @param   prettyPrinting whether to pretty print the contents
+	 * @param plainKeys 
 	 * @throws 	IOException if an I/O error occurs writing the file.
 	 */
-	public static void write(Resource resource, boolean prettyPrinting) throws IOException {
+	public static void write(Resource resource, boolean prettyPrinting, boolean plainKeys) throws IOException {
 		ResourceType type = resource.getType();
 		if (type == ResourceType.Properties) {
 			ExtendedProperties content = toProperties(resource.getTranslations());
 			content.store(resource.getPath());
 		} else {
-			String content = toJson(resource.getTranslations(), prettyPrinting);
+			String content = toJson(resource.getTranslations(), prettyPrinting, plainKeys);
 			if (type == ResourceType.ES6) {
 				content = jsonToEs6(content);
 			}
@@ -153,7 +154,7 @@ public final class Resources {
 			path = Paths.get(root.toString(), locale.get().toString(), baseName + extension);			
 		}
 		Resource resource = new Resource(type, path, locale.orElse(null));
-		write(resource, false);
+		write(resource, false, false);
 		return resource;
 	}
 	
@@ -212,9 +213,9 @@ public final class Resources {
 		}
 	}
 	
-	private static String toJson(Map<String,String> translations, boolean prettify) {
+	private static String toJson(Map<String,String> translations, boolean prettify, boolean plainKeys) {
 		List<String> keys = Lists.newArrayList(translations.keySet());
-		JsonElement elem = toJson(translations, null, keys);
+		JsonElement elem = !plainKeys ? toJson(translations, null, keys) : toPlainJson(translations, keys);
 		GsonBuilder builder = new GsonBuilder().disableHtmlEscaping();
 		if (prettify) {
 			builder.setPrettyPrinting();
@@ -222,6 +223,18 @@ public final class Resources {
 		return builder.create().toJson(elem);
 	}
 	
+	private static JsonElement toPlainJson(Map<String, String> translations, List<String> keys) {
+		JsonObject object = new JsonObject();
+		if (keys.size() > 0) {
+			translations.forEach((k, v) -> {
+				if (translations.get(k)!=null){
+					object.add(k, new JsonPrimitive(translations.get(k)));
+				}
+			});			
+		}
+		return object;
+	}
+
 	private static JsonElement toJson(Map<String,String> translations, String key, List<String> keys) {
 		if (keys.size() > 0) {
 			JsonObject object = new JsonObject();
