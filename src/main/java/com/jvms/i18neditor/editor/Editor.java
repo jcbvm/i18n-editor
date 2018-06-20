@@ -85,7 +85,7 @@ public class Editor extends JFrame {
 	private final static Logger log = LoggerFactory.getLogger(Editor.class);
 	
 	public final static String TITLE = "i18n-editor";
-	public final static String VERSION = "1.0.0";
+	public final static String VERSION = "2.0.0";
 	public final static String GITHUB_REPO = "jcbvm/i18n-editor";
 	public final static String PROJECT_FILE = ".i18n-editor-metadata";
 	public final static String SETTINGS_FILE = ".i18n-editor";
@@ -504,7 +504,7 @@ public class Editor extends JFrame {
 				"<img src=\"" + Images.getClasspathURL("images/icon-48.png") + "\"><br>" +
 				"<span style=\"font-size:1.3em;\"><strong>" + TITLE + "</strong></span><br>" + 
 				VERSION + "<br><br>" +
-				"Copyright (c) 2015 - 2017<br>" +
+				"Copyright (c) 2015 - 2018<br>" +
 				"Jacob van Mourik<br>" + 
 				"MIT Licensed");
 	}
