@@ -9,6 +9,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.text.Caret;
 
 import com.google.common.base.Strings;
 import com.jvms.i18neditor.swing.JHtmlPane;
@@ -55,7 +56,11 @@ public final class Dialogs {
 		return JOptionPane.showConfirmDialog(parent, message, title, type) == JOptionPane.YES_OPTION;
 	}
 	
-	public static String showInputDialog(Component parent, String title, String label, int type, String initialText, boolean selectAll) {
+	public static String showInputDialog(Component parent, String title, String label, int type) {
+		return showInputDialog(parent, title, label, type, null, new BlinkCaret());
+	}
+	
+	public static String showInputDialog(Component parent, String title, String label, int type, String initialText, Caret caret) {
 		JPanel content = new JPanel(new GridLayout(0, 1));
 		
 		if (!Strings.isNullOrEmpty(label)) {
@@ -64,12 +69,9 @@ public final class Dialogs {
 		
 		JTextField field =  new JTextField(initialText);
 		field.addAncestorListener(new RequestInitialFocusListener());
-		field.setCaret(new BlinkCaret());
+		field.setCaret(caret);
 		if (initialText != null) {
 			field.setCaretPosition(initialText.length());			
-		}
-		if (selectAll) {
-			field.selectAll();
 		}
 		content.add(field);
 		
@@ -78,9 +80,5 @@ public final class Dialogs {
 		
 		int result = JOptionPane.showConfirmDialog(parent, container, title, JOptionPane.OK_CANCEL_OPTION, type);
 		return result == JOptionPane.OK_OPTION ? field.getText() : null;
-	}
-	
-	public static String showInputDialog(Component parent, String title, String label, int type) {
-		return showInputDialog(parent, title, label, type, null, false);
 	}
 }

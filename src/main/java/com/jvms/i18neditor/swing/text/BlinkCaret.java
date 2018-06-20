@@ -10,10 +10,9 @@ import javax.swing.text.DefaultCaret;
  */
 public class BlinkCaret extends DefaultCaret {
 	private final static long serialVersionUID = -3365578081904749196L;
-	public final static int DEFAULT_BLINK_RATE = 500;
-
+	
 	public BlinkCaret() {
-		int blinkRate = DEFAULT_BLINK_RATE;
+		int blinkRate = 0;
 		Object o = UIManager.get("TextArea.caretBlinkRate");
 		if (o != null && o instanceof Integer) {
 			blinkRate = ((Integer) o).intValue();

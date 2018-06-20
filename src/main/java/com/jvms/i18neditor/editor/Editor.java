@@ -109,7 +109,7 @@ public class Editor extends JFrame {
 	private JPanel translationsPanel;
 	private JScrollPane resourcesScrollPane;
 	private TranslationTree translationTree;
-	private TranslationField translationField;
+	private TranslationKeyField translationField;
 	private JPanel resourcesPanel;
 	private List<ResourceField> resourceFields = Lists.newArrayList();
 	
@@ -405,7 +405,7 @@ public class Editor extends JFrame {
 			newKey = Dialogs.showInputDialog(this,
 					MessageBundle.get("dialogs.translation.rename.title"),
 					MessageBundle.get("dialogs.translation.rename.text"),
-					JOptionPane.QUESTION_MESSAGE, key, true);
+					JOptionPane.QUESTION_MESSAGE, key, new TranslationKeyCaret());
 			if (newKey != null) {
 				if (!ResourceKeys.isValid(newKey)) {
 					showError(MessageBundle.get("dialogs.translation.rename.error"));
@@ -435,7 +435,7 @@ public class Editor extends JFrame {
 			newKey = Dialogs.showInputDialog(this,
 					MessageBundle.get("dialogs.translation.duplicate.title"),
 					MessageBundle.get("dialogs.translation.duplicate.text"),
-					JOptionPane.QUESTION_MESSAGE, key, true);
+					JOptionPane.QUESTION_MESSAGE, key, new TranslationKeyCaret());
 			if (newKey != null) {
 				newKey = newKey.trim();
 				if (!ResourceKeys.isValid(newKey)) {
@@ -470,7 +470,7 @@ public class Editor extends JFrame {
 			newKey = Dialogs.showInputDialog(this,
 					MessageBundle.get("dialogs.translation.add.title"),
 					MessageBundle.get("dialogs.translation.add.text"),
-					JOptionPane.QUESTION_MESSAGE, key, false);
+					JOptionPane.QUESTION_MESSAGE, key, new TranslationKeyCaret());
 			if (newKey != null) {
 				newKey = newKey.trim();
 				if (!ResourceKeys.isValid(newKey)) {
@@ -688,7 +688,7 @@ public class Editor extends JFrame {
         translationTree.addTreeSelectionListener(new TranslationTreeNodeSelectionListener());
         translationTree.addMouseListener(new TranslationTreeMouseListener());
         
-		translationField = new TranslationField();
+		translationField = new TranslationKeyField();
 		translationField.addKeyListener(new TranslationFieldKeyListener());
 		translationField.setBorder(BorderFactory.createCompoundBorder(
 				BorderFactory.createMatteBorder(1,0,0,1,borderColor),
@@ -1012,7 +1012,7 @@ public class Editor extends JFrame {
 		@Override
 		public void keyReleased(KeyEvent e) {
 			if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-				TranslationField field = (TranslationField) e.getSource();
+				TranslationKeyField field = (TranslationKeyField) e.getSource();
 				String key = field.getValue();
 				if (ResourceKeys.isValid(key)) {
 					addTranslationKey(key);						
