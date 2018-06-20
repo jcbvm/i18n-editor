@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
@@ -144,6 +145,17 @@ public class ExtendedProperties extends Properties {
 	}
 	
 	/**
+	 * Sets a value in the property list. The {@code Locale} value will be 
+	 * stored as a {@code String} value.
+	 * 
+	 * @param 	key the key to be placed in this property list.
+	 * @param 	value the value corresponding to {@code key}.
+	 */
+	public void setProperty(String key, Locale locale) {
+		setProperty(key, locale.toString());
+	}
+	
+	/**
 	 * Gets a value from the property list as a {@code List}. This method should be used
 	 * to retrieve a value previously stored by {@link #setProperty(String, List)}.
 	 * 
@@ -251,6 +263,33 @@ public class ExtendedProperties extends Properties {
 	 */
 	public <T extends Enum<T>> T getEnumProperty(String key, Class<T> enumType, T defaultValue) {
 		T value = getEnumProperty(key, enumType);
+		return value != null ? value : defaultValue;
+	}
+	
+	/**
+	 * Gets a value from the property list as an {@code Locale}. This method should be used 
+	 * to retrieve a value previously stored by {@link #setProperty(String, Locale)}.
+	 * 
+	 * @param 	key the property key.
+	 * @return 	the value in this property list with the specified key value or {@code null}
+	 * 			if no such key exists.
+	 */
+	public Locale getLocaleProperty(String key) {
+		String value = getProperty(key);
+		return Locales.parseLocale(value);
+	}
+	
+	/**
+	 * See {@link #getLocaleProperty(Locale)}. This method returns {@code defaultValue} when
+	 * there is no value in the property list with the specified {@code key}.
+	 * 
+	 * @param 	key the property key.
+	 * @param	defaultValue the default value to return when there is no value for the specified key
+	 * @return 	the value in this property list with the specified key value or {@code defaultValue}
+	 * 			if no such key exists.
+	 */
+	public Locale getLocaleProperty(String key, Locale defaultValue) {
+		Locale value = getLocaleProperty(key);
 		return value != null ? value : defaultValue;
 	}
 	

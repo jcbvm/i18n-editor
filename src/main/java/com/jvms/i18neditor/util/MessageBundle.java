@@ -1,6 +1,7 @@
 package com.jvms.i18neditor.util;
 
 import java.text.MessageFormat;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
@@ -13,10 +14,16 @@ import java.util.ResourceBundle;
  */
 public final class MessageBundle {
 	private final static String RESOURCES_PATH = "bundles/messages";
-	private final static ResourceBundle RESOURCES;
+	private static ResourceBundle RESOURCES;
 	
-	static {
-		RESOURCES = ResourceBundle.getBundle(RESOURCES_PATH);
+	/**
+	 * Sets the preferred locale to use.
+	 * When calling this function resources will be reloaded from disk.
+	 * 
+	 * @param 	locale the preferred locale to use
+	 */
+	public static void setLocale(Locale locale) {
+		RESOURCES = ResourceBundle.getBundle(RESOURCES_PATH, locale);
 	}
 	
 	/**
@@ -41,5 +48,12 @@ public final class MessageBundle {
 	public static Character getMnemonic(String key) {
 		String value = RESOURCES.getString(key);
 		return value.charAt(0);
+	}
+	
+	/**
+	 * Loads the resources.
+	 */
+	public static void loadResources() {
+		RESOURCES = ResourceBundle.getBundle(RESOURCES_PATH);
 	}
 }

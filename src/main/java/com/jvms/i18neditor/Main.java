@@ -21,9 +21,6 @@ public class Main {
 	private final static Logger log = LoggerFactory.getLogger(Main.class);
 	
 	public static void main(String[] args) {
-		// Override locale for testing
-		//Locale.setDefault(new Locale("nl"));
-		
 		SwingUtilities.invokeLater(() -> {
 			// Enable global menu on MAC OS
 			if (SystemUtils.IS_OS_MAC) {

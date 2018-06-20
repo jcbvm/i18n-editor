@@ -1,6 +1,7 @@
 package com.jvms.i18neditor.editor;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * This class represents the editor settings.
@@ -24,6 +25,7 @@ public class EditorSettings {
 	private boolean doubleClickTreeToggling;
 	private String resourceFileDifinition;
 	private boolean resourceDirectories;
+	private Locale editorLanguage;
 	
 	public int getWindowPositionX() {
 		return windowPositionX;
@@ -150,5 +152,13 @@ public class EditorSettings {
 
 	public void setFlattenJSON(boolean flattenJSON) {
 		this.flattenJSON = flattenJSON;
+	}
+
+	public Locale getEditorLanguage() {
+		return editorLanguage;
+	}
+
+	public void setEditorLanguage(Locale editorLanguage) {
+		this.editorLanguage = editorLanguage;
 	}
 }

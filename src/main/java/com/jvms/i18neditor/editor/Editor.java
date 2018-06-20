@@ -92,6 +92,12 @@ public class Editor extends JFrame {
 	public final static String SETTINGS_DIR = System.getProperty("user.home");
 	public final static String DEFAULT_RESOURCE_DEFINITION = "translations{_LOCALE}";
 	
+	public final static Locale DEFAULT_LANGUAGE = Locale.ENGLISH;
+	public final static List<Locale> SUPPORTED_LANGUAGES = Lists.newArrayList(
+			new Locale("en"),
+			new Locale("nl"),
+			new Locale("pt", "BR"));
+	
 	private EditorProject project;
 	private EditorSettings settings = new EditorSettings();
 	private ExecutorService executor = Executors.newFixedThreadPool(2);
@@ -106,13 +112,6 @@ public class Editor extends JFrame {
 	private TranslationField translationField;
 	private JPanel resourcesPanel;
 	private List<ResourceField> resourceFields = Lists.newArrayList();
-	
-	public Editor() {
-		super();
-		setupUI();
-		setupFileDrop();
-		setupGlobalKeyEventDispatcher();
-	}
 	
 	public void createProject(Path dir, ResourceType type) {
 		try {
@@ -321,6 +320,14 @@ public class Editor extends JFrame {
 	
 	public EditorSettings getSettings() {
 		return settings;
+	}
+	
+	public Locale getCurrentLocale() {
+		Locale locale = settings.getEditorLanguage();
+		if (locale == null) {
+			locale = Locale.getDefault();
+		}
+		return locale;
 	}
 	
 	public boolean isDirty() {
@@ -557,6 +564,18 @@ public class Editor extends JFrame {
 	
 	public void launch() {
 		restoreEditorState();
+		
+		if (settings.getEditorLanguage() != null) {
+			Locale.setDefault(settings.getEditorLanguage());
+		} else {
+			Locale.setDefault(DEFAULT_LANGUAGE);
+		}
+		
+		MessageBundle.loadResources();
+		
+		setupUI();
+		setupFileDrop();
+		setupGlobalKeyEventDispatcher();
 		
 		setPreferredSize(new Dimension(settings.getWindowWidth(), settings.getWindowHeight()));
 		setLocation(settings.getWindowPositionX(), settings.getWindowPositionY());
@@ -896,6 +915,9 @@ public class Editor extends JFrame {
 		props.setProperty("default_input_height", settings.getDefaultInputHeight());
 		props.setProperty("key_field_enabled", settings.isKeyFieldEnabled());
 		props.setProperty("double_click_tree_toggling", settings.isDoubleClickTreeToggling());
+		if (settings.getEditorLanguage() != null) {
+			props.setProperty("editor_language", settings.getEditorLanguage());
+		}
 		if (!settings.getHistory().isEmpty()) {
 			props.setProperty("history", settings.getHistory());
 		}
@@ -931,6 +953,7 @@ public class Editor extends JFrame {
 		settings.setLastSelectedNode(props.getProperty("last_selected"));
 		settings.setResourceFileDefinition(props.getProperty("resource_definition", DEFAULT_RESOURCE_DEFINITION));
 		settings.setUseResourceDirectories(props.getBooleanProperty("resource_directories", false));
+		settings.setEditorLanguage(props.getLocaleProperty("editor_language"));
 	}
 	
 	private class TranslationTreeMouseListener extends MouseAdapter {

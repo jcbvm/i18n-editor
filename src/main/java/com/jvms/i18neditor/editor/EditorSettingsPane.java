@@ -4,11 +4,17 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+
+import org.apache.commons.lang3.LocaleUtils;
 
 import com.jvms.i18neditor.swing.JHelpLabel;
 import com.jvms.i18neditor.swing.JTextField;
@@ -39,6 +45,32 @@ public class EditorSettingsPane extends AbstractSettingsPane {
 		versionBox.setSelected(settings.isCheckVersionOnStartup());
 		versionBox.addChangeListener(e -> settings.setCheckVersionOnStartup(versionBox.isSelected()));
 		fieldset1.add(versionBox, createVerticalGridBagConstraints());
+		
+		List<ComboBoxLocale> localeItems = Editor.SUPPORTED_LANGUAGES.stream()
+				.map(locale->new ComboBoxLocale(locale))
+				.sorted()
+				.collect(Collectors.toList());
+		ComboBoxLocale currentLocaleItem = null;
+		for (Locale locale : LocaleUtils.localeLookupList(editor.getCurrentLocale(), Locale.ENGLISH)) {
+			for (ComboBoxLocale item : localeItems) {
+				if (item.getLocale().equals(locale)) {
+					currentLocaleItem = item;
+					break;
+				}
+			}
+			if (currentLocaleItem != null) {
+				break;
+			}
+		}
+		
+		JPanel languageListPanel = new JPanel(new GridLayout(0, 1));
+		JLabel languageListLabel = new JLabel(MessageBundle.get("settings.language.title"));
+		JComboBox<ComboBoxLocale> languageListField = new JComboBox<ComboBoxLocale>(localeItems.toArray(new ComboBoxLocale[0]));
+		languageListField.setSelectedItem(currentLocaleItem);
+		languageListField.addActionListener(e -> settings.setEditorLanguage(((ComboBoxLocale)languageListField.getSelectedItem()).getLocale()));
+		languageListPanel.add(languageListLabel);
+		languageListPanel.add(languageListField);
+		fieldset1.add(languageListPanel, createVerticalGridBagConstraints());
 		
 		// New project settings
 		JPanel fieldset2 = createFieldset(MessageBundle.get("settings.fieldset.newprojects"));
@@ -109,5 +141,26 @@ public class EditorSettingsPane extends AbstractSettingsPane {
 		add(fieldset1, createVerticalGridBagConstraints());
 		add(fieldset2, createVerticalGridBagConstraints());
 		add(fieldset3, createVerticalGridBagConstraints());
+	}
+	
+	private class ComboBoxLocale implements Comparable<ComboBoxLocale> {
+		private Locale locale;
+		
+		public ComboBoxLocale(Locale locale) {
+			this.locale = locale;
+		}
+		
+		public Locale getLocale() {
+			return locale;
+		}
+		
+		public String toString() {
+			return locale.getDisplayName();
+		}
+
+		@Override
+		public int compareTo(ComboBoxLocale o) {
+			return toString().compareTo(o.toString());
+		}
 	}
 }
