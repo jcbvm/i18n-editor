@@ -43,10 +43,10 @@ public class EditorProjectSettingsPane extends AbstractSettingsPane {
 		}
 		
 		if (project.getResourceType().equals(ResourceType.JSON)) {
-			JCheckBox plainJSONBox = new JCheckBox(MessageBundle.get("settings.plainJSON.title"));
-			plainJSONBox.setSelected(project.isPlainJSON());
-			plainJSONBox.addChangeListener(e -> project.setPlainJSON(plainJSONBox.isSelected()));
-			fieldset1.add(plainJSONBox, createVerticalGridBagConstraints());
+			JCheckBox flattenJSONBox = new JCheckBox(MessageBundle.get("settings.flattenjson.title"));
+			flattenJSONBox.setSelected(project.isFlattenJSON());
+			flattenJSONBox.addChangeListener(e -> project.setFlattenJSON(flattenJSONBox.isSelected()));
+			fieldset1.add(flattenJSONBox, createVerticalGridBagConstraints());
 		}
 		
 		JCheckBox useResourceDirsBox = new JCheckBox(MessageBundle.get("settings.resourcedirs.title"));

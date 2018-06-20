@@ -19,7 +19,7 @@ public class EditorProject {
 	private ResourceType resourceType;
 	private List<Resource> resources;
 	private boolean minifyResources;
-	private boolean plainJSON;
+	private boolean flattenJSON;
 	private boolean resourceDirectories;
 	
 	public EditorProject(Path path) {
@@ -83,11 +83,11 @@ public class EditorProject {
 		this.minifyResources = minifyResources;
 	}
 
-	public boolean isPlainJSON() {
-		return plainJSON;
+	public boolean isFlattenJSON() {
+		return flattenJSON;
 	}
 
-	public void setPlainJSON(boolean plainJSON) {
-		this.plainJSON = plainJSON;
+	public void setFlattenJSON(boolean flattenJSON) {
+		this.flattenJSON = flattenJSON;
 	}
 }

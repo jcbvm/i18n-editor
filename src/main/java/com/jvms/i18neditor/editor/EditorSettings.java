@@ -14,7 +14,7 @@ public class EditorSettings {
 	private int windowWidth;
 	private int windowHeight;
 	private boolean minifyResources;
-	private boolean plainJSON;
+	private boolean flattenJSON;
 	private List<String> history;
 	private List<String> lastExpandedNodes;
 	private String lastSelectedNode;
@@ -136,14 +136,6 @@ public class EditorSettings {
 	public void setDoubleClickTreeToggling(boolean doubleClickTreeToggling) {
 		this.doubleClickTreeToggling = doubleClickTreeToggling;
 	}
-
-	public boolean isPlainJSON() {
-		return plainJSON;
-	}
-
-	public void setPlainJSON(boolean plainJSON) {
-		this.plainJSON = plainJSON;
-	}
 	
 	public boolean isUseResourceDirectories() {
 		return resourceDirectories;
@@ -151,5 +143,12 @@ public class EditorSettings {
 
 	public void setUseResourceDirectories(boolean resourceDirectories) {
 		this.resourceDirectories = resourceDirectories;
+	}
+	public boolean isFlattenJSON() {
+		return flattenJSON;
+	}
+
+	public void setFlattenJSON(boolean flattenJSON) {
+		this.flattenJSON = flattenJSON;
 	}
 }

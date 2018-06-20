@@ -48,6 +48,11 @@ public class EditorSettingsPane extends AbstractSettingsPane {
 		minifyBox.addChangeListener(e -> settings.setMinifyResources(minifyBox.isSelected()));		
 		fieldset2.add(minifyBox, createVerticalGridBagConstraints());
 		
+		JCheckBox flattenJSONBox = new JCheckBox(MessageBundle.get("settings.flattenjson.title"));
+		flattenJSONBox.setSelected(settings.isFlattenJSON());
+		flattenJSONBox.addChangeListener(e -> settings.setFlattenJSON(flattenJSONBox.isSelected()));
+		fieldset2.add(flattenJSONBox, createVerticalGridBagConstraints());
+		
 		JCheckBox useResourceDirsBox = new JCheckBox(MessageBundle.get("settings.resourcedirs.title"));
 		useResourceDirsBox.setSelected(settings.isUseResourceDirectories());
 		useResourceDirsBox.addChangeListener(e -> settings.setUseResourceDirectories(useResourceDirsBox.isSelected()));		

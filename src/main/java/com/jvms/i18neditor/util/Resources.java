@@ -137,7 +137,7 @@ public final class Resources {
 	 * @param 	plainKeys 
 	 * @throws 	IOException if an I/O error occurs writing the file.
 	 */
-	public static void write(Resource resource, boolean prettyPrinting, boolean plainKeys) throws IOException {
+	public static void write(Resource resource, boolean prettyPrinting, boolean flattenKeys) throws IOException {
 		if (resource.getChecksum() != null) {
 			String checksum = createChecksum(resource);
 			if (!checksum.equals(resource.getChecksum())) {
@@ -149,7 +149,7 @@ public final class Resources {
 			ExtendedProperties content = toProperties(resource.getTranslations());
 			content.store(resource.getPath());
 		} else {
-			String content = toJson(resource.getTranslations(), prettyPrinting, plainKeys);
+			String content = toJson(resource.getTranslations(), prettyPrinting, flattenKeys);
 			if (type == ResourceType.ES6) {
 				content = jsonToEs6(content);
 			}
@@ -233,9 +233,9 @@ public final class Resources {
 		}
 	}
 	
-	private static String toJson(Map<String,String> translations, boolean prettify, boolean plainKeys) {
+	private static String toJson(Map<String,String> translations, boolean prettify, boolean flattenKeys) {
 		List<String> keys = Lists.newArrayList(translations.keySet());
-		JsonElement elem = !plainKeys ? toJson(translations, null, keys) : toPlainJson(translations, keys);
+		JsonElement elem = !flattenKeys ? toJson(translations, null, keys) : toFlatJson(translations, keys);
 		GsonBuilder builder = new GsonBuilder().disableHtmlEscaping();
 		if (prettify) {
 			builder.setPrettyPrinting();
@@ -243,18 +243,18 @@ public final class Resources {
 		return builder.create().toJson(elem);
 	}
 	
-	private static JsonElement toPlainJson(Map<String, String> translations, List<String> keys) {
+	private static JsonElement toFlatJson(Map<String, String> translations, List<String> keys) {
 		JsonObject object = new JsonObject();
 		if (keys.size() > 0) {
 			translations.forEach((k, v) -> {
-				if (translations.get(k)!=null){
+				if (translations.get(k) != null){
 					object.add(k, new JsonPrimitive(translations.get(k)));
 				}
 			});			
 		}
 		return object;
 	}
-
+	
 	private static JsonElement toJson(Map<String,String> translations, String key, List<String> keys) {
 		if (keys.size() > 0) {
 			JsonObject object = new JsonObject();
