@@ -105,6 +105,12 @@ public class Resource {
 		this.translations = translations;
 	}
 	
+	/**
+	 * Checks whether the resource has a translation with the given key.
+	 * 
+	 * @param	key the key of the translation to look for.
+	 * @return 	whether a translation with the given key exists.
+	 */
 	public boolean hasTranslation(String key) {
 		return !Strings.isNullOrEmpty(translations.get(key));
 	}
@@ -125,8 +131,8 @@ public class Resource {
 	 * <ul>
 	 * <li>If the given key does not exists yet and is not empty, a new translation will be added to the map.</li>
 	 * <li>If the given key already exists, the existing value will be overwritten with the given value.</li>
-	 * <li>If the given key is a parent key of any existing keys, the existing child keys will be removed.</li>
-	 * <li>If the given key is a child key of any existing keys, the existing parent keys will be removed.</li>
+	 * <li>If the given key is a parent key of any existing keys, the existing child keys will be removed (when parent values are not supported).</li>
+	 * <li>If the given key is a child key of any existing keys, the existing parent keys will be removed (when parent values are not supported).</li>
 	 * </ul>
 	 * 
 	 * @param 	key the key of the translation to add.
@@ -139,8 +145,10 @@ public class Resource {
 			existing != null && existing.equals(value)) {
 			return;
 		}
-		removeParents(key);
-		removeChildren(key);
+		if (!supportsParentValues()) {
+			removeParents(key);
+			removeChildren(key);
+		}
 		if (value.isEmpty()) {
 			translations.remove(key);
 		} else {
@@ -214,7 +222,19 @@ public class Resource {
 	public String getChecksum() {
 		return checksum;
 	}
-
+	
+	/**
+	 * Returns whether the resource has support for parent values.
+	 * 
+	 * <p>For example if we have a value set for the key <code>a.b</code> we 
+	 * might also set a value for <code>a</code>.</p>
+	 * 
+	 * @return 	whether parent values are supported.
+	 */
+	public boolean supportsParentValues() {
+		return type == ResourceType.Properties;
+	}
+	
 	/**
 	 * Sets the checksum of the resource's file.
 	 * 

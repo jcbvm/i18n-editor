@@ -47,7 +47,7 @@ public class TranslationTreeNode extends DefaultMutableTreeNode {
 	}
 	
 	public boolean isEditable() {
-		return !isRoot() && isLeaf();
+		return !isRoot();
 	}
 	
 	public String getKey() {

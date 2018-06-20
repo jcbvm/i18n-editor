@@ -625,7 +625,8 @@ public class Editor extends JFrame {
 		resourceFields.forEach(field -> {
 			Locale locale = field.getResource().getLocale();
 			String label = locale != null ? locale.getDisplayName() : MessageBundle.get("resources.locale.default");
-			field.setEnabled(selectedNode != null && selectedNode.isEditable());
+			field.setEnabled(selectedNode != null && selectedNode.isEditable() && 
+					(selectedNode.isLeaf() || field.getResource().supportsParentValues()));
 			field.setRows(settings.getDefaultInputHeight());
 			resourcesPanel.add(Box.createVerticalStrut(5));
 			resourcesPanel.add(new JLabel(label));
@@ -998,7 +999,7 @@ public class Editor extends JFrame {
 				translationField.setValue(key);
 				resourceFields.forEach(f -> {
 					f.setValue(key);
-					f.setEnabled(node.isEditable());
+					f.setEnabled(node.isEditable() && (node.isLeaf() || f.getResource().supportsParentValues()));
 				});
 				
 				// Restore scroll position and foc
