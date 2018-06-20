@@ -13,7 +13,6 @@ public class EditorSettings {
 	private int windowDeviderPosition;
 	private int windowWidth;
 	private int windowHeight;
-	private String resourceName;
 	private boolean minifyResources;
 	private boolean plainJSON;
 	private List<String> history;
@@ -23,6 +22,8 @@ public class EditorSettings {
 	private int defaultInputHeight;
 	private boolean keyFieldEnabled;
 	private boolean doubleClickTreeToggling;
+	private String resourceFileDifinition;
+	private boolean resourceDirectories;
 	
 	public int getWindowPositionX() {
 		return windowPositionX;
@@ -88,12 +89,12 @@ public class EditorSettings {
 		this.lastSelectedNode = lastSelectedNode;
 	}
 
-	public String getResourceName() {
-		return resourceName;
+	public String getResourceFileDefinition() {
+		return resourceFileDifinition;
 	}
 
-	public void setResourceName(String resourceName) {
-		this.resourceName = resourceName;
+	public void setResourceFileDefinition(String resourceFileDifinition) {
+		this.resourceFileDifinition = resourceFileDifinition;
 	}
 
 	public boolean isMinifyResources() {
@@ -142,5 +143,13 @@ public class EditorSettings {
 
 	public void setPlainJSON(boolean plainJSON) {
 		this.plainJSON = plainJSON;
+	}
+	
+	public boolean isUseResourceDirectories() {
+		return resourceDirectories;
+	}
+
+	public void setUseResourceDirectories(boolean resourceDirectories) {
+		this.resourceDirectories = resourceDirectories;
 	}
 }

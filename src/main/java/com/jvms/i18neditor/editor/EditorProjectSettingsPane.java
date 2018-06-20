@@ -10,6 +10,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import com.jvms.i18neditor.ResourceType;
+import com.jvms.i18neditor.swing.JHelpLabel;
 import com.jvms.i18neditor.swing.JTextField;
 import com.jvms.i18neditor.util.MessageBundle;
 
@@ -29,7 +30,6 @@ public class EditorProjectSettingsPane extends AbstractSettingsPane {
 	}
 	
 	private void setupUI() {
-		EditorSettings settings = editor.getSettings();
 		EditorProject project = editor.getProject();
 		
 		// General settings
@@ -41,25 +41,35 @@ public class EditorProjectSettingsPane extends AbstractSettingsPane {
 			minifyBox.addChangeListener(e -> project.setMinifyResources(minifyBox.isSelected()));
 			fieldset1.add(minifyBox, createVerticalGridBagConstraints());
 		}
+		
 		if (project.getResourceType().equals(ResourceType.JSON)) {
 			JCheckBox plainJSONBox = new JCheckBox(MessageBundle.get("settings.plainJSON.title"));
 			plainJSONBox.setSelected(project.isPlainJSON());
 			plainJSONBox.addChangeListener(e -> project.setPlainJSON(plainJSONBox.isSelected()));
 			fieldset1.add(plainJSONBox, createVerticalGridBagConstraints());
 		}
-		JPanel resourcePanel = new JPanel(new GridLayout(0, 1));
-		JLabel resourceNameLabel = new JLabel(MessageBundle.get("settings.resourcename.title"));
-		JTextField resourceNameField = new JTextField(project.getResourceName());
-		resourceNameField.addKeyListener(new KeyAdapter() {
+		
+		JCheckBox useResourceDirsBox = new JCheckBox(MessageBundle.get("settings.resourcedirs.title"));
+		useResourceDirsBox.setSelected(project.isUseResourceDirectories());
+		useResourceDirsBox.addChangeListener(e -> project.setUseResourceDirectories(useResourceDirsBox.isSelected()));		
+		fieldset1.add(useResourceDirsBox, createVerticalGridBagConstraints());
+		
+		JPanel resourceDefinitionPanel = new JPanel(new GridLayout(0, 1));
+		JLabel resourceDefinitionLabel = new JLabel(MessageBundle.get("settings.resourcedef.title"));
+		JTextField resourceDefinitionField = new JTextField(project.getResourceFileDefinition());
+		resourceDefinitionField.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
-				String value = resourceNameField.getText().trim();
-				project.setResourceName(value.isEmpty() ? settings.getResourceName() : value);
+				String value = resourceDefinitionField.getText().trim();
+				project.setResourceFileDefinition(value.isEmpty() ? Editor.DEFAULT_RESOURCE_DEFINITION : value);
 			}
 		});
-		resourcePanel.add(resourceNameLabel);
-		resourcePanel.add(resourceNameField);
-		fieldset1.add(resourcePanel, createVerticalGridBagConstraints());		
+		resourceDefinitionPanel.add(resourceDefinitionLabel);
+		resourceDefinitionPanel.add(resourceDefinitionField);
+		fieldset1.add(resourceDefinitionPanel, createVerticalGridBagConstraints());
+		
+		JHelpLabel resourceDefinitionHelpLabel = new JHelpLabel(MessageBundle.get("settings.resourcedef.help"));
+		fieldset1.add(resourceDefinitionHelpLabel, createVerticalGridBagConstraints(3));
 		
 		setLayout(new GridBagLayout());
 		add(fieldset1, createVerticalGridBagConstraints());

@@ -1,7 +1,6 @@
 package com.jvms.i18neditor.util;
 
 import java.text.MessageFormat;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
@@ -17,7 +16,7 @@ public final class MessageBundle {
 	private final static ResourceBundle RESOURCES;
 	
 	static {
-		RESOURCES = ResourceBundle.getBundle(RESOURCES_PATH, Locale.getDefault());
+		RESOURCES = ResourceBundle.getBundle(RESOURCES_PATH);
 	}
 	
 	/**

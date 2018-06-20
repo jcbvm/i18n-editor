@@ -8,12 +8,11 @@ package com.jvms.i18neditor;
  * @author Jacob van Mourik
  */
 public enum ResourceType {
-	JSON(".json", false), 
-	ES6(".js", false), 
-	Properties(".properties", true);
+	JSON(".json"), 
+	ES6(".js"), 
+	Properties(".properties");
 	
 	private final String extension;
-	private final boolean embedLocale;
 	
 	/**
 	 * Gets the file extension of the resource type.
@@ -24,17 +23,7 @@ public enum ResourceType {
 		return extension;
 	}
 	
-	/**
-	 * Whether the locale should be embedded in the filename for this resource type.
-	 * 
-	 * @return 	whether the locale should be embedded in the filename.
-	 */
-	public boolean isEmbedLocale() {
-		return embedLocale;
-	}
-	
-	private ResourceType(String extension, boolean embedLocale) {
+	private ResourceType(String extension) {
 		this.extension = extension;
-		this.embedLocale = embedLocale;
 	}
 }

@@ -34,7 +34,8 @@ public class Resource {
 	private final ResourceType type;
 	private final List<ResourceListener> listeners = Lists.newLinkedList();
 	private SortedMap<String,String> translations = Maps.newTreeMap();
-	
+	private String checksum;
+
 	/**
 	 * See {@link #Resource(ResourceType, Path, Locale)}.
 	 */
@@ -95,6 +96,11 @@ public class Resource {
 		return ImmutableSortedMap.copyOf(translations);
 	}
 	
+	/**
+	 * Sets the translations of the resource.
+	 * 
+	 * @param translations	the translations
+	 */
 	public void setTranslations(SortedMap<String,String> translations) {
 		this.translations = translations;
 	}
@@ -197,6 +203,25 @@ public class Resource {
 	 */
 	public void removeListener(ResourceListener listener) {
 		listeners.remove(listener);
+	}
+	
+	/**
+	 * Gets the checksum of the resource's file.
+	 * This method only returns the checksum set via {@link #setChecksum(checksum)}.
+	 * 
+	 * @return	the checksum.
+	 */
+	public String getChecksum() {
+		return checksum;
+	}
+
+	/**
+	 * Sets the checksum of the resource's file.
+	 * 
+	 * @param checksum	the checksum to set.
+	 */
+	public void setChecksum(String checksum) {
+		this.checksum = checksum;
 	}
 	
 	private void duplicateTranslation(String key, String newKey, boolean keepOld) {

@@ -13,6 +13,7 @@ import javax.swing.JPanel;
  * @author Jacob van Mourik
  */
 public abstract class AbstractSettingsPane extends JPanel {
+	private final static long serialVersionUID = -8953194193840198893L;
 	private GridBagConstraints vGridBagConstraints;
 	
 	protected AbstractSettingsPane() {
@@ -24,9 +25,14 @@ public abstract class AbstractSettingsPane extends JPanel {
 		vGridBagConstraints.weightx = 1;
 	}
 	
-	protected GridBagConstraints createVerticalGridBagConstraints() {
+	protected GridBagConstraints createVerticalGridBagConstraints(int weigthy) {
 		vGridBagConstraints.gridy = (vGridBagConstraints.gridy + 1) % Integer.MAX_VALUE;
+		vGridBagConstraints.weighty = weigthy;
 		return vGridBagConstraints;
+	}
+	
+	protected GridBagConstraints createVerticalGridBagConstraints() {
+		return createVerticalGridBagConstraints(1);
 	}
 	
 	protected JPanel createFieldset(String title) {

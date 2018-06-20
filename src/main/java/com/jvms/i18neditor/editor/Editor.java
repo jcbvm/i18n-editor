@@ -52,12 +52,12 @@ import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
 import javax.swing.tree.TreePath;
 
-import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jvms.i18neditor.Resource;
@@ -70,6 +70,7 @@ import com.jvms.i18neditor.util.ExtendedProperties;
 import com.jvms.i18neditor.util.GithubRepoUtil;
 import com.jvms.i18neditor.util.GithubRepoUtil.GithubRepoReleaseData;
 import com.jvms.i18neditor.util.Images;
+import com.jvms.i18neditor.util.Locales;
 import com.jvms.i18neditor.util.MessageBundle;
 import com.jvms.i18neditor.util.ResourceKeys;
 import com.jvms.i18neditor.util.Resources;
@@ -86,10 +87,10 @@ public class Editor extends JFrame {
 	public final static String TITLE = "i18n-editor";
 	public final static String VERSION = "1.0.0";
 	public final static String GITHUB_REPO = "jcbvm/i18n-editor";
-	public final static String DEFAULT_RESOURCE_NAME = "translations";
 	public final static String PROJECT_FILE = ".i18n-editor-metadata";
 	public final static String SETTINGS_FILE = ".i18n-editor";
 	public final static String SETTINGS_DIR = System.getProperty("user.home");
+	public final static String DEFAULT_RESOURCE_DEFINITION = "translations{_LOCALE}";
 	
 	private EditorProject project;
 	private EditorSettings settings = new EditorSettings();
@@ -121,7 +122,8 @@ public class Editor extends JFrame {
 				return;
 			}
 			
-			List<Resource> resourceList = Resources.get(dir, settings.getResourceName(), Optional.empty());
+			List<Resource> resourceList = Resources.get(dir, 
+					settings.getResourceFileDefinition(), settings.isUseResourceDirectories(), Optional.of(type));
 			if (!resourceList.isEmpty()) {
 				boolean importProject = Dialogs.showConfirmDialog(this, 
 						MessageBundle.get("dialogs.project.new.conflict.title"),
@@ -138,8 +140,9 @@ public class Editor extends JFrame {
 			restoreProjectState(project);
 			project.setResourceType(type);
 			
-			if (type == ResourceType.Properties) {
-				Resource resource = Resources.create(dir, type, Optional.empty(), project.getResourceName());
+			if (!project.isUseResourceDirectories()) {
+				Resource resource = Resources.create(type, dir, 
+						project.getResourceFileDefinition(), false, Optional.empty());
 				setupResource(resource);
 				project.addResource(resource);
 			} else {
@@ -169,7 +172,8 @@ public class Editor extends JFrame {
 			restoreProjectState(project);
 			
 			Optional<ResourceType> type = Optional.ofNullable(project.getResourceType());
-			List<Resource> resourceList = Resources.get(dir, project.getResourceName(), type);
+			List<Resource> resourceList = Resources.get(dir, 
+					project.getResourceFileDefinition(), project.isUseResourceDirectories(), type);
 			Map<String,String> keys = Maps.newTreeMap();
 			
 			if (resourceList.isEmpty()) {
@@ -371,13 +375,13 @@ public class Editor extends JFrame {
 					MessageBundle.get("dialogs.locale.add.text"),
 					JOptionPane.QUESTION_MESSAGE);
 			if (localeString != null) {
-				localeString = localeString.trim();
-				if (localeString.isEmpty()) {
+				Locale locale = Locales.parseLocale(localeString.trim());
+				if (locale == null) {
 					showError(MessageBundle.get("dialogs.locale.add.error.invalid"));
 				} else {
 					try {
-						Locale locale = LocaleUtils.toLocale(localeString);
-						Resource resource = Resources.create(path, type, Optional.of(locale), project.getResourceName());
+						Resource resource = Resources.create(type, path, 
+								project.getResourceFileDefinition(), project.isUseResourceDirectories(), Optional.of(locale));
 						addResource(resource);
 					} catch (IOException e) {
 						log.error("Error creating new locale", e);
@@ -829,6 +833,7 @@ public class Editor extends JFrame {
 	}
 	
 	private void updateTreeNodeStatuses() {
+		if (project == null) return;
 		Set<String> keys = project.getResources().stream()
 				.flatMap(r -> r.getTranslations().keySet().stream())
 				.filter(key -> project.getResources().stream().anyMatch(r -> !r.hasTranslation(key)))
@@ -837,6 +842,7 @@ public class Editor extends JFrame {
 	}
 	
 	private void updateTreeNodeStatus(String key) {
+		if (project == null) return;
 		boolean hasError = project.getResources().stream().anyMatch(r -> !r.hasTranslation(key));
 		translationTree.updateNode(key, hasError);
 	}
@@ -845,8 +851,9 @@ public class Editor extends JFrame {
 		ExtendedProperties props = new ExtendedProperties();
 		props.setProperty("minify_resources", project.isMinifyResources());
 		props.setProperty("plain_json", project.isPlainJSON());
-		props.setProperty("resource_name", project.getResourceName());
 		props.setProperty("resource_type", project.getResourceType().toString());
+		props.setProperty("resource_definition", project.getResourceFileDefinition());
+		props.setProperty("resource_directories", project.isUseResourceDirectories());
 		props.store(Paths.get(project.getPath().toString(), PROJECT_FILE));
 	}
 	
@@ -857,11 +864,20 @@ public class Editor extends JFrame {
 			props.load(Paths.get(project.getPath().toString(), PROJECT_FILE));
 			project.setMinifyResources(props.getBooleanProperty("minify_resources", settings.isMinifyResources()));
 			project.setPlainJSON(props.getBooleanProperty("plain_json", settings.isPlainJSON()));
-			project.setResourceName(props.getProperty("resource_name", settings.getResourceName()));
 			project.setResourceType(props.getEnumProperty("resource_type", ResourceType.class));
+			String resourceName = props.getProperty("resource_name"); // for backwards compatibility
+			if (Strings.isNullOrEmpty(resourceName)) {
+				project.setResourceFileDefinition(props.getProperty("resource_definition", settings.getResourceFileDefinition()));
+				project.setUseResourceDirectories(props.getBooleanProperty("resource_directories", settings.isUseResourceDirectories()));
+			} else {
+				project.setResourceFileDefinition(resourceName);
+				project.setUseResourceDirectories(true);
+			}
 		} else {
-			project.setResourceName(settings.getResourceName());
 			project.setMinifyResources(settings.isMinifyResources());
+			project.setPlainJSON(settings.isPlainJSON());
+			project.setResourceFileDefinition(settings.getResourceFileDefinition());
+			project.setUseResourceDirectories(settings.isUseResourceDirectories());
 		}
 	}
 	
@@ -874,7 +890,8 @@ public class Editor extends JFrame {
 		props.setProperty("window_div_pos", contentPane.getDividerLocation());
 		props.setProperty("minify_resources", settings.isMinifyResources());
 		props.setProperty("plain_json", settings.isPlainJSON());
-		props.setProperty("resource_name", settings.getResourceName());
+		props.setProperty("resource_definition", settings.getResourceFileDefinition());
+		props.setProperty("resource_directories", settings.isUseResourceDirectories());
 		props.setProperty("check_version", settings.isCheckVersionOnStartup());
 		props.setProperty("default_input_height", settings.getDefaultInputHeight());
 		props.setProperty("key_field_enabled", settings.isKeyFieldEnabled());
@@ -903,16 +920,17 @@ public class Editor extends JFrame {
 		settings.setWindowPositionX(props.getIntegerProperty("window_pos_x", 0));
 		settings.setWindowPositionY(props.getIntegerProperty("window_pos_y", 0));
 		settings.setWindowDeviderPosition(props.getIntegerProperty("window_div_pos", 250));
-		settings.setHistory(props.getListProperty("history"));
-		settings.setLastExpandedNodes(props.getListProperty("last_expanded"));
-		settings.setLastSelectedNode(props.getProperty("last_selected"));
-		settings.setMinifyResources(props.getBooleanProperty("minify_resources", false));
-		settings.setPlainJSON(props.getBooleanProperty("plain_json", false));
-		settings.setResourceName(props.getProperty("resource_name", DEFAULT_RESOURCE_NAME));
 		settings.setCheckVersionOnStartup(props.getBooleanProperty("check_version", true));
 		settings.setDefaultInputHeight(props.getIntegerProperty("default_input_height", 5));
 		settings.setKeyFieldEnabled(props.getBooleanProperty("key_field_enabled", true));
 		settings.setDoubleClickTreeToggling(props.getBooleanProperty("double_click_tree_toggling", false));
+		settings.setMinifyResources(props.getBooleanProperty("minify_resources", false));
+		settings.setPlainJSON(props.getBooleanProperty("plain_json", false));
+		settings.setHistory(props.getListProperty("history"));
+		settings.setLastExpandedNodes(props.getListProperty("last_expanded"));
+		settings.setLastSelectedNode(props.getProperty("last_selected"));
+		settings.setResourceFileDefinition(props.getProperty("resource_definition", DEFAULT_RESOURCE_DEFINITION));
+		settings.setUseResourceDirectories(props.getBooleanProperty("resource_directories", false));
 	}
 	
 	private class TranslationTreeMouseListener extends MouseAdapter {

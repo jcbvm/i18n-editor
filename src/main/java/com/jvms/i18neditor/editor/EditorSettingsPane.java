@@ -10,6 +10,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 
+import com.jvms.i18neditor.swing.JHelpLabel;
 import com.jvms.i18neditor.swing.JTextField;
 import com.jvms.i18neditor.util.MessageBundle;
 
@@ -47,19 +48,27 @@ public class EditorSettingsPane extends AbstractSettingsPane {
 		minifyBox.addChangeListener(e -> settings.setMinifyResources(minifyBox.isSelected()));		
 		fieldset2.add(minifyBox, createVerticalGridBagConstraints());
 		
-		JPanel resourceNamePanel = new JPanel(new GridLayout(0, 1));
-		JLabel resourceNameLabel = new JLabel(MessageBundle.get("settings.resourcename.title"));
-		JTextField resourceNameField = new JTextField(settings.getResourceName());
-		resourceNameField.addKeyListener(new KeyAdapter() {
+		JCheckBox useResourceDirsBox = new JCheckBox(MessageBundle.get("settings.resourcedirs.title"));
+		useResourceDirsBox.setSelected(settings.isUseResourceDirectories());
+		useResourceDirsBox.addChangeListener(e -> settings.setUseResourceDirectories(useResourceDirsBox.isSelected()));		
+		fieldset2.add(useResourceDirsBox, createVerticalGridBagConstraints());
+		
+		JPanel resourceDefinitionPanel = new JPanel(new GridLayout(0, 1));
+		JLabel resourceDefinitionLabel = new JLabel(MessageBundle.get("settings.resourcedef.title"));
+		JTextField resourceDefinitionField = new JTextField(settings.getResourceFileDefinition());
+		resourceDefinitionField.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
-				String value = resourceNameField.getText().trim();
-				settings.setResourceName(value.isEmpty() ? Editor.DEFAULT_RESOURCE_NAME : value);
+				String value = resourceDefinitionField.getText().trim();
+				settings.setResourceFileDefinition(value.isEmpty() ? Editor.DEFAULT_RESOURCE_DEFINITION : value);
 			}
 		});
-		resourceNamePanel.add(resourceNameLabel);
-		resourceNamePanel.add(resourceNameField);
-		fieldset2.add(resourceNamePanel, createVerticalGridBagConstraints());
+		resourceDefinitionPanel.add(resourceDefinitionLabel);
+		resourceDefinitionPanel.add(resourceDefinitionField);
+		fieldset2.add(resourceDefinitionPanel, createVerticalGridBagConstraints());
+		
+		JHelpLabel resourceDefinitionHelpLabel = new JHelpLabel(MessageBundle.get("settings.resourcedef.help"));
+		fieldset2.add(resourceDefinitionHelpLabel, createVerticalGridBagConstraints(3));
 		
 		// Editing settings
 		JPanel fieldset3 = createFieldset(MessageBundle.get("settings.fieldset.editing"));

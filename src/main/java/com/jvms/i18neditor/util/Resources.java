@@ -1,10 +1,13 @@
 package com.jvms.i18neditor.util;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -14,7 +17,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 import com.google.common.collect.Lists;
@@ -33,55 +35,72 @@ import com.jvms.i18neditor.ResourceType;
  * @author Jacob van Mourik
  */
 public final class Resources {
-	private final static Charset UTF8_ENCODING = Charset.forName("UTF-8");
-	private final static String LOCALE_REGEX = "[a-z]{2}(_[A-Z]{2})?";
+	private final static Charset UTF8_ENCODING; 
+	private final static String FILENAME_LOCALE_REGEX;
+	
+	static {
+		UTF8_ENCODING = Charset.forName("UTF-8");
+		FILENAME_LOCALE_REGEX = Pattern.quote("{") + "(.*)" + Pattern.quote("LOCALE") + "(.*)" + Pattern.quote("}");
+	}
 	
 	/**
-	 * Gets all resources from the given {@code rootDir} directory path.
+	 * Gets all resources from the given <code>rootDir</code> directory path.
 	 * 
-	 * <p>The {@code baseName} is the base of the filename of the resource files to look for.<br>
-	 * The base name is without extension and without any locale information.<br>
-	 * When a resource type is given, only resources of that type will returned.</p>
+	 * <p>The <code>fileDefinition</code> is the filename definition of resource files to look for.
+	 * The definition consists of a filename including optional locale part (see <code>useLocaleDirs</code>).
+	 * The locale part should be in the format: <code>{LOCALE}</code>, where <code>{</code> and <code>}</code> tags 
+	 * defines the start and end of the locale part and <code>LOCALE</code> the location of the locale itself.</p>
+	 * 
+	 * <p>When a resource type is given, only resources of that type will returned.</p>
 	 * 
 	 * <p>This function will not load the contents of the file, only its description.<br>
 	 * If you want to load the contents, use {@link #load(Resource)} afterwards.</p>
 	 * 
-	 * @param 	rootDir the root directory of the resources
-	 * @param 	baseName the base name of the resource files to look for
+	 * @param 	root the root directory of the resources
+	 * @param 	fileDefinition the resource's file definition for lookup (using locale interpolation)
+	 * @param	directories whether to look for resources in (locale) directories only
 	 * @param 	type the type of the resource files to look for
 	 * @return	list of found resources
 	 * @throws 	IOException if an I/O error occurs reading the directory.
 	 */
-	public static List<Resource> get(Path rootDir, String baseName, Optional<ResourceType> type) throws IOException {
+	public static List<Resource> get(Path root, String fileDefinition, boolean directories, Optional<ResourceType> type) 
+			throws IOException {
 		List<Resource> result = Lists.newLinkedList();
-		List<Path> files = Files.walk(rootDir, 1).collect(Collectors.toList());
-		for (Path p : files) {
-			ResourceType resourceType = null;
-			for (ResourceType t : ResourceType.values()) {
-				if (isResourceType(type, t) && isResource(rootDir, p, t, baseName)) {
-					resourceType = t;
-					break;
-				}
+		List<Path> files = Files.walk(root, 1).collect(Collectors.toList());
+		String defaultFileName = getFilename(fileDefinition, Optional.empty());
+		Pattern fileDefinitionPattern = Pattern.compile("^" + getFilenameRegex(fileDefinition) + "$");
+		
+		for (Path file : files) {
+			Path parent = file.getParent();
+			if (parent == null || Files.isSameFile(root, file) || !Files.isSameFile(root, parent)) {
+				continue;
 			}
-			if (resourceType != null) {
-				String fileName = p.getFileName().toString();
-				String extension = resourceType.getExtension();
-				Locale locale = null;
-				Path path = null;
-				if (resourceType.isEmbedLocale()) {
-					String pattern = "^" + baseName + "_(" + LOCALE_REGEX + ")" + extension + "$";
-					Matcher match = Pattern.compile(pattern).matcher(fileName);
-					if (match.find()) {
-						locale = LocaleUtils.toLocale(match.group(1));
-					}
-					path = Paths.get(rootDir.toString(), baseName + (locale == null ? "" : "_" + locale.toString()) + extension);				
-				} else {
-					locale = LocaleUtils.toLocale(fileName);
-					path = Paths.get(rootDir.toString(), locale.toString(), baseName + extension);			
+			String filename = com.google.common.io.Files.getNameWithoutExtension(file.getFileName().toString());
+			for (ResourceType rt : ResourceType.values()) {
+				if (!type.orElse(rt).equals(rt)) {
+					continue;
 				}
-				result.add(new Resource(resourceType, path, locale));
+				if (directories && Files.isDirectory(file)) {
+					Locale locale = Locales.parseLocale(filename);
+					if (locale == null) {
+						continue;
+					}
+					Path rf = Paths.get(root.toString(), locale.toString(), getFilename(fileDefinition, Optional.of(locale)) + rt.getExtension());
+					if (Files.isRegularFile(rf)) {
+						result.add(new Resource(rt, rf, locale));
+					}
+				}
+				if (!directories && Files.isRegularFile(file)) {
+					Matcher matcher = fileDefinitionPattern.matcher(filename);
+					if (!matcher.matches() && !filename.equals(defaultFileName)) {
+						continue;
+					}
+					Locale locale = matcher.matches() ? Locales.parseLocale(matcher.group(1)) : null;
+					result.add(new Resource(rt, file, locale));
+				}
 			}
 		};
+		
 		return result;
 	}
 	
@@ -107,6 +126,7 @@ public final class Resources {
 			translations = fromJson(content);
 		}
 		resource.setTranslations(translations);
+		resource.setChecksum(createChecksum(resource));
 	}
 	
 	/**
@@ -114,10 +134,16 @@ public final class Resources {
 	 * 
 	 * @param 	resource the resource to write.
 	 * @param   prettyPrinting whether to pretty print the contents
-	 * @param plainKeys 
+	 * @param 	plainKeys 
 	 * @throws 	IOException if an I/O error occurs writing the file.
 	 */
 	public static void write(Resource resource, boolean prettyPrinting, boolean plainKeys) throws IOException {
+		if (resource.getChecksum() != null) {
+			String checksum = createChecksum(resource);
+			if (!checksum.equals(resource.getChecksum())) {
+				throw new ChecksumException("File on disk has been changed.");
+			}
+		}
 		ResourceType type = resource.getType();
 		if (type == ResourceType.Properties) {
 			ExtendedProperties content = toProperties(resource.getTranslations());
@@ -133,6 +159,7 @@ public final class Resources {
 			}
 			Files.write(resource.getPath(), Lists.newArrayList(content), UTF8_ENCODING);
 		}
+		resource.setChecksum(createChecksum(resource));
 	}
 	
 	/**
@@ -142,39 +169,32 @@ public final class Resources {
 	 * 
 	 * @param 	type the type of the resource to create.
 	 * @param 	root the root directory to write the resource to.
+	 * @param	filenameDefinition the filename definition of the resource.
+	 * @param	directory whether to store the translation into a (locale) directory
+	 * @param	locale the locale of the resource (optional).
 	 * @return	The newly created resource.
 	 * @throws 	IOException if an I/O error occurs writing the file.
 	 */
-	public static Resource create(Path root, ResourceType type, Optional<Locale> locale, String baseName) throws IOException {
+	public static Resource create(ResourceType type, Path root, String fileDefinition, boolean directory, Optional<Locale> locale) 
+			throws IOException {
 		String extension = type.getExtension();
 		Path path;
-		if (type.isEmbedLocale()) {
-			path = Paths.get(root.toString(), baseName + (locale.isPresent() ? "_" + locale.get().toString() : "") + extension);				
+		if (directory) {
+			path = Paths.get(root.toString(), locale.get().toString(), getFilename(fileDefinition, locale) + extension);			
 		} else {
-			path = Paths.get(root.toString(), locale.get().toString(), baseName + extension);			
+			path = Paths.get(root.toString(), getFilename(fileDefinition, locale) + extension);				
 		}
 		Resource resource = new Resource(type, path, locale.orElse(null));
 		write(resource, false, false);
 		return resource;
 	}
 	
-	private static boolean isResource(Path root, Path path, ResourceType type, String baseName) throws IOException {
-		String extension = type.getExtension();
-		Path parent = path.getParent();
-		if (parent == null || Files.isSameFile(root, path) || !Files.isSameFile(root, parent)) {
-			return false;
-		} else if (type.isEmbedLocale()) {
-			return Files.isRegularFile(path) &&
-					Pattern.matches("^" + baseName + "(_" + LOCALE_REGEX + ")?" + extension + "$", path.getFileName().toString());			
-		} else {
-			return Files.isDirectory(path) &&
-					Pattern.matches("^" + LOCALE_REGEX + "$", path.getFileName().toString()) &&
-					Files.isRegularFile(Paths.get(path.toString(), baseName + extension));
-		}
+	private static String getFilenameRegex(String fileDefinition) {
+		return fileDefinition.replaceAll(FILENAME_LOCALE_REGEX, "$1(" + Locales.LOCALE_REGEX + ")$2");
 	}
 	
-	private static boolean isResourceType(Optional<ResourceType> a, ResourceType b) {
-		return !a.isPresent() || a.get() == b;
+	private static String getFilename(String fileDefinition, Optional<Locale> locale) {
+		return fileDefinition.replaceAll(FILENAME_LOCALE_REGEX, locale.isPresent() ? ("$1" + locale.get().toString() + "$2") : "");
 	}
 	
 	private static SortedMap<String,String> fromProperties(ExtendedProperties properties) {
@@ -257,5 +277,27 @@ public final class Resources {
 	
 	private static String jsonToEs6(String content) {
 		return "export default " + content + ";";
+	}
+	
+	private static String createChecksum(Resource resource) throws IOException {
+		MessageDigest digest;
+		try {
+			digest = MessageDigest.getInstance("SHA-1");
+		} catch (NoSuchAlgorithmException e) {
+			return null;
+		}
+		byte[] buffer = new byte[1024];
+		int bytesRead = 0;
+		try (InputStream is = Files.newInputStream(resource.getPath())) {
+			while ((bytesRead = is.read(buffer)) != -1) {
+				digest.update(buffer, 0, bytesRead);
+			}
+		}
+		String result = "";
+		byte[] bytes = digest.digest();
+		for (int i = 0; i < bytes.length; i++) {
+			result += Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1);
+		}
+		return result;
 	}
 }

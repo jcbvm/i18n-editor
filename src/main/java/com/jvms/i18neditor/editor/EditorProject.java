@@ -15,14 +15,16 @@ import com.jvms.i18neditor.ResourceType;
  */
 public class EditorProject {
 	private Path path;
-	private String resourceName;
+	private String resourceFileDefinition;
 	private ResourceType resourceType;
-	private List<Resource> resources = Lists.newLinkedList();
+	private List<Resource> resources;
 	private boolean minifyResources;
 	private boolean plainJSON;
+	private boolean resourceDirectories;
 	
 	public EditorProject(Path path) {
 		this.path = path;
+		this.resources = Lists.newLinkedList();
 	}
 
 	public Path getPath() {
@@ -56,13 +58,21 @@ public class EditorProject {
 	public boolean hasResources() {
 		return !resources.isEmpty();
 	}
-
-	public String getResourceName() {
-		return resourceName;
+	
+	public boolean isUseResourceDirectories() {
+		return resourceDirectories;
 	}
 
-	public void setResourceName(String resourceFilename) {
-		this.resourceName = resourceFilename;
+	public void setUseResourceDirectories(boolean resourceDirectories) {
+		this.resourceDirectories = resourceDirectories;
+	}
+	
+	public String getResourceFileDefinition() {
+		return resourceFileDefinition;
+	}
+
+	public void setResourceFileDefinition(String resourceFileDefinition) {
+		this.resourceFileDefinition = resourceFileDefinition;
 	}
 
 	public boolean isMinifyResources() {
