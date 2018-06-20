@@ -183,8 +183,8 @@ public class EditorMenuBar extends JMenuBar {
         editMenu.add(findTranslationMenuItem);
         editMenu.addSeparator();
         editMenu.add(renameTranslationMenuItem);
-        editMenu.add(copyTranslationKeyMenuItem);
         editMenu.add(duplicateTranslationMenuItem);
+        editMenu.add(copyTranslationKeyMenuItem);
         editMenu.add(removeTranslationMenuItem);
         
         // View menu
