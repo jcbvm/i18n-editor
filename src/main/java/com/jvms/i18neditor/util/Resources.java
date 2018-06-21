@@ -95,8 +95,10 @@ public final class Resources {
 					if (!matcher.matches() && !filename.equals(defaultFileName)) {
 						continue;
 					}
-					Locale locale = matcher.matches() ? Locales.parseLocale(matcher.group(1)) : null;
-					result.add(new Resource(rt, file, locale));
+					if (!matchesResourceType(file, rt)) {
+						continue;
+					}
+					result.add(new Resource(rt, file, matcher.matches() ? Locales.parseLocale(matcher.group(1)) : null));
 				}
 			}
 		};
@@ -299,5 +301,10 @@ public final class Resources {
 			result += Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1);
 		}
 		return result;
+	}
+	
+	private static boolean matchesResourceType(Path path, ResourceType type) {
+		String fileExt = com.google.common.io.Files.getFileExtension(path.getFileName().toString());
+		return ("."+fileExt).equals(type.getExtension());
 	}
 }
