@@ -90,7 +90,6 @@ public class ExtendedProperties extends Properties {
 	 * <p>Any {@code IOException} will be ignored.</p>
 	 * 
 	 * @param 	path the path to the property file.
-	 * @param   comments the comments to add to the property file.
 	 */
 	public void store(Path path) {
 		try (OutputStream out = new OutputStreamWrapper(Files.newOutputStream(path))) {

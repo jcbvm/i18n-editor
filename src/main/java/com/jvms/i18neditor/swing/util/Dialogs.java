@@ -53,7 +53,7 @@ public final class Dialogs {
 	}
 	
 	public static boolean showConfirmDialog(Component parent, String title, String message, int type) {
-		return JOptionPane.showConfirmDialog(parent, message, title, type) == JOptionPane.YES_OPTION;
+		return JOptionPane.showConfirmDialog(parent, message, title, JOptionPane.YES_NO_OPTION, type) == JOptionPane.YES_OPTION;
 	}
 	
 	public static String showInputDialog(Component parent, String title, String label, int type) {

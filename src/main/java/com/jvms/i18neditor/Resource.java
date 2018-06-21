@@ -141,19 +141,14 @@ public class Resource {
 	public void storeTranslation(String key, String value) {
 		checkKey(key);
 		String existing = translations.get(key);
-		if (existing == null && value.isEmpty() || 
-			existing != null && existing.equals(value)) {
+		if (value == null || existing != null && existing.equals(value)) {
 			return;
 		}
 		if (!supportsParentValues()) {
 			removeParents(key);
 			removeChildren(key);
 		}
-		if (value.isEmpty()) {
-			translations.remove(key);
-		} else {
-			translations.put(key, value);
-		}
+		translations.put(key, value);
 		notifyListeners();
 	}
 	

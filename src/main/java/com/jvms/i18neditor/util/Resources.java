@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.SortedMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,10 +20,12 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
@@ -113,6 +116,8 @@ public final class Resources {
 	/**
 	 * Loads the translations of a {@link Resource} from disk.
 	 * 
+	 * <p>This function will store a checksum to the resource.</p>
+	 * 
 	 * @param 	resource the resource.
 	 * @throws 	IOException if an I/O error occurs reading the file.
 	 */
@@ -136,7 +141,13 @@ public final class Resources {
 	}
 	
 	/**
-	 * Writes the translations of the given resource to disk.
+	 * Writes the translations of the given {@link Resource} to disk.
+	 * Empty translation values will be skipped.
+	 * 
+	 * <p>This function will perform a checksum check before saving 
+	 * to see if the file on disk has been changed in the meantime.</p>
+	 * 
+	 * <p>This function will store a checksum to the resource.</p>
 	 * 
 	 * @param 	resource the resource to write.
 	 * @param   prettyPrinting whether to pretty print the contents
@@ -173,6 +184,8 @@ public final class Resources {
 	 * This function should be used to create new resources. For creating an instance of an
 	 * existing resource on disk, see {@link #read(Path)}.
 	 * 
+	 * <p>This function will store a checksum to the resource.</p>
+	 * 
 	 * @param 	type the type of the resource to create.
 	 * @param 	root the root directory to write the resource to.
 	 * @param	filenameDefinition the filename definition of the resource.
@@ -203,7 +216,7 @@ public final class Resources {
 		return fileDefinition.replaceAll(FILENAME_LOCALE_REGEX, locale.isPresent() ? ("$1" + locale.get().toString() + "$2") : "");
 	}
 	
-	private static SortedMap<String,String> fromProperties(ExtendedProperties properties) {
+	private static SortedMap<String,String> fromProperties(Properties properties) {
 		SortedMap<String,String> result = Maps.newTreeMap();
 		properties.forEach((key, value) -> {
 			result.put((String)key, StringEscapeUtils.unescapeJava((String)value));
@@ -213,7 +226,11 @@ public final class Resources {
 	
 	private static ExtendedProperties toProperties(Map<String,String> translations) {
 		ExtendedProperties result = new ExtendedProperties();
-		result.putAll(translations);
+		translations.forEach((key, value) -> {
+			if (!Strings.isNullOrEmpty(value)) {
+				result.put(key, value);
+			}
+		});
 		return result;
 	}
 	
@@ -253,7 +270,7 @@ public final class Resources {
 		JsonObject object = new JsonObject();
 		if (keys.size() > 0) {
 			translations.forEach((k, v) -> {
-				if (translations.get(k) != null){
+				if (!Strings.isNullOrEmpty(translations.get(k))) {
 					object.add(k, new JsonPrimitive(translations.get(k)));
 				}
 			});			
@@ -273,6 +290,9 @@ public final class Resources {
 		}
 		if (key == null) {
 			return new JsonObject();
+		}
+		if (Strings.isNullOrEmpty(translations.get(key))) {
+			return JsonNull.INSTANCE;
 		}
 		return new JsonPrimitive(translations.get(key));
 	}
