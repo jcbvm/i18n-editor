@@ -98,7 +98,11 @@ public final class Resources {
 					if (!matchesResourceType(file, rt)) {
 						continue;
 					}
-					result.add(new Resource(rt, file, matcher.matches() ? Locales.parseLocale(matcher.group(1)) : null));
+					Locale locale = null;
+					if (matcher.matches() && matcher.groupCount() > 0) {
+						locale = Locales.parseLocale(matcher.group(1));
+					}
+					result.add(new Resource(rt, file, locale));
 				}
 			}
 		};

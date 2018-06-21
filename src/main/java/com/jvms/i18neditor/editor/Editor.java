@@ -890,8 +890,9 @@ public class Editor extends JFrame {
 				project.setResourceFileDefinition(props.getProperty("resource_definition", settings.getResourceFileDefinition()));
 				project.setUseResourceDirectories(props.getBooleanProperty("resource_directories", settings.isUseResourceDirectories()));
 			} else {
+				// for backwards compatibility
 				project.setResourceFileDefinition(resourceName);
-				project.setUseResourceDirectories(true);
+				project.setUseResourceDirectories(project.getResourceType() != ResourceType.Properties);
 			}
 		} else {
 			project.setMinifyResources(settings.isMinifyResources());
