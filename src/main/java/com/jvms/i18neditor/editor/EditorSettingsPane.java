@@ -75,12 +75,14 @@ public class EditorSettingsPane extends AbstractSettingsPane {
 		// New project settings
 		JPanel fieldset2 = createFieldset(MessageBundle.get("settings.fieldset.newprojects"));
 		
-		JCheckBox minifyBox = new JCheckBox(MessageBundle.get("settings.minify.title"));
+		JCheckBox minifyBox = new JCheckBox(MessageBundle.get("settings.minify.title") + " " + 
+				MessageBundle.get("settings.resource.jsones6"));
 		minifyBox.setSelected(settings.isMinifyResources());
 		minifyBox.addChangeListener(e -> settings.setMinifyResources(minifyBox.isSelected()));		
 		fieldset2.add(minifyBox, createVerticalGridBagConstraints());
 		
-		JCheckBox flattenJSONBox = new JCheckBox(MessageBundle.get("settings.flattenjson.title"));
+		JCheckBox flattenJSONBox = new JCheckBox(MessageBundle.get("settings.flattenjson.title") + " " + 
+				MessageBundle.get("settings.resource.jsones6"));
 		flattenJSONBox.setSelected(settings.isFlattenJSON());
 		flattenJSONBox.addChangeListener(e -> settings.setFlattenJSON(flattenJSONBox.isSelected()));
 		fieldset2.add(flattenJSONBox, createVerticalGridBagConstraints());

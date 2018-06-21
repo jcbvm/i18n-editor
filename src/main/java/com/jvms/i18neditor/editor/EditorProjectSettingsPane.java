@@ -35,14 +35,13 @@ public class EditorProjectSettingsPane extends AbstractSettingsPane {
 		// General settings
 		JPanel fieldset1 = createFieldset(MessageBundle.get("settings.fieldset.general"));
 		
-		if (project.getResourceType() != ResourceType.Properties) {
+		ResourceType type = project.getResourceType();
+		if (type == ResourceType.JSON || type == ResourceType.ES6) {
 			JCheckBox minifyBox = new JCheckBox(MessageBundle.get("settings.minify.title"));
 			minifyBox.setSelected(project.isMinifyResources());
 			minifyBox.addChangeListener(e -> project.setMinifyResources(minifyBox.isSelected()));
 			fieldset1.add(minifyBox, createVerticalGridBagConstraints());
-		}
-		
-		if (project.getResourceType().equals(ResourceType.JSON)) {
+			
 			JCheckBox flattenJSONBox = new JCheckBox(MessageBundle.get("settings.flattenjson.title"));
 			flattenJSONBox.setSelected(project.isFlattenJSON());
 			flattenJSONBox.addChangeListener(e -> project.setFlattenJSON(flattenJSONBox.isSelected()));
