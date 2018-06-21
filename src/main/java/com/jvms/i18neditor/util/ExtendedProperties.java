@@ -7,9 +7,12 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -302,6 +305,11 @@ public class ExtendedProperties extends Properties {
 	public boolean containsKeys(String... keys) {
 		return Arrays.asList(keys).stream().allMatch(k -> containsKey(k));
 	}
+	
+	@Override
+    public synchronized Enumeration<Object> keys() {
+        return Collections.enumeration(new TreeSet<Object>(super.keySet()));
+    }
 	
 	private class OutputStreamWrapper extends FilterOutputStream {
         private boolean firstlineseen = false;
