@@ -184,8 +184,8 @@ public class EditorMenuBar extends JMenuBar {
         editMenu.addSeparator();
         editMenu.add(renameTranslationMenuItem);
         editMenu.add(duplicateTranslationMenuItem);
-        editMenu.add(copyTranslationKeyMenuItem);
         editMenu.add(removeTranslationMenuItem);
+        editMenu.add(copyTranslationKeyMenuItem);
         
         // View menu
         viewMenu = new JMenu(MessageBundle.get("menu.view.title"));

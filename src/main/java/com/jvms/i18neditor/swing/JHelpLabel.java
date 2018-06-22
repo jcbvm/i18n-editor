@@ -1,5 +1,6 @@
 package com.jvms.i18neditor.swing;
 
+import java.awt.Dimension;
 import java.awt.Font;
 
 import javax.swing.JLabel;
@@ -20,6 +21,9 @@ public class JHelpLabel extends JLabel {
 	public JHelpLabel(String text) {
 		super(text);
 		
+		Dimension size = getSize();
+		size.height -= 10;
+		setSize(size);
 		setFont(getFont().deriveFont(Font.PLAIN, getFont().getSize()-1));
 		setForeground(UIManager.getColor("Label.disabledForeground"));
 	}

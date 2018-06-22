@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.text.Caret;
 
 import com.google.common.base.Strings;
+import com.jvms.i18neditor.swing.JHelpLabel;
 import com.jvms.i18neditor.swing.JHtmlPane;
 import com.jvms.i18neditor.swing.JTextField;
 import com.jvms.i18neditor.swing.event.RequestInitialFocusListener;
@@ -56,11 +57,11 @@ public final class Dialogs {
 		return JOptionPane.showConfirmDialog(parent, message, title, JOptionPane.YES_NO_OPTION, type) == JOptionPane.YES_OPTION;
 	}
 	
-	public static String showInputDialog(Component parent, String title, String label, int type) {
-		return showInputDialog(parent, title, label, type, null, new BlinkCaret());
+	public static String showInputDialog(Component parent, String title, String label, String help, int type) {
+		return showInputDialog(parent, title, label, help, type, null, new BlinkCaret());
 	}
 	
-	public static String showInputDialog(Component parent, String title, String label, int type, String initialText, Caret caret) {
+	public static String showInputDialog(Component parent, String title, String label, String help, int type, String initialText, Caret caret) {
 		JPanel content = new JPanel(new GridLayout(0, 1));
 		
 		if (!Strings.isNullOrEmpty(label)) {
@@ -74,6 +75,10 @@ public final class Dialogs {
 			field.setCaretPosition(initialText.length());			
 		}
 		content.add(field);
+		
+		if (!Strings.isNullOrEmpty(help)) {
+			content.add(new JHelpLabel(help));
+		}
 		
 		JPanel container = new JPanel(new GridBagLayout());
 		container.add(content);

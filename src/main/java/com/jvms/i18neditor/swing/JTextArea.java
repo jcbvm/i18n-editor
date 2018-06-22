@@ -35,7 +35,7 @@ public class JTextArea extends javax.swing.JTextArea {
 		super();
 		
 		Border border = BorderFactory.createLineBorder(Colors.scale(UIManager.getColor("Panel.background"), .8f));
-		setBorder(BorderFactory.createCompoundBorder(border, BorderFactory.createEmptyBorder(6,8,6,8)));
+		setBorder(BorderFactory.createCompoundBorder(border, BorderFactory.createEmptyBorder(5,8,5,8)));
 		getDocument().addUndoableEditListener(e -> undoManager.addEdit(e.getEdit()));
 		
 		setAlignmentX(LEFT_ALIGNMENT);

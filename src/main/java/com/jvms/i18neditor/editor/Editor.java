@@ -380,7 +380,7 @@ public class Editor extends JFrame {
 			localeString = Dialogs.showInputDialog(this,
 					MessageBundle.get("dialogs.locale.add.title", type),
 					MessageBundle.get("dialogs.locale.add.text"),
-					JOptionPane.QUESTION_MESSAGE);
+					null, JOptionPane.QUESTION_MESSAGE);
 			if (localeString != null) {
 				Locale locale = Locales.parseLocale(localeString.trim());
 				if (locale == null) {
@@ -405,6 +405,7 @@ public class Editor extends JFrame {
 			newKey = Dialogs.showInputDialog(this,
 					MessageBundle.get("dialogs.translation.rename.title"),
 					MessageBundle.get("dialogs.translation.rename.text"),
+					MessageBundle.get("dialogs.translation.add.help"),
 					JOptionPane.QUESTION_MESSAGE, key, new TranslationKeyCaret());
 			if (newKey != null) {
 				if (!ResourceKeys.isValid(newKey)) {
@@ -435,6 +436,7 @@ public class Editor extends JFrame {
 			newKey = Dialogs.showInputDialog(this,
 					MessageBundle.get("dialogs.translation.duplicate.title"),
 					MessageBundle.get("dialogs.translation.duplicate.text"),
+					MessageBundle.get("dialogs.translation.add.help"),
 					JOptionPane.QUESTION_MESSAGE, key, new TranslationKeyCaret());
 			if (newKey != null) {
 				newKey = newKey.trim();
@@ -470,6 +472,7 @@ public class Editor extends JFrame {
 			newKey = Dialogs.showInputDialog(this,
 					MessageBundle.get("dialogs.translation.add.title"),
 					MessageBundle.get("dialogs.translation.add.text"),
+					MessageBundle.get("dialogs.translation.add.help"),
 					JOptionPane.QUESTION_MESSAGE, key, new TranslationKeyCaret());
 			if (newKey != null) {
 				newKey = newKey.trim();
@@ -486,7 +489,7 @@ public class Editor extends JFrame {
 		String key = Dialogs.showInputDialog(this,
 				MessageBundle.get("dialogs.translation.find.title"),
 				MessageBundle.get("dialogs.translation.find.text"),
-				JOptionPane.QUESTION_MESSAGE);
+				null, JOptionPane.QUESTION_MESSAGE);
 		if (key != null) {
 			TranslationTreeNode node = translationTree.getNodeByKey(key.trim());
 			if (node == null) {
