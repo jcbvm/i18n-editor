@@ -40,7 +40,7 @@ When using flat file structure the translations files are all in the same direct
 
 When using directories, the directory will be named after the locales and the files within these directories will be of the from `translations` (customizable via the settings menu).
 
-For `Properties` formatted translation project a default translation file will be created called `translations.properties` (customizable via the settings menu), this is the fallback translation file (which is common for a java ResourceBundle).
+For `Properties` formatted translation projects a default translation file will be created called `translations.properties` (customizable via the settings menu), this is the fallback translation file (which is common for a java ResourceBundle).
 
 #### Translation status
 In the tree on the left side of the editor translations with missing values will be marked with a yellow icon in front of them.
