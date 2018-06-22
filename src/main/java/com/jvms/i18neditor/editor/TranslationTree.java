@@ -68,8 +68,10 @@ public class TranslationTree extends JTree {
 	public void updateNode(String key, boolean error) {
 		TranslationTreeModel model = (TranslationTreeModel) getModel();
 		TranslationTreeNode node = model.getNodeByKey(key);
-		node.setError(error);
-		model.nodeWithParentsChanged(node);
+		if (node != null && node.isLeaf()) {
+			node.setError(error);
+			model.nodeWithParentsChanged(node);
+		}
 	}
 	
 	public TranslationTreeNode addNodeByKey(String key) {
