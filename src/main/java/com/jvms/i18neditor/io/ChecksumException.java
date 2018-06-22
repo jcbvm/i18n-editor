@@ -1,4 +1,4 @@
-package com.jvms.i18neditor.util;
+package com.jvms.i18neditor.io;
 
 import java.io.IOException;
 

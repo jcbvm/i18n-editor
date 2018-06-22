@@ -31,6 +31,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.jvms.i18neditor.Resource;
 import com.jvms.i18neditor.ResourceType;
+import com.jvms.i18neditor.io.ChecksumException;
 
 /**
  * This class provides utility functions for a {@link Resource}.

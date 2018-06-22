@@ -62,6 +62,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jvms.i18neditor.Resource;
 import com.jvms.i18neditor.ResourceType;
+import com.jvms.i18neditor.io.ChecksumException;
 import com.jvms.i18neditor.swing.JFileDrop;
 import com.jvms.i18neditor.swing.JScrollablePanel;
 import com.jvms.i18neditor.swing.util.Dialogs;
@@ -193,7 +194,7 @@ public class Editor extends JFrame {
 						project.addResource(resource);
 					} catch (IOException e) {
 						log.error("Error importing resource file " + resource.getPath(), e);
-						showError(MessageBundle.get("resources.import.error.single", resource.getPath().toString()));
+						showError(MessageBundle.get("resources.import.error.single", resource.getPath()));
 					}
 				});
 				project.getResources().forEach(r -> keys.putAll(r.getTranslations()));
@@ -214,12 +215,8 @@ public class Editor extends JFrame {
 		boolean error = false;
 		if (project != null) {
 			for (Resource resource : project.getResources()) {
-				try {
-					Resources.write(resource, !project.isMinifyResources(), project.isFlattenJSON());
-				} catch (IOException e) {
+				if (!saveResource(resource)) {
 					error = true;
-					log.error("Error saving resource file " + resource.getPath(), e);
-					showError(MessageBundle.get("resources.write.error.single", resource.getPath().toString()));
 				}
 			}
 		}
@@ -878,6 +875,30 @@ public class Editor extends JFrame {
 		if (project == null) return;
 		boolean hasError = project.getResources().stream().anyMatch(r -> !r.hasTranslation(key));
 		translationTree.updateNode(key, hasError);
+	}
+	
+	private boolean saveResource(Resource resource) {
+		if (project != null) {
+			try {
+				Resources.write(resource, !project.isMinifyResources(), project.isFlattenJSON());
+			} catch (ChecksumException e) {
+				boolean confirm = Dialogs.showConfirmDialog(this, 
+						MessageBundle.get("dialogs.save.checksum.title"), 
+						MessageBundle.get("dialogs.save.checksum.text", resource.getPath()),
+						JOptionPane.WARNING_MESSAGE);
+				if (confirm) {
+					resource.setChecksum(null);
+					saveResource(resource);
+				} else {
+					return false;
+				}
+			} catch (IOException e) {
+				log.error("Error saving resource file " + resource.getPath(), e);
+				showError(MessageBundle.get("resources.write.error.single", resource.getPath().toString()));
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	private void storeProjectState() {
