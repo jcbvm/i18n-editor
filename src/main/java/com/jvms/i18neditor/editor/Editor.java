@@ -376,7 +376,7 @@ public class Editor extends JFrame {
 		String localeString = "";
 		Path path = project.getPath();
 		ResourceType type = project.getResourceType();
-		while (localeString != null && localeString.isEmpty()) {
+		while (localeString != null) {
 			localeString = Dialogs.showInputDialog(this,
 					MessageBundle.get("dialogs.locale.add.title", type),
 					MessageBundle.get("dialogs.locale.add.text"),
@@ -390,6 +390,7 @@ public class Editor extends JFrame {
 						Resource resource = Resources.create(type, path, 
 								project.getResourceFileDefinition(), project.isUseResourceDirectories(), Optional.of(locale));
 						addResource(resource);
+						localeString = null;
 					} catch (IOException e) {
 						log.error("Error creating new locale", e);
 						showError(MessageBundle.get("dialogs.locale.add.error.create"));
@@ -401,7 +402,7 @@ public class Editor extends JFrame {
 	
 	public void showRenameTranslationDialog(String key) {
 		String newKey = "";
-		while (newKey != null && newKey.isEmpty()) {
+		while (newKey != null) {
 			newKey = Dialogs.showInputDialog(this,
 					MessageBundle.get("dialogs.translation.rename.title"),
 					MessageBundle.get("dialogs.translation.rename.text"),
@@ -421,9 +422,11 @@ public class Editor extends JFrame {
 								JOptionPane.WARNING_MESSAGE);
 						if (confirm) {
 							renameTranslationKey(key, newKey);
+							newKey = null;
 						}
 					} else {
 						renameTranslationKey(key, newKey);
+						newKey = null;
 					}
 				}
 			}
@@ -432,7 +435,7 @@ public class Editor extends JFrame {
 	
 	public void showDuplicateTranslationDialog(String key) {
 		String newKey = "";
-		while (newKey != null && newKey.isEmpty()) {
+		while (newKey != null) {
 			newKey = Dialogs.showInputDialog(this,
 					MessageBundle.get("dialogs.translation.duplicate.title"),
 					MessageBundle.get("dialogs.translation.duplicate.text"),
@@ -453,9 +456,11 @@ public class Editor extends JFrame {
 								JOptionPane.WARNING_MESSAGE);
 						if (confirm) {
 							duplicateTranslationKey(key, newKey);
+							newKey = null;
 						}
 					} else {
 						duplicateTranslationKey(key, newKey);
+						newKey = null;
 					}
 				}
 			}
@@ -468,7 +473,7 @@ public class Editor extends JFrame {
 		if (node != null && !node.isRoot()) {
 			key = node.getKey() + ".";
 		}
-		while (newKey != null && newKey.isEmpty()) {
+		while (newKey != null) {
 			newKey = Dialogs.showInputDialog(this,
 					MessageBundle.get("dialogs.translation.add.title"),
 					MessageBundle.get("dialogs.translation.add.text"),
@@ -480,24 +485,29 @@ public class Editor extends JFrame {
 					showError(MessageBundle.get("dialogs.translation.add.error"));
 				} else {
 					addTranslationKey(newKey);
+					newKey = null;
 				}
 			}
 		}
 	}
 	
 	public void showFindTranslationDialog() {
-		String key = Dialogs.showInputDialog(this,
-				MessageBundle.get("dialogs.translation.find.title"),
-				MessageBundle.get("dialogs.translation.find.text"),
-				null, JOptionPane.QUESTION_MESSAGE);
-		if (key != null) {
-			TranslationTreeNode node = translationTree.getNodeByKey(key.trim());
-			if (node == null) {
-				Dialogs.showWarningDialog(this, 
-						MessageBundle.get("dialogs.translation.find.title"), 
-						MessageBundle.get("dialogs.translation.find.error"));
-			} else {
-				translationTree.setSelectionNode(node);
+		String key = "";
+		while (key != null) {
+			key = Dialogs.showInputDialog(this,
+					MessageBundle.get("dialogs.translation.find.title"),
+					MessageBundle.get("dialogs.translation.find.text"),
+					null, JOptionPane.QUESTION_MESSAGE, key, new TranslationKeyCaret());
+			if (key != null) {
+				TranslationTreeNode node = translationTree.getNodeByKey(key.trim());
+				if (node == null) {
+					Dialogs.showWarningDialog(this, 
+							MessageBundle.get("dialogs.translation.find.title"), 
+							MessageBundle.get("dialogs.translation.find.error"));
+				} else {
+					translationTree.setSelectionNode(node);
+					key = null;
+				}
 			}
 		}
 	}
