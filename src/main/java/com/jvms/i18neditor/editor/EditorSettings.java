@@ -9,6 +9,8 @@ import java.util.Locale;
  * @author Jacob van Mourik
  */
 public class EditorSettings {
+	public final static String DEFAULT_RESOURCE_FILE_DEFINITION = "translations{_LOCALE}";
+	
 	private int windowPositionX;
 	private int windowPositionY;
 	private int windowDeviderPosition;

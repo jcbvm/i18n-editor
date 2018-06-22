@@ -91,7 +91,6 @@ public class Editor extends JFrame {
 	public final static String PROJECT_FILE = ".i18n-editor-metadata";
 	public final static String SETTINGS_FILE = ".i18n-editor";
 	public final static String SETTINGS_DIR = System.getProperty("user.home");
-	public final static String DEFAULT_RESOURCE_DEFINITION = "translations{_LOCALE}";
 	
 	public final static Locale DEFAULT_LANGUAGE = Locale.ENGLISH;
 	public final static List<Locale> SUPPORTED_LANGUAGES = Lists.newArrayList(
@@ -987,7 +986,7 @@ public class Editor extends JFrame {
 		settings.setHistory(props.getListProperty("history"));
 		settings.setLastExpandedNodes(props.getListProperty("last_expanded"));
 		settings.setLastSelectedNode(props.getProperty("last_selected"));
-		settings.setResourceFileDefinition(props.getProperty("resource_definition", DEFAULT_RESOURCE_DEFINITION));
+		settings.setResourceFileDefinition(props.getProperty("resource_definition", EditorSettings.DEFAULT_RESOURCE_FILE_DEFINITION));
 		settings.setUseResourceDirectories(props.getBooleanProperty("resource_directories", false));
 		settings.setEditorLanguage(props.getLocaleProperty("editor_language"));
 	}

@@ -99,7 +99,7 @@ public class EditorSettingsPane extends AbstractSettingsPane {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				String value = resourceDefinitionField.getText().trim();
-				settings.setResourceFileDefinition(value.isEmpty() ? Editor.DEFAULT_RESOURCE_DEFINITION : value);
+				settings.setResourceFileDefinition(value.isEmpty() ? EditorSettings.DEFAULT_RESOURCE_FILE_DEFINITION : value);
 			}
 		});
 		resourceDefinitionPanel.add(resourceDefinitionLabel);
