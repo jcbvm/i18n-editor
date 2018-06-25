@@ -16,7 +16,7 @@ The editor supports translation files with the following format:
 - Creating new translations/locales or editing existing ones.
 - Renaming, duplicating, creating or deleting individual translations.
 - Detecting missing translations.
-- Supports multiple project file structures.
+- Supports multiple project layouts.
 - Supports custom file naming.
 - Supports file minification.
 - Supports both nested and flat JSON/ES6 structure.
@@ -35,7 +35,7 @@ You can download the latest release by going to [this page](https://github.com/j
 #### Getting started
 To start, open the application and go to `File > New Project` to create a new project. After choosing the desired file format for your translations, select the root folder where you want to store your translation files. After selecting the root folder you'll be asked to add your first locale. From here you can add more locales by going to `Edit > Add Locale...` or start adding translations either via `Edit > Add Translation...`, via the right click menu in the left side panel or via the key field at the bottom of the left side panel. Each time you start the editor it will open the last project you was working on. You can always import an existing project by going to `File > Import Project...` and selecting the root folder of your existing project or by simply dragging your project folder into the application.
 
-#### Project file structure
+#### Project layout
 The translations files can be stored in two different ways. Either using flat or folder structure.
 This setting can be changed in the settings menu, the default setting is flat structure.
 
