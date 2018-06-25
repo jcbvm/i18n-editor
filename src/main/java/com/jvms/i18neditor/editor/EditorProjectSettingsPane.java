@@ -6,6 +6,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -35,6 +36,40 @@ public class EditorProjectSettingsPane extends AbstractSettingsPane {
 		// General settings
 		JPanel fieldset1 = createFieldset(MessageBundle.get("settings.fieldset.general"));
 		
+		ComboBoxFileStructure currentFileStructureItem = null;
+		for (ComboBoxFileStructure item : fileStructureComboBoxItems) {
+			if (item.getStructure().equals(project.getResourceFileStructure())) {
+				currentFileStructureItem = item;
+				break;
+			}
+		}
+		JPanel fileStructurePanel = new JPanel(new GridLayout(0, 1));
+		JLabel fileStructureLabel = new JLabel(MessageBundle.get("settings.filestructure.title"));
+		JComboBox fileStructureField = new JComboBox(fileStructureComboBoxItems.toArray());
+		fileStructureField.setSelectedItem(currentFileStructureItem);
+		fileStructureField.addActionListener(e -> {
+			project.setResourceFileStructure(((ComboBoxFileStructure)fileStructureField.getSelectedItem()).getStructure());
+		});
+		fileStructurePanel.add(fileStructureLabel);
+		fileStructurePanel.add(fileStructureField);
+		fieldset1.add(fileStructurePanel, createVerticalGridBagConstraints());
+		
+		JPanel resourceDefinitionPanel = new JPanel(new GridLayout(0, 1));
+		JLabel resourceDefinitionLabel = new JLabel(MessageBundle.get("settings.resourcedef.title"));
+		JHelpLabel resourceDefinitionHelpLabel = new JHelpLabel(MessageBundle.get("settings.resourcedef.help"));
+		JTextField resourceDefinitionField = new JTextField(project.getResourceFileDefinition());
+		resourceDefinitionField.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				String value = resourceDefinitionField.getText().trim();
+				project.setResourceFileDefinition(value.isEmpty() ? EditorSettings.DEFAULT_RESOURCE_FILE_DEFINITION : value);
+			}
+		});
+		resourceDefinitionPanel.add(resourceDefinitionLabel);
+		resourceDefinitionPanel.add(resourceDefinitionField);
+		fieldset1.add(resourceDefinitionPanel, createVerticalGridBagConstraints());
+		fieldset1.add(resourceDefinitionHelpLabel, createVerticalGridBagConstraints(3));
+		
 		ResourceType type = project.getResourceType();
 		if (type == ResourceType.JSON || type == ResourceType.ES6) {
 			JCheckBox minifyBox = new JCheckBox(MessageBundle.get("settings.minify.title"));
@@ -47,28 +82,6 @@ public class EditorProjectSettingsPane extends AbstractSettingsPane {
 			flattenJSONBox.addChangeListener(e -> project.setFlattenJSON(flattenJSONBox.isSelected()));
 			fieldset1.add(flattenJSONBox, createVerticalGridBagConstraints());
 		}
-		
-		JCheckBox useResourceDirsBox = new JCheckBox(MessageBundle.get("settings.resourcedirs.title"));
-		useResourceDirsBox.setSelected(project.isUseResourceDirectories());
-		useResourceDirsBox.addChangeListener(e -> project.setUseResourceDirectories(useResourceDirsBox.isSelected()));		
-		fieldset1.add(useResourceDirsBox, createVerticalGridBagConstraints());
-		
-		JPanel resourceDefinitionPanel = new JPanel(new GridLayout(0, 1));
-		JLabel resourceDefinitionLabel = new JLabel(MessageBundle.get("settings.resourcedef.title"));
-		JTextField resourceDefinitionField = new JTextField(project.getResourceFileDefinition());
-		resourceDefinitionField.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyReleased(KeyEvent e) {
-				String value = resourceDefinitionField.getText().trim();
-				project.setResourceFileDefinition(value.isEmpty() ? EditorSettings.DEFAULT_RESOURCE_FILE_DEFINITION : value);
-			}
-		});
-		resourceDefinitionPanel.add(resourceDefinitionLabel);
-		resourceDefinitionPanel.add(resourceDefinitionField);
-		fieldset1.add(resourceDefinitionPanel, createVerticalGridBagConstraints());
-		
-		JHelpLabel resourceDefinitionHelpLabel = new JHelpLabel(MessageBundle.get("settings.resourcedef.help"));
-		fieldset1.add(resourceDefinitionHelpLabel, createVerticalGridBagConstraints(3));
 		
 		setLayout(new GridBagLayout());
 		add(fieldset1, createVerticalGridBagConstraints());

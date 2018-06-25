@@ -3,9 +3,16 @@ package com.jvms.i18neditor.editor;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
+
+import com.google.common.collect.Lists;
+import com.jvms.i18neditor.FileStructure;
+import com.jvms.i18neditor.util.MessageBundle;
 
 /**
  * This class represents an abstract base class for all setting panes.
@@ -15,6 +22,16 @@ import javax.swing.JPanel;
 public abstract class AbstractSettingsPane extends JPanel {
 	private final static long serialVersionUID = -8953194193840198893L;
 	private GridBagConstraints vGridBagConstraints;
+	
+	protected final List<ComboBoxFileStructure> fileStructureComboBoxItems = Lists.newArrayList(FileStructure.values()).stream()
+			.map(val -> new ComboBoxFileStructure(val, MessageBundle.get("settings.filestructure." + val.name().toLowerCase())))
+			.sorted()
+			.collect(Collectors.toList());
+	
+	protected final List<ComboBoxLocale> localeComboBoxItems = Editor.SUPPORTED_LANGUAGES.stream()
+			.map(val -> new ComboBoxLocale(val))
+			.sorted()
+			.collect(Collectors.toList());
 	
 	protected AbstractSettingsPane() {
 		super();
@@ -41,5 +58,49 @@ public abstract class AbstractSettingsPane extends JPanel {
 				BorderFactory.createTitledBorder(null, title), 
 				BorderFactory.createEmptyBorder(5,5,5,5)));
 		return fieldset;
+	}
+	
+	protected class ComboBoxFileStructure implements Comparable<ComboBoxFileStructure> {
+		private FileStructure structure;
+		private String label;
+		
+		public ComboBoxFileStructure(FileStructure structure, String label) {
+			this.structure = structure;
+			this.label = label;
+		}
+		
+		public FileStructure getStructure() {
+			return structure;
+		}
+		
+		public String toString() {
+			return label;
+		}
+
+		@Override
+		public int compareTo(ComboBoxFileStructure o) {
+			return toString().compareTo(o.toString());
+		}
+	}
+	
+	protected class ComboBoxLocale implements Comparable<ComboBoxLocale> {
+		private Locale locale;
+		
+		public ComboBoxLocale(Locale locale) {
+			this.locale = locale;
+		}
+		
+		public Locale getLocale() {
+			return locale;
+		}
+		
+		public String toString() {
+			return locale.getDisplayName();
+		}
+
+		@Override
+		public int compareTo(ComboBoxLocale o) {
+			return toString().compareTo(o.toString());
+		}
 	}
 }

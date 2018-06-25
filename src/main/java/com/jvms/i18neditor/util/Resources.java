@@ -29,6 +29,7 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.jvms.i18neditor.FileStructure;
 import com.jvms.i18neditor.Resource;
 import com.jvms.i18neditor.ResourceType;
 import com.jvms.i18neditor.io.ChecksumException;
@@ -62,12 +63,12 @@ public final class Resources {
 	 * 
 	 * @param 	root the root directory of the resources
 	 * @param 	fileDefinition the resource's file definition for lookup (using locale interpolation)
-	 * @param	directories whether to look for resources in (locale) directories only
+	 * @param	structure the file structure used for the lookup
 	 * @param 	type the type of the resource files to look for
 	 * @return	list of found resources
 	 * @throws 	IOException if an I/O error occurs reading the directory.
 	 */
-	public static List<Resource> get(Path root, String fileDefinition, boolean directories, Optional<ResourceType> type) 
+	public static List<Resource> get(Path root, String fileDefinition, FileStructure structure, Optional<ResourceType> type) 
 			throws IOException {
 		List<Resource> result = Lists.newLinkedList();
 		List<Path> files = Files.walk(root, 1).collect(Collectors.toList());
@@ -84,7 +85,7 @@ public final class Resources {
 				if (!type.orElse(rt).equals(rt)) {
 					continue;
 				}
-				if (directories && Files.isDirectory(file)) {
+				if (structure == FileStructure.Nested && Files.isDirectory(file)) {
 					Locale locale = Locales.parseLocale(filename);
 					if (locale == null) {
 						continue;
@@ -94,7 +95,7 @@ public final class Resources {
 						result.add(new Resource(rt, rf, locale));
 					}
 				}
-				if (!directories && Files.isRegularFile(file)) {
+				if (structure == FileStructure.Flat && Files.isRegularFile(file)) {
 					Matcher matcher = fileDefinitionPattern.matcher(filename);
 					if (!matcher.matches() && !filename.equals(defaultFileName)) {
 						continue;
@@ -190,16 +191,16 @@ public final class Resources {
 	 * @param 	type the type of the resource to create.
 	 * @param 	root the root directory to write the resource to.
 	 * @param	filenameDefinition the filename definition of the resource.
-	 * @param	directory whether to store the translation into a (locale) directory
+	 * @param	structure the file structure to use
 	 * @param	locale the locale of the resource (optional).
 	 * @return	The newly created resource.
 	 * @throws 	IOException if an I/O error occurs writing the file.
 	 */
-	public static Resource create(ResourceType type, Path root, String fileDefinition, boolean directory, Optional<Locale> locale) 
+	public static Resource create(ResourceType type, Path root, String fileDefinition, FileStructure structure, Optional<Locale> locale) 
 			throws IOException {
 		String extension = type.getExtension();
 		Path path;
-		if (directory) {
+		if (structure == FileStructure.Nested) {
 			path = Paths.get(root.toString(), locale.get().toString(), getFilename(fileDefinition, locale) + extension);			
 		} else {
 			path = Paths.get(root.toString(), getFilename(fileDefinition, locale) + extension);				

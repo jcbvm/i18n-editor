@@ -4,9 +4,7 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -46,13 +44,9 @@ public class EditorSettingsPane extends AbstractSettingsPane {
 		versionBox.addChangeListener(e -> settings.setCheckVersionOnStartup(versionBox.isSelected()));
 		fieldset1.add(versionBox, createVerticalGridBagConstraints());
 		
-		List<ComboBoxLocale> localeItems = Editor.SUPPORTED_LANGUAGES.stream()
-				.map(locale->new ComboBoxLocale(locale))
-				.sorted()
-				.collect(Collectors.toList());
 		ComboBoxLocale currentLocaleItem = null;
 		for (Locale locale : LocaleUtils.localeLookupList(editor.getCurrentLocale(), Locale.ENGLISH)) {
-			for (ComboBoxLocale item : localeItems) {
+			for (ComboBoxLocale item : localeComboBoxItems) {
 				if (item.getLocale().equals(locale)) {
 					currentLocaleItem = item;
 					break;
@@ -62,18 +56,53 @@ public class EditorSettingsPane extends AbstractSettingsPane {
 				break;
 			}
 		}
-		
 		JPanel languageListPanel = new JPanel(new GridLayout(0, 1));
 		JLabel languageListLabel = new JLabel(MessageBundle.get("settings.language.title"));
-		JComboBox<ComboBoxLocale> languageListField = new JComboBox<ComboBoxLocale>(localeItems.toArray(new ComboBoxLocale[0]));
+		JComboBox languageListField = new JComboBox(localeComboBoxItems.toArray());
 		languageListField.setSelectedItem(currentLocaleItem);
-		languageListField.addActionListener(e -> settings.setEditorLanguage(((ComboBoxLocale)languageListField.getSelectedItem()).getLocale()));
+		languageListField.addActionListener(e -> {
+			settings.setEditorLanguage(((ComboBoxLocale)languageListField.getSelectedItem()).getLocale());
+		});
 		languageListPanel.add(languageListLabel);
 		languageListPanel.add(languageListField);
 		fieldset1.add(languageListPanel, createVerticalGridBagConstraints());
 		
 		// New project settings
 		JPanel fieldset2 = createFieldset(MessageBundle.get("settings.fieldset.newprojects"));
+		
+		ComboBoxFileStructure currentFileStructureItem = null;
+		for (ComboBoxFileStructure item : fileStructureComboBoxItems) {
+			if (item.getStructure().equals(settings.getResourceFileStructure())) {
+				currentFileStructureItem = item;
+				break;
+			}
+		}
+		JPanel fileStructurePanel = new JPanel(new GridLayout(0, 1));
+		JLabel fileStructureLabel = new JLabel(MessageBundle.get("settings.filestructure.title"));
+		JComboBox fileStructureField = new JComboBox(fileStructureComboBoxItems.toArray());
+		fileStructureField.setSelectedItem(currentFileStructureItem);
+		fileStructureField.addActionListener(e -> {
+			settings.setResourceFileStructure(((ComboBoxFileStructure)fileStructureField.getSelectedItem()).getStructure());
+		});
+		fileStructurePanel.add(fileStructureLabel);
+		fileStructurePanel.add(fileStructureField);
+		fieldset2.add(fileStructurePanel, createVerticalGridBagConstraints());
+		
+		JPanel resourceDefinitionPanel = new JPanel(new GridLayout(0, 1));
+		JLabel resourceDefinitionLabel = new JLabel(MessageBundle.get("settings.resourcedef.title"));
+		JHelpLabel resourceDefinitionHelpLabel = new JHelpLabel(MessageBundle.get("settings.resourcedef.help"));
+		JTextField resourceDefinitionField = new JTextField(settings.getResourceFileDefinition());
+		resourceDefinitionField.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				String value = resourceDefinitionField.getText().trim();
+				settings.setResourceFileDefinition(value.isEmpty() ? EditorSettings.DEFAULT_RESOURCE_FILE_DEFINITION : value);
+			}
+		});
+		resourceDefinitionPanel.add(resourceDefinitionLabel);
+		resourceDefinitionPanel.add(resourceDefinitionField);
+		fieldset2.add(resourceDefinitionPanel, createVerticalGridBagConstraints());
+		fieldset2.add(resourceDefinitionHelpLabel, createVerticalGridBagConstraints(3));
 		
 		JCheckBox minifyBox = new JCheckBox(MessageBundle.get("settings.minify.title") + " " + 
 				MessageBundle.get("settings.resource.jsones6"));
@@ -86,28 +115,6 @@ public class EditorSettingsPane extends AbstractSettingsPane {
 		flattenJSONBox.setSelected(settings.isFlattenJSON());
 		flattenJSONBox.addChangeListener(e -> settings.setFlattenJSON(flattenJSONBox.isSelected()));
 		fieldset2.add(flattenJSONBox, createVerticalGridBagConstraints());
-		
-		JCheckBox useResourceDirsBox = new JCheckBox(MessageBundle.get("settings.resourcedirs.title"));
-		useResourceDirsBox.setSelected(settings.isUseResourceDirectories());
-		useResourceDirsBox.addChangeListener(e -> settings.setUseResourceDirectories(useResourceDirsBox.isSelected()));		
-		fieldset2.add(useResourceDirsBox, createVerticalGridBagConstraints());
-		
-		JPanel resourceDefinitionPanel = new JPanel(new GridLayout(0, 1));
-		JLabel resourceDefinitionLabel = new JLabel(MessageBundle.get("settings.resourcedef.title"));
-		JTextField resourceDefinitionField = new JTextField(settings.getResourceFileDefinition());
-		resourceDefinitionField.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyReleased(KeyEvent e) {
-				String value = resourceDefinitionField.getText().trim();
-				settings.setResourceFileDefinition(value.isEmpty() ? EditorSettings.DEFAULT_RESOURCE_FILE_DEFINITION : value);
-			}
-		});
-		resourceDefinitionPanel.add(resourceDefinitionLabel);
-		resourceDefinitionPanel.add(resourceDefinitionField);
-		fieldset2.add(resourceDefinitionPanel, createVerticalGridBagConstraints());
-		
-		JHelpLabel resourceDefinitionHelpLabel = new JHelpLabel(MessageBundle.get("settings.resourcedef.help"));
-		fieldset2.add(resourceDefinitionHelpLabel, createVerticalGridBagConstraints(3));
 		
 		// Editing settings
 		JPanel fieldset3 = createFieldset(MessageBundle.get("settings.fieldset.editing"));
@@ -143,26 +150,5 @@ public class EditorSettingsPane extends AbstractSettingsPane {
 		add(fieldset1, createVerticalGridBagConstraints());
 		add(fieldset2, createVerticalGridBagConstraints());
 		add(fieldset3, createVerticalGridBagConstraints());
-	}
-	
-	private class ComboBoxLocale implements Comparable<ComboBoxLocale> {
-		private Locale locale;
-		
-		public ComboBoxLocale(Locale locale) {
-			this.locale = locale;
-		}
-		
-		public Locale getLocale() {
-			return locale;
-		}
-		
-		public String toString() {
-			return locale.getDisplayName();
-		}
-
-		@Override
-		public int compareTo(ComboBoxLocale o) {
-			return toString().compareTo(o.toString());
-		}
 	}
 }

@@ -60,6 +60,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.jvms.i18neditor.FileStructure;
 import com.jvms.i18neditor.Resource;
 import com.jvms.i18neditor.ResourceType;
 import com.jvms.i18neditor.io.ChecksumException;
@@ -122,7 +123,7 @@ public class Editor extends JFrame {
 			}
 			
 			List<Resource> resourceList = Resources.get(dir, 
-					settings.getResourceFileDefinition(), settings.isUseResourceDirectories(), Optional.of(type));
+					settings.getResourceFileDefinition(), settings.getResourceFileStructure(), Optional.of(type));
 			if (!resourceList.isEmpty()) {
 				boolean importProject = Dialogs.showConfirmDialog(this, 
 						MessageBundle.get("dialogs.project.new.conflict.title"),
@@ -139,9 +140,9 @@ public class Editor extends JFrame {
 			restoreProjectState(project);
 			project.setResourceType(type);
 			
-			if (!project.isUseResourceDirectories()) {
+			if (project.getResourceFileStructure() == FileStructure.Flat) {
 				Resource resource = Resources.create(type, dir, 
-						project.getResourceFileDefinition(), false, Optional.empty());
+						project.getResourceFileDefinition(), FileStructure.Flat, Optional.empty());
 				setupResource(resource);
 				project.addResource(resource);
 			}
@@ -172,7 +173,7 @@ public class Editor extends JFrame {
 			
 			Optional<ResourceType> type = Optional.ofNullable(project.getResourceType());
 			List<Resource> resourceList = Resources.get(dir, 
-					project.getResourceFileDefinition(), project.isUseResourceDirectories(), type);
+					project.getResourceFileDefinition(), project.getResourceFileStructure(), type);
 			Map<String,String> keys = Maps.newTreeMap();
 			
 			if (resourceList.isEmpty()) {
@@ -275,7 +276,7 @@ public class Editor extends JFrame {
 		}
 		try {
 			Resource resource = Resources.create(project.getResourceType(), project.getPath(), 
-					project.getResourceFileDefinition(), project.isUseResourceDirectories(), Optional.of(locale));
+					project.getResourceFileDefinition(), project.getResourceFileStructure(), Optional.of(locale));
 			addResource(resource);
 			requestFocusInFirstResourceField();
 			return true;
@@ -948,7 +949,7 @@ public class Editor extends JFrame {
 		props.setProperty("flatten_json", project.isFlattenJSON());
 		props.setProperty("resource_type", project.getResourceType().toString());
 		props.setProperty("resource_definition", project.getResourceFileDefinition());
-		props.setProperty("resource_directories", project.isUseResourceDirectories());
+		props.setProperty("resource_structure", project.getResourceFileStructure());
 		props.store(Paths.get(project.getPath().toString(), PROJECT_FILE));
 	}
 	
@@ -963,17 +964,17 @@ public class Editor extends JFrame {
 			String resourceName = props.getProperty("resource_name"); // for backwards compatibility
 			if (Strings.isNullOrEmpty(resourceName)) {
 				project.setResourceFileDefinition(props.getProperty("resource_definition", settings.getResourceFileDefinition()));
-				project.setUseResourceDirectories(props.getBooleanProperty("resource_directories", settings.isUseResourceDirectories()));
+				project.setResourceFileStructure(props.getEnumProperty("resource_structure", FileStructure.class, settings.getResourceFileStructure()));
 			} else {
 				// for backwards compatibility
 				project.setResourceFileDefinition(resourceName);
-				project.setUseResourceDirectories(project.getResourceType() != ResourceType.Properties);
+				project.setResourceFileStructure(project.getResourceType() == ResourceType.Properties ? FileStructure.Flat : FileStructure.Nested);
 			}
 		} else {
 			project.setMinifyResources(settings.isMinifyResources());
 			project.setFlattenJSON(settings.isFlattenJSON());
 			project.setResourceFileDefinition(settings.getResourceFileDefinition());
-			project.setUseResourceDirectories(settings.isUseResourceDirectories());
+			project.setResourceFileStructure(settings.getResourceFileStructure());
 		}
 	}
 	
@@ -987,7 +988,7 @@ public class Editor extends JFrame {
 		props.setProperty("minify_resources", settings.isMinifyResources());
 		props.setProperty("flatten_json", settings.isFlattenJSON());
 		props.setProperty("resource_definition", settings.getResourceFileDefinition());
-		props.setProperty("resource_directories", settings.isUseResourceDirectories());
+		props.setProperty("resource_structure", settings.getResourceFileStructure());
 		props.setProperty("check_version", settings.isCheckVersionOnStartup());
 		props.setProperty("default_input_height", settings.getDefaultInputHeight());
 		props.setProperty("key_field_enabled", settings.isKeyFieldEnabled());
@@ -1029,7 +1030,7 @@ public class Editor extends JFrame {
 		settings.setLastExpandedNodes(props.getListProperty("last_expanded"));
 		settings.setLastSelectedNode(props.getProperty("last_selected"));
 		settings.setResourceFileDefinition(props.getProperty("resource_definition", EditorSettings.DEFAULT_RESOURCE_FILE_DEFINITION));
-		settings.setUseResourceDirectories(props.getBooleanProperty("resource_directories", false));
+		settings.setResourceFileStructure(props.getEnumProperty("resource_structure", FileStructure.class, FileStructure.Flat));
 		settings.setEditorLanguage(props.getLocaleProperty("editor_language"));
 	}
 	

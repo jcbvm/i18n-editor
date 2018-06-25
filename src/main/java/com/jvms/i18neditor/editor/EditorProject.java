@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.jvms.i18neditor.FileStructure;
 import com.jvms.i18neditor.Resource;
 import com.jvms.i18neditor.ResourceType;
 
@@ -13,14 +14,14 @@ import com.jvms.i18neditor.ResourceType;
  * 
  * @author Jacob van Mourik
  */
-public class EditorProject {
+public class EditorProject {	
 	private Path path;
 	private String resourceFileDefinition;
 	private ResourceType resourceType;
 	private List<Resource> resources;
 	private boolean minifyResources;
 	private boolean flattenJSON;
-	private boolean resourceDirectories;
+	private FileStructure resourceFileStructure;
 	
 	public EditorProject(Path path) {
 		this.path = path;
@@ -59,14 +60,6 @@ public class EditorProject {
 		return !resources.isEmpty();
 	}
 	
-	public boolean isUseResourceDirectories() {
-		return resourceDirectories;
-	}
-
-	public void setUseResourceDirectories(boolean resourceDirectories) {
-		this.resourceDirectories = resourceDirectories;
-	}
-	
 	public String getResourceFileDefinition() {
 		return resourceFileDefinition;
 	}
@@ -93,5 +86,13 @@ public class EditorProject {
 	
 	public boolean supportsResourceParentValues() {
 		return resourceType == ResourceType.Properties;
+	}
+
+	public FileStructure getResourceFileStructure() {
+		return resourceFileStructure;
+	}
+
+	public void setResourceFileStructure(FileStructure resourceFileStructure) {
+		this.resourceFileStructure = resourceFileStructure;
 	}
 }

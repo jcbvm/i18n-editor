@@ -3,6 +3,8 @@ package com.jvms.i18neditor.editor;
 import java.util.List;
 import java.util.Locale;
 
+import com.jvms.i18neditor.FileStructure;
+
 /**
  * This class represents the editor settings.
  * 
@@ -26,8 +28,8 @@ public class EditorSettings {
 	private boolean keyFieldEnabled;
 	private boolean doubleClickTreeToggling;
 	private String resourceFileDifinition;
-	private boolean resourceDirectories;
 	private Locale editorLanguage;
+	private FileStructure resourceFileStructure;
 	
 	public int getWindowPositionX() {
 		return windowPositionX;
@@ -141,13 +143,6 @@ public class EditorSettings {
 		this.doubleClickTreeToggling = doubleClickTreeToggling;
 	}
 	
-	public boolean isUseResourceDirectories() {
-		return resourceDirectories;
-	}
-
-	public void setUseResourceDirectories(boolean resourceDirectories) {
-		this.resourceDirectories = resourceDirectories;
-	}
 	public boolean isFlattenJSON() {
 		return flattenJSON;
 	}
@@ -162,5 +157,13 @@ public class EditorSettings {
 
 	public void setEditorLanguage(Locale editorLanguage) {
 		this.editorLanguage = editorLanguage;
+	}
+
+	public FileStructure getResourceFileStructure() {
+		return resourceFileStructure;
+	}
+
+	public void setResourceFileStructure(FileStructure resourceFileStructure) {
+		this.resourceFileStructure = resourceFileStructure;
 	}
 }
