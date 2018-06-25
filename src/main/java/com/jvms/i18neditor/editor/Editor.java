@@ -144,14 +144,14 @@ public class Editor extends JFrame {
 						project.getResourceFileDefinition(), false, Optional.empty());
 				setupResource(resource);
 				project.addResource(resource);
-			} else {
-				SwingUtilities.invokeLater(() -> showAddLocaleDialog());
 			}
 			translationTree.setModel(new TranslationTreeModel());
 			
 			updateHistory();
 			updateUI();
 			requestFocusInFirstResourceField();
+			
+			SwingUtilities.invokeLater(() -> showAddLocaleDialog());
 		} catch (IOException e) {
 			log.error("Error creating resource files", e);
 			showError(MessageBundle.get("resources.create.error"));
