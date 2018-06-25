@@ -90,4 +90,8 @@ public class EditorProject {
 	public void setFlattenJSON(boolean flattenJSON) {
 		this.flattenJSON = flattenJSON;
 	}
+	
+	public boolean supportsResourceParentValues() {
+		return resourceType == ResourceType.Properties;
+	}
 }
