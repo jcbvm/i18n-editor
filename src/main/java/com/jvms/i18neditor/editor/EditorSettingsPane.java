@@ -102,7 +102,7 @@ public class EditorSettingsPane extends AbstractSettingsPane {
 		resourceDefinitionPanel.add(resourceDefinitionLabel);
 		resourceDefinitionPanel.add(resourceDefinitionField);
 		fieldset2.add(resourceDefinitionPanel, createVerticalGridBagConstraints());
-		fieldset2.add(resourceDefinitionHelpLabel, createVerticalGridBagConstraints(3));
+		fieldset2.add(resourceDefinitionHelpLabel, createVerticalGridBagConstraints());
 		
 		JCheckBox minifyBox = new JCheckBox(MessageBundle.get("settings.minify.title") + " " + 
 				MessageBundle.get("settings.resource.jsones6"));

@@ -68,7 +68,7 @@ public class EditorProjectSettingsPane extends AbstractSettingsPane {
 		resourceDefinitionPanel.add(resourceDefinitionLabel);
 		resourceDefinitionPanel.add(resourceDefinitionField);
 		fieldset1.add(resourceDefinitionPanel, createVerticalGridBagConstraints());
-		fieldset1.add(resourceDefinitionHelpLabel, createVerticalGridBagConstraints(3));
+		fieldset1.add(resourceDefinitionHelpLabel, createVerticalGridBagConstraints());
 		
 		ResourceType type = project.getResourceType();
 		if (type == ResourceType.JSON || type == ResourceType.ES6) {

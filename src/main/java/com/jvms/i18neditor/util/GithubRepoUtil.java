@@ -33,15 +33,27 @@ public final class GithubRepoUtil {
 	}
 	
 	/**
+	 * Gets the full Github Repository URL.
+	 * 
+	* @param 	username the Github Repository user name.
+	 * @param 	project the Github Repository project name.
+	 * @return	the full Github Repository URL.
+	 */
+	public static String getURL(String username, String project) {
+		return "https://github.com/" + username + "/" + project;
+	}
+	
+	/**
 	 * Gets the latest release data of a Github Repository.
 	 * 
-	 * @param 	repo the Github Repository to get the latest release data from.
+	 * @param 	username the Github Repository user name.
+	 * @param 	project the Github Repository project name.
 	 * @return	the latest Github Repository release data.
 	 */
-	public static Future<GithubRepoReleaseData> getLatestRelease(String repo) {
+	public static Future<GithubRepoReleaseData> getLatestRelease(String username, String project) {
 		return executor.submit(() -> {
 			HttpURLConnection connection = null;
-			URL url = new URL("https://api.github.com/repos/" + repo + "/releases/latest");
+			URL url = new URL("https://api.github.com/repos/" + username + "/" + project + "/releases/latest");
 			try {
 				connection = (HttpURLConnection)url.openConnection();
 				try (InputStreamReader reader = new InputStreamReader(connection.getInputStream(), Charsets.UTF_8)) {

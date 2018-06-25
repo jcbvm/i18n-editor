@@ -88,7 +88,8 @@ public class Editor extends JFrame {
 	
 	public final static String TITLE = "i18n-editor";
 	public final static String VERSION = "2.0.0-beta.1";
-	public final static String GITHUB_REPO = "jcbvm/i18n-editor";
+	public final static String GITHUB_USER = "jcbvm";
+	public final static String GITHUB_PROJECT = "i18n-editor";
 	public final static String PROJECT_FILE = ".i18n-editor-metadata";
 	public final static String SETTINGS_FILE = ".i18n-editor";
 	public final static String SETTINGS_DIR = System.getProperty("user.home");
@@ -526,7 +527,7 @@ public class Editor extends JFrame {
 			GithubRepoReleaseData data;
 			String content;
 			try {
-				data = GithubRepoUtil.getLatestRelease(GITHUB_REPO).get(30, TimeUnit.SECONDS);
+				data = GithubRepoUtil.getLatestRelease(Editor.GITHUB_USER, Editor.GITHUB_PROJECT).get(30, TimeUnit.SECONDS);
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {
 				data = null;
 			}

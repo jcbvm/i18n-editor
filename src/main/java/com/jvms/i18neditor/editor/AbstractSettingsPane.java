@@ -36,20 +36,15 @@ public abstract class AbstractSettingsPane extends JPanel {
 	protected AbstractSettingsPane() {
 		super();
 		vGridBagConstraints = new GridBagConstraints();
-		vGridBagConstraints.insets = new Insets(2,2,2,2);
+		vGridBagConstraints.insets = new Insets(4,4,4,4);
 		vGridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		vGridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		vGridBagConstraints.weightx = 1;
 	}
 	
-	protected GridBagConstraints createVerticalGridBagConstraints(int weigthy) {
-		vGridBagConstraints.gridy = (vGridBagConstraints.gridy + 1) % Integer.MAX_VALUE;
-		vGridBagConstraints.weighty = weigthy;
-		return vGridBagConstraints;
-	}
-	
 	protected GridBagConstraints createVerticalGridBagConstraints() {
-		return createVerticalGridBagConstraints(1);
+		vGridBagConstraints.gridy = (vGridBagConstraints.gridy + 1) % Integer.MAX_VALUE;
+		return vGridBagConstraints;
 	}
 	
 	protected JPanel createFieldset(String title) {

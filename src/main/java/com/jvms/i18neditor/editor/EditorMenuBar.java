@@ -4,6 +4,8 @@ import java.awt.Desktop;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -25,6 +27,7 @@ import com.jvms.i18neditor.editor.menu.FindTranslationMenuItem;
 import com.jvms.i18neditor.editor.menu.RemoveTranslationMenuItem;
 import com.jvms.i18neditor.editor.menu.RenameTranslationMenuItem;
 import com.jvms.i18neditor.swing.util.Dialogs;
+import com.jvms.i18neditor.util.GithubRepoUtil;
 import com.jvms.i18neditor.util.MessageBundle;
 
 /**
@@ -220,10 +223,21 @@ public class EditorMenuBar extends JMenuBar {
      	JMenuItem versionMenuItem = new JMenuItem(MessageBundle.get("menu.help.version.title"));
      	versionMenuItem.addActionListener(e -> editor.showVersionDialog(false));
      	
+     	JMenuItem homeMenuItem = new JMenuItem(MessageBundle.get("menu.help.home.title", Editor.TITLE));
+     	homeMenuItem.addActionListener(e -> {
+     		try {
+				Desktop.getDesktop().browse(URI.create(GithubRepoUtil.getURL(Editor.GITHUB_USER, Editor.GITHUB_PROJECT)));
+			} catch (IOException e1) {
+				//
+			}
+     	});
+     	
      	JMenuItem aboutMenuItem = new JMenuItem(MessageBundle.get("menu.help.about.title", Editor.TITLE));
      	aboutMenuItem.addActionListener(e -> editor.showAboutDialog());
      	
      	helpMenu.add(versionMenuItem);
+     	helpMenu.addSeparator();
+     	helpMenu.add(homeMenuItem);
      	helpMenu.add(aboutMenuItem);
      	
      	add(fileMenu);
