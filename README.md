@@ -40,7 +40,7 @@ The translations files can be stored in two different ways. Either using flat or
 This setting can be changed in the settings menu, the default setting is flat layout.
 
 ##### Flat project layout
-When using the flat layout the translation files are all in the same directory and follow the name pattern `translations_en_US`, `translations_nl_NL` etc. (the name and place of the locale within the name can be changed in the settings menu). When  you create a project with a flat file structure there will also be a file created with the name `translations`, this is a file you can use as default/fallback translation file (if you don't need a default/fallback file, you can simply remove it from your project folder).
+When using the flat layout the translation files are all in the same directory and follow the name pattern `translations_en_US`, `translations_nl_NL` etc. (the name and place of the locale within the name can be changed in the settings menu). When  you create a project with a flat layout there will also a file be created called `translations`, this is a file you can use as default/fallback translation file (if you don't need a default/fallback file, you can simply remove it from your project folder).
 
 ##### Directory project layout
 When using the directory layout directories will be named after the locales and the files within these directories will be of the form `translations` (the name can be changed in the settings menu).
