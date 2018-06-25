@@ -31,19 +31,20 @@ You can download the latest release by going to [this page](https://github.com/j
 ## Usage
 
 #### Getting started
-To start, open the application and go to `File > New Project` to create a new project. After choosing the desired file format for your translations, select the root directory where you want to store your translation files. After selecting the root directory you'll be asked to add your first locale. From here you can add more locales by going to `Edit > Add Locale...` or start adding translations either via `Edit > Add Translation...`, via the right click menu in the left side panel or via the key field at the bottom of the left side panel. Each time you start the editor it will open the last project you was working on. You can always import an existing project by going to `File > Import Project...` and selecting the root directory of your existing project.
+To start, open the application and go to `File > New Project` to create a new project. After choosing the desired file format for your translations, select the root directory where you want to store your translation files. After selecting the root directory you'll be asked to add your first locale. From here you can add more locales by going to `Edit > Add Locale...` or start adding translations either via `Edit > Add Translation...`, via the right click menu in the left side panel or via the key field at the bottom of the left side panel. Each time you start the editor it will open the last project you was working on. You can always import an existing project by going to `File > Import Project...` and selecting the root directory of your existing project or by simply dragging your project folder into the application.
 
 #### Translation files
-The translations files can be stored in two different ways. Either using flat file structure or using directories.
+The translations files can be stored in two different ways. Either using flat file structure or using directory structure.
+This setting can be changed in the settings menu, the default setting is flat file structure.
 
-When using flat file structure the translations files are all in the same directory and follow the name pattern `translations_en_US`, `translations_nl_NL` etc. (the name and place of the locale within the name can be changed in the settings menu).
+##### Flat file structure
+When using the flat file structure the translation files are all in the same directory and follow the name pattern `translations_en_US`, `translations_nl_NL` etc. (the name and place of the locale within the name can be changed in the settings menu). When  you create a project with a flat file structure there will also be a file created with the name `translations`, this is a file you can use as default/fallback translation file (if you don't need a default/fallback file, you can simply remove it from your project folder).
 
-When using directories, the directory will be named after the locales and the files within these directories will be of the from `translations` (customizable via the settings menu).
-
-For `Properties` formatted translation projects a default translation file will be created called `translations.properties` (customizable via the settings menu), this is the fallback translation file (which is common for a java ResourceBundle).
+##### Directory structure
+When using the directory structure directories will be named after the locales and the files within these directories will be of the form `translations` (the name can be changed in the settings menu).
 
 #### Translation status
-In the tree on the left side of the editor translations with missing values will be marked with a yellow icon in front of them.
+To help finding missing translations in your files the editor will mark translations with one or more missing values with a yellow icon.
 
 #### Settings
 You can access the settings of the editor by going to `Settings > Preferences...`. Here you can change the filename of the translation files you want to use (by default they are named `translations`), select whether you want to minify and or flatten the translations on save and change interface related properties. Some of this settings can also be applied on each project individually via `Settings > Project Preferences...`.
