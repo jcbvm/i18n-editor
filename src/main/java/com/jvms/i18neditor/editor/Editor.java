@@ -104,6 +104,7 @@ public class Editor extends JFrame {
 	private TranslationTree translationTree;
 	private TranslationField translationField;
 	private JPanel resourcesPanel;
+	private UndoRedoManagerTranslation undoManagerTranslations = new UndoRedoManagerTranslation(this, translationTree);
 	private List<ResourceField> resourceFields = Lists.newArrayList();
 
 	public Editor() {
@@ -272,12 +273,15 @@ public class Editor extends JFrame {
 			if (project != null) {
 				project.getResources().forEach(resource -> resource.storeTranslation(key, ""));
 			}
+			undoManagerTranslations.rememberAction(new AddActionTranslation(key));
 			translationTree.addNodeByKey(key);
 		}
 		requestFocusInFirstResourceField();
 	}
 
 	public void removeTranslationKey(String key) {
+		undoManagerTranslations.rememberAction(new RemoveActionTranslation(key));
+
 		if (project != null) {
 			project.getResources().forEach(resource -> resource.removeTranslation(key));
 		}
@@ -290,6 +294,7 @@ public class Editor extends JFrame {
 			project.getResources().forEach(resource -> resource.renameTranslation(key, newKey));
 		}
 		translationTree.renameNodeByKey(key, newKey);
+		undoManagerTranslations.rememberAction(new RenameActionTranslation(key, newKey));
 		requestFocusInFirstResourceField();
 	}
 
@@ -297,6 +302,7 @@ public class Editor extends JFrame {
 		if (project != null) {
 			project.getResources().forEach(resource -> resource.duplicateTranslation(key, newKey));
 		}
+		undoManagerTranslations.rememberAction(new AddActionTranslation(newKey));
 		translationTree.duplicateNodeByKey(key, newKey);
 		requestFocusInFirstResourceField();
 	}
@@ -621,7 +627,22 @@ public class Editor extends JFrame {
 	}
 
 	public void UndoTranslationKey() {
+		undoManagerTranslations.undo();
+	}
 
+	public void RedoTranslationKey() {
+		undoManagerTranslations.redo();
+	}
+
+	public UndoRedoManagerTranslation getUndoRedoManagerTranslation() {
+		return undoManagerTranslations;
+	}
+
+	public void setNodeInFocus(String name) {
+		TranslationTreeNode selectedNode = translationTree.getNodeByKey(name);
+		if (selectedNode != null) {
+			translationTree.setSelectionNode(selectedNode);
+		}
 	}
 
 	private void requestFocusInFirstResourceField() {
@@ -1005,5 +1026,15 @@ public class Editor extends JFrame {
 				System.exit(0);
 			}
 		}
+	}
+
+	public boolean canUndoTranslation() {
+		// TODO Auto-generated method stub
+		return undoManagerTranslations.canUndo();
+	}
+
+	public boolean canRedoTranslation() {
+		// TODO Auto-generated method stub
+		return undoManagerTranslations.canRedo();
 	}
 }

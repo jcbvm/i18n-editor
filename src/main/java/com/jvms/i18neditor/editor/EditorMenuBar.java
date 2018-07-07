@@ -22,6 +22,7 @@ import com.jvms.i18neditor.editor.menu.CopyTranslationKeyToClipboardMenuItem;
 import com.jvms.i18neditor.editor.menu.DuplicateTranslationMenuItem;
 import com.jvms.i18neditor.editor.menu.ExpandTranslationsMenuItem;
 import com.jvms.i18neditor.editor.menu.FindTranslationMenuItem;
+import com.jvms.i18neditor.editor.menu.RedoTranslationKeyMenuItem;
 import com.jvms.i18neditor.editor.menu.RemoveTranslationMenuItem;
 import com.jvms.i18neditor.editor.menu.RenameTranslationMenuItem;
 import com.jvms.i18neditor.editor.menu.UndoTranslationKeyMenuItem;
@@ -45,6 +46,7 @@ public class EditorMenuBar extends JMenuBar {
 	private JMenuItem renameTranslationMenuItem;
 	private JMenuItem copyTranslationKeyMenuItem;
 	private JMenuItem undoTranslationKeyMenuItem;
+	private JMenuItem redoTranslationKeyMenuItem;
 	private JMenuItem duplicateTranslationMenuItem;
 	private JMenuItem removeTranslationMenuItem;
 	private JMenuItem openContainingFolderMenuItem;
@@ -183,10 +185,13 @@ public class EditorMenuBar extends JMenuBar {
 		renameTranslationMenuItem = new RenameTranslationMenuItem(editor, false);
 		copyTranslationKeyMenuItem = new CopyTranslationKeyToClipboardMenuItem(editor, false);
 		undoTranslationKeyMenuItem = new UndoTranslationKeyMenuItem(editor, false);
-
+		redoTranslationKeyMenuItem = new RedoTranslationKeyMenuItem(editor, false);
+		editor.getUndoRedoManagerTranslation().addListener(undoTranslationKeyMenuItem);
+		editor.getUndoRedoManagerTranslation().addListener(redoTranslationKeyMenuItem);
 		editMenu.add(new AddLocaleMenuItem(editor, true));
 		editMenu.addSeparator();
 		editMenu.add(undoTranslationKeyMenuItem);
+		editMenu.add(redoTranslationKeyMenuItem);
 		editMenu.addSeparator();
 		editMenu.add(addTranslationMenuItem);
 		editMenu.add(findTranslationMenuItem);
@@ -242,9 +247,9 @@ public class EditorMenuBar extends JMenuBar {
 		tree.addTreeSelectionListener(e -> {
 			TranslationTreeNode node = tree.getSelectionNode();
 			boolean enabled = node != null && !node.isRoot();
+
 			renameTranslationMenuItem.setEnabled(enabled);
 			copyTranslationKeyMenuItem.setEnabled(enabled);
-			undoTranslationKeyMenuItem.setEnabled(enabled);
 			duplicateTranslationMenuItem.setEnabled(enabled);
 			removeTranslationMenuItem.setEnabled(enabled);
 		});

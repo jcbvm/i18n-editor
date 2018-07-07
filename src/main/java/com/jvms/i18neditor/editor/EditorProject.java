@@ -20,7 +20,7 @@ public class EditorProject {
 	private List<Resource> resources = Lists.newLinkedList();
 	private boolean minifyResources;
 	private boolean plainJSON;
-	
+
 	public EditorProject(Path path) {
 		this.path = path;
 	}
@@ -48,11 +48,11 @@ public class EditorProject {
 	public void setResources(List<Resource> resources) {
 		this.resources = resources;
 	}
-	
+
 	public void addResource(Resource resource) {
 		resources.add(resource);
 	}
-	
+
 	public boolean hasResources() {
 		return !resources.isEmpty();
 	}
