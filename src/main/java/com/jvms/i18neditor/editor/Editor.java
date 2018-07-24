@@ -98,7 +98,8 @@ public class Editor extends JFrame {
 	public final static List<Locale> SUPPORTED_LANGUAGES = Lists.newArrayList(
 			new Locale("en"),
 			new Locale("nl"),
-			new Locale("pt", "BR"));
+			new Locale("pt", "BR"),
+			new Locale("es", "ES"));
 	
 	private EditorProject project;
 	private EditorSettings settings = new EditorSettings();
