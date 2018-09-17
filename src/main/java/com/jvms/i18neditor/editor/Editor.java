@@ -193,7 +193,7 @@ public class Editor extends JFrame {
 				}));
 				resourceList.forEach(resource -> {
 					try {
-						Resources.load(resource);
+						Resources.load(resource, settings.isPreserveCommnets());
 						setupResource(resource);
 						project.addResource(resource);
 					} catch (IOException e) {

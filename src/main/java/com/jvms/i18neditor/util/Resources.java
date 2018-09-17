@@ -129,9 +129,10 @@ public final class Resources {
 	 * <p>This function will store a checksum to the resource.</p>
 	 * 
 	 * @param 	resource the resource.
+	 * @param 	resource preseve the ES6 file commnets.
 	 * @throws 	IOException if an I/O error occurs reading the file.
 	 */
-	public static void load(Resource resource) throws IOException {
+	public static void load(Resource resource, boolean preserveComments) throws IOException {
 		ResourceType type = resource.getType();
 		Path path = resource.getPath();
 		LinkedHashMap<String,String> translations;
@@ -142,7 +143,7 @@ public final class Resources {
 		} else {
 			String content = Files.lines(path, UTF8_ENCODING).reduce("", (a, b) -> a + "\n" + b);
 			if (type == ResourceType.ES6) {
-				content = es6ToJson(content);
+				content = es6ToJson(content, preserveComments);
 			}
 			translations = fromJson(content);
 		}
@@ -311,83 +312,66 @@ public final class Resources {
 		return new JsonPrimitive(translations.get(key));
 	}
 	
-	enum State { outsideComment, insideLineComment, insideblockComment, insideblockComment_noNewLineYet, insideString };
-
-	public static String removeComments(String code) {
-	  State state = State.outsideComment;
-	  StringBuilder result = new StringBuilder();
-	  Scanner s = new Scanner(code);
-	  s.useDelimiter("");
-	  int comment = 0;
-	  while (s.hasNext()) {
-	    String c = s.next();
-	    switch (state) {
-	      case outsideComment:
-	        if (c.equals("/") && s.hasNext()) {
-	          String c2 = s.next();
-	          if (c2.equals("/")) {
-	            state = State.insideLineComment;
-	            result.append("'inner-comment" + comment  + "': '");
-	            comment++;
-	          } else if (c2.equals("*")) {
-	            state = State.insideblockComment_noNewLineYet;
-	            result.append("'inner-comment" + comment  + "': '");
-	            comment++;
-	          } else {
-	            result.append(c).append(c2);
-	          }
-	        } else {
-	          result.append(c);
-	          if (c.equals("\"")) {
-	            state = State.insideString;
-	          }
-	        }
-	        break;
-	      case insideString:
-	        result.append(c);
-	        if (c.equals("\"")) {
-	          state = State.outsideComment;
-	        } else if (c.equals("\\") && s.hasNext()) {
-	          result.append(s.next());
-	        }
-	        break;
-	      case insideLineComment:
-	        if (c.equals("\n")) {
-	        	state = State.outsideComment;
-	        	result.append("',");
-	        }
-	        if (c.equals("'")) c = "\"";
-	        result.append(c);
-	        break;
-	      case insideblockComment_noNewLineYet:
-	        if (c.equals("\n")) {
-	          result.append("\n");
-	          state = State.insideblockComment;
-	        }
-	      case insideblockComment:
-	        while (c.equals("*") && s.hasNext()) {
-	          String c2 = s.next();
-	          if (c2.equals("/")) {
-	            state = State.outsideComment;
-	            break;
-	          }
-	        }
-	    }
-	  }
-	  s.close();
-	  return result.toString();
-	}	
-	
-	private static String es6ToJson(String content) {
-		content = content.replaceAll("export +default", "").replaceAll("} *;", "}");
-		content = removeComments(content).replaceAll("\n", "").replaceAll(", *}", " }");
-		
+	private static String es6ToJson(String content, boolean preserveComments) {			
+		content = applyComments(content, preserveComments)
+				.replaceAll("export +default", "")
+				.replaceAll("} *;", "}")
+				.replaceAll("\n", "")
+				.replaceAll(", *}", " }");
+				
 		return content;
 	}
 	
 	private static String jsonToEs6(String content) {
 		return "export default " + content + ";";
 	}
+	
+	private enum CommentState { 
+		outsideComment,
+		insideblockComment,
+	};
+
+	public static String applyComments(String code, boolean preserveComments) {
+      CommentState state = CommentState.outsideComment;
+	  StringBuilder result = new StringBuilder();
+	  Scanner scanner = new Scanner(code);
+	  scanner.useDelimiter("\\n");
+	  int comment = 0;
+	 
+	  while (scanner.hasNext()) { 		  
+	    String current = scanner.next().trim();
+	    
+	    switch (state) {
+	    	case outsideComment:
+	    		if (current.startsWith("//")) {
+	    			if (preserveComments) {
+	    				result.append("'inline-comment" + comment  + "': ' '" + current.substring(2) + "'");
+	    				comment++;
+	    			}
+	    		} else if(current.startsWith("/*")) {
+	    			state = CommentState.insideblockComment;
+	    			if (preserveComments) {
+	    				result.append("'block-comment" + comment  + "': ' '" + current.substring(2) + " \n");
+	    				comment++;
+	    			}
+    			} else {
+    				result.append(current);
+    			}
+	    		break;
+	    	case insideblockComment:
+	    		if (current.endsWith("*/")) {
+	    			state = CommentState.outsideComment;
+	    			result.append("' " + current);
+	    		} else {
+	    			result.append(current + " \n");
+	    		}
+	    		break;
+	    }
+	  }
+	  
+	  scanner.close();
+	  return result.toString();
+	}	
 	
 	private static String createChecksum(Resource resource) throws IOException {
 		MessageDigest digest;
