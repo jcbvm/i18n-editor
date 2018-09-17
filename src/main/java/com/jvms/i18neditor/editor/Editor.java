@@ -965,6 +965,8 @@ public class Editor extends JFrame {
 			props.load(Paths.get(project.getPath().toString(), PROJECT_FILE));
 			project.setMinifyResources(props.getBooleanProperty("minify_resources", settings.isMinifyResources()));
 			project.setFlattenJSON(props.getBooleanProperty("flatten_json", settings.isFlattenJSON()));
+			project.setPreservCommnets(props.getBooleanProperty("preserve_commnets", settings.isPreserveCommnets()));
+			project.setUseSingleQuotes(props.getBooleanProperty("use_single_quotes", settings.isUseSingleQuotes()));
 			project.setResourceType(props.getEnumProperty("resource_type", ResourceType.class));
 			String resourceName = props.getProperty("resource_name"); // for backwards compatibility
 			if (Strings.isNullOrEmpty(resourceName)) {
@@ -1031,6 +1033,8 @@ public class Editor extends JFrame {
 		settings.setDoubleClickTreeToggling(props.getBooleanProperty("double_click_tree_toggling", false));
 		settings.setMinifyResources(props.getBooleanProperty("minify_resources", false));
 		settings.setFlattenJSON(props.getBooleanProperty("flatten_json", false));
+		settings.setPreserveCommnets(props.getBooleanProperty("preserve_commnets", false));
+		settings.setUseSingleQuotes(props.getBooleanProperty("use_single_quotes", false));
 		settings.setHistory(props.getListProperty("history"));
 		settings.setLastExpandedNodes(props.getListProperty("last_expanded"));
 		settings.setLastSelectedNode(props.getProperty("last_selected"));

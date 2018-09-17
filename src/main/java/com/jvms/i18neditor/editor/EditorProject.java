@@ -21,6 +21,8 @@ public class EditorProject {
 	private List<Resource> resources;
 	private boolean minifyResources;
 	private boolean flattenJSON;
+	private boolean preservCommnets;
+	private boolean useSingleQuote;
 	private FileStructure resourceFileStructure;
 	
 	public EditorProject(Path path) {
@@ -82,6 +84,22 @@ public class EditorProject {
 
 	public void setFlattenJSON(boolean flattenJSON) {
 		this.flattenJSON = flattenJSON;
+	}
+	
+	public void setPreservCommnets(boolean preserverCommnets) {
+		this.preservCommnets = preserverCommnets;
+	}
+	
+	public boolean isPreserveComments( ) {
+		return this.preservCommnets;
+	}
+	
+	public void setUseSingleQuotes(boolean useSingleQuotes) {
+		this.useSingleQuote = useSingleQuotes;
+	}
+	
+	public boolean isUseSingleQuotes() {
+		return this.useSingleQuote;
 	}
 	
 	public boolean supportsResourceParentValues() {
