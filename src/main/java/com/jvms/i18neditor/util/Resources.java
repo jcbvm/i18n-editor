@@ -132,7 +132,7 @@ public final class Resources {
 	 * @param 	resource preseve the ES6 file commnets.
 	 * @throws 	IOException if an I/O error occurs reading the file.
 	 */
-	public static void load(Resource resource, boolean preserveComments) throws IOException {
+	public static void load(Resource resource, boolean preserveComments, boolean useSingleQuotes) throws IOException {
 		ResourceType type = resource.getType();
 		Path path = resource.getPath();
 		LinkedHashMap<String,String> translations;
@@ -143,7 +143,7 @@ public final class Resources {
 		} else {
 			String content = Files.lines(path, UTF8_ENCODING).reduce("", (a, b) -> a + "\n" + b);
 			if (type == ResourceType.ES6) {
-				content = es6ToJson(content, preserveComments);
+				content = es6ToJson(content, preserveComments, useSingleQuotes);
 			}
 			translations = fromJson(content);
 		}
@@ -162,10 +162,12 @@ public final class Resources {
 	 * 
 	 * @param 	resource the resource to write.
 	 * @param   prettyPrinting whether to pretty print the contents
-	 * @param 	plainKeys 
+	 * @param   flattenKeys whether to pretty print the contents
+	 * @param   preserveComments whether to preserver the file comments
+	 * @param   useSingleQuotes whether to use single quote
 	 * @throws 	IOException if an I/O error occurs writing the file.
 	 */
-	public static void write(Resource resource, boolean prettyPrinting, boolean flattenKeys) throws IOException {
+	public static void write(Resource resource, boolean prettyPrinting, boolean flattenKeys, boolean preserveComments, boolean useSingleQuotes) throws IOException {
 		if (resource.getChecksum() != null) {
 			String checksum = createChecksum(resource);
 			if (!checksum.equals(resource.getChecksum())) {
@@ -178,12 +180,16 @@ public final class Resources {
 			content.store(resource.getPath());
 		} else {
 			String content = toJson(resource.getTranslations(), prettyPrinting, flattenKeys);
-			if (type == ResourceType.ES6) {
-				content = content
-						.replaceAll("(\"inner-comment\\d+\":\\s+\")(.+)(\",)", "//" + "$2")
-						.replaceAll("\"", "'")
-						.replaceAll("\\\\\'", "\"");
-				content = jsonToEs6(content);
+			if (type == ResourceType.ES6) {			
+				if (preserveComments) {
+					content = content.replaceAll("(\"comment\\d+\":\\s+\")(.+)(\",)", "$2");
+				}
+				
+				if (useSingleQuotes) {
+					content = content.replaceAll("\"", "'");
+				}
+				
+				content = jsonToEs6(content.replaceAll("\\\\\'", "\""));
 			}
 			if (!Files.exists(resource.getPath())) {
 				Files.createDirectories(resource.getPath().getParent());
@@ -219,7 +225,7 @@ public final class Resources {
 			path = Paths.get(root.toString(), getFilename(fileDefinition, locale) + extension);				
 		}
 		Resource resource = new Resource(type, path, locale.orElse(null));
-		write(resource, false, false);
+		write(resource, false, false, false, false);
 		return resource;
 	}
 	
@@ -312,8 +318,8 @@ public final class Resources {
 		return new JsonPrimitive(translations.get(key));
 	}
 	
-	private static String es6ToJson(String content, boolean preserveComments) {			
-		content = applyComments(content, preserveComments)
+	private static String es6ToJson(String content, boolean preserveComments, boolean useSingleQuotes) {			
+		content = applyComments(content, preserveComments, useSingleQuotes)
 				.replaceAll("export +default", "")
 				.replaceAll("} *;", "}")
 				.replaceAll("\n", "")
@@ -331,39 +337,39 @@ public final class Resources {
 		insideblockComment,
 	};
 
-	public static String applyComments(String code, boolean preserveComments) {
+	public static String applyComments(String code, boolean preserveComments, boolean useSingleQuotes) {
       CommentState state = CommentState.outsideComment;
 	  StringBuilder result = new StringBuilder();
 	  Scanner scanner = new Scanner(code);
 	  scanner.useDelimiter("\\n");
-	  int comment = 0;
+	  String quote = useSingleQuotes ? "'" : "\""; 
+	  int count = 0;
 	 
 	  while (scanner.hasNext()) { 		  
 	    String current = scanner.next().trim();
 	    
 	    switch (state) {
 	    	case outsideComment:
-	    		if (current.startsWith("//")) {
+	    		if (current.startsWith("//") || current.startsWith("/*")) {
 	    			if (preserveComments) {
-	    				result.append("'inline-comment" + comment  + "': ' '" + current.substring(2) + "'");
-	    				comment++;
+	    				result.append(buidlJSONComment("comment",count, current, quote));
+	    				count++;
 	    			}
-	    		} else if(current.startsWith("/*")) {
-	    			state = CommentState.insideblockComment;
-	    			if (preserveComments) {
-	    				result.append("'block-comment" + comment  + "': ' '" + current.substring(2) + " \n");
-	    				comment++;
+	    			
+	    			if(current.startsWith("/*")) {
+		    			state = CommentState.insideblockComment;
 	    			}
     			} else {
     				result.append(current);
     			}
 	    		break;
 	    	case insideblockComment:
+	    		if(preserveComments) {
+	    			result.append(buidlJSONComment("comment", count, current, quote));
+	    			count++;
+	    		}
 	    		if (current.endsWith("*/")) {
 	    			state = CommentState.outsideComment;
-	    			result.append("' " + current);
-	    		} else {
-	    			result.append(current + " \n");
 	    		}
 	    		break;
 	    }
@@ -372,6 +378,22 @@ public final class Resources {
 	  scanner.close();
 	  return result.toString();
 	}	
+	
+	private static String buidlJSONComment(String key, int count, String value, String quote) {
+		StringBuilder builder = new StringBuilder();
+		builder
+			.append(quote)
+			.append(key)
+			.append(count)
+			.append(quote)
+			.append(": ")
+			.append(quote)
+			.append(value.replaceAll(quote, quote == "'" ? "\"" : "'"))
+			.append(quote)
+			.append(" ,");
+		
+		return builder.toString();
+	}
 	
 	private static String createChecksum(Resource resource) throws IOException {
 		MessageDigest digest;

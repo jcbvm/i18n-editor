@@ -193,7 +193,7 @@ public class Editor extends JFrame {
 				}));
 				resourceList.forEach(resource -> {
 					try {
-						Resources.load(resource, settings.isPreserveCommnets());
+						Resources.load(resource, settings.isPreserveCommnets(), settings.isUseSingleQuotes());
 						setupResource(resource);
 						project.addResource(resource);
 					} catch (IOException e) {
@@ -927,7 +927,7 @@ public class Editor extends JFrame {
 	private boolean saveResource(Resource resource) {
 		if (project != null) {
 			try {
-				Resources.write(resource, !project.isMinifyResources(), project.isFlattenJSON());
+				Resources.write(resource, !project.isMinifyResources(), project.isFlattenJSON(), project.isPreserveComments(), project.isUseSingleQuotes());
 			} catch (ChecksumException e) {
 				boolean confirm = Dialogs.showConfirmDialog(this, 
 						MessageBundle.get("dialogs.save.checksum.title"), 
@@ -952,6 +952,8 @@ public class Editor extends JFrame {
 		ExtendedProperties props = new ExtendedProperties();
 		props.setProperty("minify_resources", project.isMinifyResources());
 		props.setProperty("flatten_json", project.isFlattenJSON());
+		props.setProperty("preserve_comments", project.isPreserveComments());
+		props.setProperty("use_single_quotes", project.isUseSingleQuotes());
 		props.setProperty("resource_type", project.getResourceType().toString());
 		props.setProperty("resource_definition", project.getResourceFileDefinition());
 		props.setProperty("resource_structure", project.getResourceFileStructure());
@@ -965,7 +967,7 @@ public class Editor extends JFrame {
 			props.load(Paths.get(project.getPath().toString(), PROJECT_FILE));
 			project.setMinifyResources(props.getBooleanProperty("minify_resources", settings.isMinifyResources()));
 			project.setFlattenJSON(props.getBooleanProperty("flatten_json", settings.isFlattenJSON()));
-			project.setPreservCommnets(props.getBooleanProperty("preserve_commnets", settings.isPreserveCommnets()));
+			project.setPreservCommnets(props.getBooleanProperty("preserve_comments", settings.isPreserveCommnets()));
 			project.setUseSingleQuotes(props.getBooleanProperty("use_single_quotes", settings.isUseSingleQuotes()));
 			project.setResourceType(props.getEnumProperty("resource_type", ResourceType.class));
 			String resourceName = props.getProperty("resource_name"); // for backwards compatibility
@@ -994,6 +996,8 @@ public class Editor extends JFrame {
 		props.setProperty("window_div_pos", contentPane.getDividerLocation());
 		props.setProperty("minify_resources", settings.isMinifyResources());
 		props.setProperty("flatten_json", settings.isFlattenJSON());
+		props.setProperty("preserve_comments", project.isPreserveComments());
+		props.setProperty("use_single_quotes", project.isUseSingleQuotes());
 		props.setProperty("resource_definition", settings.getResourceFileDefinition());
 		props.setProperty("resource_structure", settings.getResourceFileStructure());
 		props.setProperty("check_version", settings.isCheckVersionOnStartup());
@@ -1033,7 +1037,7 @@ public class Editor extends JFrame {
 		settings.setDoubleClickTreeToggling(props.getBooleanProperty("double_click_tree_toggling", false));
 		settings.setMinifyResources(props.getBooleanProperty("minify_resources", false));
 		settings.setFlattenJSON(props.getBooleanProperty("flatten_json", false));
-		settings.setPreserveCommnets(props.getBooleanProperty("preserve_commnets", false));
+		settings.setPreserveCommnets(props.getBooleanProperty("preserve_comments", false));
 		settings.setUseSingleQuotes(props.getBooleanProperty("use_single_quotes", false));
 		settings.setHistory(props.getListProperty("history"));
 		settings.setLastExpandedNodes(props.getListProperty("last_expanded"));

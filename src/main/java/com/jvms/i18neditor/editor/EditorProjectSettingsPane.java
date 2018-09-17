@@ -85,12 +85,12 @@ public class EditorProjectSettingsPane extends AbstractSettingsPane {
 			if (type == ResourceType.ES6) {
 				JCheckBox commentsJSONBox = new JCheckBox(MessageBundle.get("settings.comments.title"));
 				commentsJSONBox.setSelected(project.isPreserveComments());
-				commentsJSONBox.addChangeListener(e -> project.setPreservCommnets(flattenJSONBox.isSelected()));
+				commentsJSONBox.addChangeListener(e -> project.setPreservCommnets(commentsJSONBox.isSelected()));
 				fieldset1.add(commentsJSONBox, createVerticalGridBagConstraints());
 				
 				JCheckBox singleQuotesJSONBox = new JCheckBox(MessageBundle.get("settings.singlequote.title"));
 				singleQuotesJSONBox.setSelected(project.isUseSingleQuotes());
-				singleQuotesJSONBox.addChangeListener(e -> project.setUseSingleQuotes(flattenJSONBox.isSelected()));
+				singleQuotesJSONBox.addChangeListener(e -> project.setUseSingleQuotes(singleQuotesJSONBox.isSelected()));
 				fieldset1.add(singleQuotesJSONBox, createVerticalGridBagConstraints());
 			}
 		}
