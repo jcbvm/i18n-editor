@@ -26,8 +26,6 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
-import com.commentremover.app.CommentProcessor;
-import com.commentremover.app.CommentRemover;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
