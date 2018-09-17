@@ -21,22 +21,22 @@ public class Main {
 	private final static Logger log = LoggerFactory.getLogger(Main.class);
 	
 	public static void main(String[] args) {
-		SwingUtilities.invokeLater(() -> {
-			// Enable global menu on MAC OS
-			if (SystemUtils.IS_OS_MAC) {
-				System.setProperty("apple.laf.useScreenMenuBar", "true");
-			}
-			try {
-				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-				// For windows use menu font for entire UI
-				if (SystemUtils.IS_OS_WINDOWS) {
-					setUIFont(UIManager.getFont("Menu.font"));				
-				}
-			} catch (Exception e) {
-				log.warn("Unable to use native look and feel");
-			}
+//		SwingUtilities.invokeLater(() -> {
+//			// Enable global menu on MAC OS
+//			if (SystemUtils.IS_OS_MAC) {
+//				System.setProperty("apple.laf.useScreenMenuBar", "true");
+//			}
+//			try {
+//				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+//				// For windows use menu font for entire UI
+//				if (SystemUtils.IS_OS_WINDOWS) {
+//					setUIFont(UIManager.getFont("Menu.font"));				
+//				}
+//			} catch (Exception e) {
+//				log.warn("Unable to use native look and feel");
+//			}
 			new Editor().launch();
-		});
+//		});
 	}
 	
 	private static void setUIFont(Font font) {

@@ -57,7 +57,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicates;
 import com.google.common.base.Strings;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jvms.i18neditor.FileStructure;
@@ -201,7 +203,8 @@ public class Editor extends JFrame {
 				});
 				project.getResources().forEach(r -> keys.putAll(r.getTranslations()));
 			}
-			translationTree.setModel(new TranslationTreeModel(Lists.newArrayList(keys.keySet())));
+			translationTree.setModel(new TranslationTreeModel(Lists.newArrayList(
+					Collections2.filter(keys.keySet(), Predicates.not(Predicates.containsPattern("inner-comment"))))));
 			
 			updateTreeNodeStatuses();
 			updateHistory();

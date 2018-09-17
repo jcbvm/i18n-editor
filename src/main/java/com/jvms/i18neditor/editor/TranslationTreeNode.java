@@ -1,5 +1,6 @@
 package com.jvms.i18neditor.editor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -61,7 +62,12 @@ public class TranslationTreeNode extends DefaultMutableTreeNode {
 	
 	@SuppressWarnings("unchecked")
 	public List<TranslationTreeNode> getChildren() {
-		return Collections.list(children());
+		List<TranslationTreeNode> result = new ArrayList<TranslationTreeNode>();
+		List<TreeNode> children = Collections.list(children());
+		for (TreeNode child : children) {
+			result.add((TranslationTreeNode)child);
+		}
+		return result;
 	}
 	
 	public TranslationTreeNode getChild(String name) {

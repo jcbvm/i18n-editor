@@ -8,21 +8,30 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Scanner;
 import java.util.SortedMap;
+import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
+import com.commentremover.app.CommentProcessor;
+import com.commentremover.app.CommentRemover;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
@@ -32,6 +41,7 @@ import com.google.gson.JsonPrimitive;
 import com.jvms.i18neditor.FileStructure;
 import com.jvms.i18neditor.Resource;
 import com.jvms.i18neditor.ResourceType;
+import com.jvms.i18neditor.editor.menu.RemoveTranslationMenuItem;
 import com.jvms.i18neditor.io.ChecksumException;
 
 /**
@@ -126,13 +136,13 @@ public final class Resources {
 	public static void load(Resource resource) throws IOException {
 		ResourceType type = resource.getType();
 		Path path = resource.getPath();
-		SortedMap<String,String> translations;
+		LinkedHashMap<String,String> translations;
 		if (type == ResourceType.Properties) {
 			ExtendedProperties content = new ExtendedProperties();
 			content.load(path);
 			translations = fromProperties(content);
 		} else {
-			String content = Files.lines(path, UTF8_ENCODING).collect(Collectors.joining());
+			String content = Files.lines(path, UTF8_ENCODING).reduce("", (a, b) -> a + "\n" + b);
 			if (type == ResourceType.ES6) {
 				content = es6ToJson(content);
 			}
@@ -170,6 +180,10 @@ public final class Resources {
 		} else {
 			String content = toJson(resource.getTranslations(), prettyPrinting, flattenKeys);
 			if (type == ResourceType.ES6) {
+				content = content
+						.replaceAll("(\"inner-comment\\d+\":\\s+\")(.+)(\",)", "//" + "$2")
+						.replaceAll("\"", "'")
+						.replaceAll("\\\\\'", "\"");
 				content = jsonToEs6(content);
 			}
 			if (!Files.exists(resource.getPath())) {
@@ -218,8 +232,8 @@ public final class Resources {
 		return fileDefinition.replaceAll(FILENAME_LOCALE_REGEX, locale.isPresent() ? ("$1" + locale.get().toString() + "$2") : "");
 	}
 	
-	private static SortedMap<String,String> fromProperties(Properties properties) {
-		SortedMap<String,String> result = Maps.newTreeMap();
+	private static LinkedHashMap<String,String> fromProperties(Properties properties) {
+		LinkedHashMap<String,String> result = Maps.newLinkedHashMap();
 		properties.forEach((key, value) -> {
 			result.put((String)key, StringEscapeUtils.unescapeJava((String)value));
 		});
@@ -236,14 +250,14 @@ public final class Resources {
 		return result;
 	}
 	
-	private static SortedMap<String,String> fromJson(String json) {
-		SortedMap<String,String> result = Maps.newTreeMap();
+	private static LinkedHashMap<String,String> fromJson(String json) {
+		LinkedHashMap<String,String> result = Maps.newLinkedHashMap();
 		JsonElement elem = new JsonParser().parse(json);
 		fromJson(null, elem, result);
 		return result;
 	}
 	
-	private static void fromJson(String key, JsonElement elem, Map<String,String> content) {
+	private static void fromJson(String key, JsonElement elem, LinkedHashMap<String,String> content) {
 		if (elem.isJsonObject()) {
 			elem.getAsJsonObject().entrySet().forEach(entry -> {
 				String newKey = key == null ? entry.getKey() : ResourceKeys.create(key, entry.getKey());
@@ -258,7 +272,7 @@ public final class Resources {
 		}
 	}
 	
-	private static String toJson(Map<String,String> translations, boolean prettify, boolean flattenKeys) {
+	private static String toJson(LinkedHashMap<String,String> translations, boolean prettify, boolean flattenKeys) {
 		List<String> keys = Lists.newArrayList(translations.keySet());
 		JsonElement elem = !flattenKeys ? toJson(translations, null, keys) : toFlatJson(translations, keys);
 		GsonBuilder builder = new GsonBuilder().disableHtmlEscaping();
@@ -299,8 +313,78 @@ public final class Resources {
 		return new JsonPrimitive(translations.get(key));
 	}
 	
+	enum State { outsideComment, insideLineComment, insideblockComment, insideblockComment_noNewLineYet, insideString };
+
+	public static String removeComments(String code) {
+	  State state = State.outsideComment;
+	  StringBuilder result = new StringBuilder();
+	  Scanner s = new Scanner(code);
+	  s.useDelimiter("");
+	  int comment = 0;
+	  while (s.hasNext()) {
+	    String c = s.next();
+	    switch (state) {
+	      case outsideComment:
+	        if (c.equals("/") && s.hasNext()) {
+	          String c2 = s.next();
+	          if (c2.equals("/")) {
+	            state = State.insideLineComment;
+	            result.append("'inner-comment" + comment  + "': '");
+	            comment++;
+	          } else if (c2.equals("*")) {
+	            state = State.insideblockComment_noNewLineYet;
+	            result.append("'inner-comment" + comment  + "': '");
+	            comment++;
+	          } else {
+	            result.append(c).append(c2);
+	          }
+	        } else {
+	          result.append(c);
+	          if (c.equals("\"")) {
+	            state = State.insideString;
+	          }
+	        }
+	        break;
+	      case insideString:
+	        result.append(c);
+	        if (c.equals("\"")) {
+	          state = State.outsideComment;
+	        } else if (c.equals("\\") && s.hasNext()) {
+	          result.append(s.next());
+	        }
+	        break;
+	      case insideLineComment:
+	        if (c.equals("\n")) {
+	        	state = State.outsideComment;
+	        	result.append("',");
+	        }
+	        if (c.equals("'")) c = "\"";
+	        result.append(c);
+	        break;
+	      case insideblockComment_noNewLineYet:
+	        if (c.equals("\n")) {
+	          result.append("\n");
+	          state = State.insideblockComment;
+	        }
+	      case insideblockComment:
+	        while (c.equals("*") && s.hasNext()) {
+	          String c2 = s.next();
+	          if (c2.equals("/")) {
+	            state = State.outsideComment;
+	            break;
+	          }
+	        }
+	    }
+	  }
+	  s.close();
+	  return result.toString();
+	}	
+	
 	private static String es6ToJson(String content) {
-		return content.replaceAll("export +default", "").replaceAll("} *;", "}");
+		content = content.replaceAll("export +default", "").replaceAll("} *;", "}");
+		content = removeComments(content).replaceAll("\n", "").replaceAll(", *}", " }");
+		
+		return content;
 	}
 	
 	private static String jsonToEs6(String content) {
