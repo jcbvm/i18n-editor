@@ -204,7 +204,7 @@ public class Editor extends JFrame {
 				project.getResources().forEach(r -> keys.putAll(r.getTranslations()));
 			}
 			translationTree.setModel(new TranslationTreeModel(Lists.newArrayList(
-					Collections2.filter(keys.keySet(), Predicates.not(Predicates.containsPattern("inner-comment"))))));
+					Collections2.filter(keys.keySet(), Predicates.not(Predicates.containsPattern("comment"))))));
 			
 			updateTreeNodeStatuses();
 			updateHistory();
