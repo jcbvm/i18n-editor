@@ -116,6 +116,19 @@ public class EditorSettingsPane extends AbstractSettingsPane {
 		flattenJSONBox.addChangeListener(e -> settings.setFlattenJSON(flattenJSONBox.isSelected()));
 		fieldset2.add(flattenJSONBox, createVerticalGridBagConstraints());
 		
+		JCheckBox commentsJSONBox = new JCheckBox(MessageBundle.get("settings.comments.title") + " " + 
+				MessageBundle.get("settings.resource.jsones6"));
+		commentsJSONBox.setSelected(settings.isPreserveCommnets());
+		commentsJSONBox.addChangeListener(e -> settings.setPreserveCommnets(commentsJSONBox.isSelected()));
+		fieldset2.add(commentsJSONBox, createVerticalGridBagConstraints());
+		
+		JCheckBox singleQuotesJSONBox = new JCheckBox(MessageBundle.get("settings.singlequote.title") + " " + 
+				MessageBundle.get("settings.resource.jsones6"));
+		singleQuotesJSONBox.setSelected(settings.isUseSingleQuotes());
+		singleQuotesJSONBox.addChangeListener(e -> settings.setUseSingleQuotes(singleQuotesJSONBox.isSelected()));
+		fieldset2.add(singleQuotesJSONBox, createVerticalGridBagConstraints());
+		
+		
 		// Editing settings
 		JPanel fieldset3 = createFieldset(MessageBundle.get("settings.fieldset.editing"));
 		

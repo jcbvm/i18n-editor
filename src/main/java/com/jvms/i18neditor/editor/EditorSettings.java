@@ -20,6 +20,8 @@ public class EditorSettings {
 	private int windowHeight;
 	private boolean minifyResources;
 	private boolean flattenJSON;
+	private boolean preserveCommnets;
+	private boolean useSingleQuotes; 
 	private List<String> history;
 	private List<String> lastExpandedNodes;
 	private String lastSelectedNode;
@@ -149,6 +151,22 @@ public class EditorSettings {
 
 	public void setFlattenJSON(boolean flattenJSON) {
 		this.flattenJSON = flattenJSON;
+	}
+	
+	public boolean isPreserveCommnets() {
+		return preserveCommnets;
+	}
+
+	public void setPreserveCommnets(boolean preservCommnets) {
+		this.preserveCommnets = preservCommnets;
+	}
+	
+	public boolean isUseSingleQuotes() {
+		return useSingleQuotes;
+	}
+
+	public void setUseSingleQuotes(boolean useSingleQuotes) {
+		this.useSingleQuotes = useSingleQuotes;
 	}
 
 	public Locale getEditorLanguage() {

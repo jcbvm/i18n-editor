@@ -1,6 +1,7 @@
 package com.jvms.i18neditor;
 
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -33,7 +34,7 @@ public class Resource {
 	private final Locale locale;
 	private final ResourceType type;
 	private final List<ResourceListener> listeners = Lists.newLinkedList();
-	private SortedMap<String,String> translations = Maps.newTreeMap();
+	private LinkedHashMap<String,String> translations = Maps.newLinkedHashMap();
 	private String checksum;
 
 	/**
@@ -92,8 +93,8 @@ public class Resource {
 	 * 
 	 * @return 	the translations of the resource.
 	 */
-	public SortedMap<String,String> getTranslations() {
-		return ImmutableSortedMap.copyOf(translations);
+	public LinkedHashMap<String,String> getTranslations() {
+		return translations;
 	}
 	
 	/**
@@ -101,7 +102,7 @@ public class Resource {
 	 * 
 	 * @param translations	the translations
 	 */
-	public void setTranslations(SortedMap<String,String> translations) {
+	public void setTranslations(LinkedHashMap<String,String> translations) {
 		this.translations = translations;
 	}
 	

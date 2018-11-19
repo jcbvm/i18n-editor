@@ -1,9 +1,12 @@
 package com.jvms.i18neditor.editor;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 
 import com.google.common.collect.Lists;
 import com.jvms.i18neditor.util.MessageBundle;
@@ -31,7 +34,12 @@ public class TranslationTreeModel extends DefaultTreeModel {
 	
 	@SuppressWarnings("unchecked")
 	public Enumeration<TranslationTreeNode> getEnumeration(TranslationTreeNode node) {
-		return node.depthFirstEnumeration();
+		List<TranslationTreeNode> result = new ArrayList<TranslationTreeNode>();
+		List<TreeNode> children = Collections.list(node.depthFirstEnumeration());
+		for (TreeNode child : children) {
+			result.add((TranslationTreeNode)child);
+		}
+		return Collections.enumeration(result);
 	}
 	
 	public TranslationTreeNode getNodeByKey(String key) {
