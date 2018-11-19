@@ -186,7 +186,7 @@ public final class Resources {
 				}
 				
 				if (useSingleQuotes) {
-					content = content.replaceAll("\"", "'");
+					content = content.replaceAll("'", "\\\\u2019").replaceAll("\"", "'");
 				}
 				
 				content = jsonToEs6(content.replaceAll("\\\\\'", "\""));
