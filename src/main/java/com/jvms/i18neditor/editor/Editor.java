@@ -99,7 +99,8 @@ public class Editor extends JFrame {
 			new Locale("en"),
 			new Locale("nl"),
 			new Locale("pt", "BR"),
-			new Locale("es", "ES"));
+			new Locale("es", "ES"),
+			new Locale("ru"));
 	
 	private EditorProject project;
 	private EditorSettings settings = new EditorSettings();
