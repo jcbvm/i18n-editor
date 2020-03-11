@@ -68,34 +68,35 @@ public final class Resources {
 	 * @return	list of found resources
 	 * @throws 	IOException if an I/O error occurs reading the directory.
 	 */
-	public static List<Resource> get(Path root, String fileDefinition, FileStructure structure, Optional<ResourceType> type) 
+	public static List<Resource> get(Path root, String fileDefinition, FileStructure structure, Optional<ResourceType> type)
 			throws IOException {
 		List<Resource> result = Lists.newLinkedList();
 		List<Path> files = Files.walk(root, 1).collect(Collectors.toList());
-		String defaultFileName = getFilename(fileDefinition, Optional.empty());
-		Pattern fileDefinitionPattern = Pattern.compile("^" + getFilenameRegex(fileDefinition) + "$");
-		
+
 		for (Path file : files) {
 			Path parent = file.getParent();
 			if (parent == null || Files.isSameFile(root, file) || !Files.isSameFile(root, parent)) {
 				continue;
 			}
-			String filename = com.google.common.io.Files.getNameWithoutExtension(file.getFileName().toString());
+
 			for (ResourceType rt : ResourceType.values()) {
 				if (!type.orElse(rt).equals(rt)) {
 					continue;
 				}
 				if (structure == FileStructure.Nested && Files.isDirectory(file)) {
-					Locale locale = Locales.parseLocale(filename);
+					Locale locale = Locales.parseLocale(file.getFileName().toString());
 					if (locale == null) {
 						continue;
 					}
-					Path rf = Paths.get(root.toString(), locale.toString(), getFilename(fileDefinition, Optional.of(locale)) + rt.getExtension());
+					Path rf = Paths.get(file.toString(), getFilename(fileDefinition, Optional.of(locale)) + rt.getExtension());
 					if (Files.isRegularFile(rf)) {
 						result.add(new Resource(rt, rf, locale));
 					}
 				}
 				if (structure == FileStructure.Flat && Files.isRegularFile(file)) {
+					String filename = com.google.common.io.Files.getNameWithoutExtension(file.getFileName().toString());
+					String defaultFileName = getFilename(fileDefinition, Optional.empty());
+					Pattern fileDefinitionPattern = Pattern.compile("^" + getFilenameRegex(fileDefinition) + "$");
 					Matcher matcher = fileDefinitionPattern.matcher(filename);
 					if (!matcher.matches() && !filename.equals(defaultFileName)) {
 						continue;
@@ -198,12 +199,11 @@ public final class Resources {
 	 */
 	public static Resource create(ResourceType type, Path root, String fileDefinition, FileStructure structure, Optional<Locale> locale) 
 			throws IOException {
-		String extension = type.getExtension();
 		Path path;
 		if (structure == FileStructure.Nested) {
-			path = Paths.get(root.toString(), locale.get().toString(), getFilename(fileDefinition, locale) + extension);			
+			path = Paths.get(root.toString(), locale.get().toString(), getFilename(fileDefinition, locale) + type.getExtension());
 		} else {
-			path = Paths.get(root.toString(), getFilename(fileDefinition, locale) + extension);				
+			path = Paths.get(root.toString(), getFilename(fileDefinition, locale) + type.getExtension());
 		}
 		Resource resource = new Resource(type, path, locale.orElse(null));
 		write(resource, false, false);
