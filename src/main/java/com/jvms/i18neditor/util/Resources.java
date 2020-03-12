@@ -193,19 +193,23 @@ public final class Resources {
 	 * @param 	root the root directory to write the resource to.
 	 * @param	filenameDefinition the filename definition of the resource.
 	 * @param	structure the file structure to use
-	 * @param	locale the locale of the resource (optional).
+	 * @param	localeString the locale of the resource (may be null).
 	 * @return	The newly created resource.
 	 * @throws 	IOException if an I/O error occurs writing the file.
 	 */
-	public static Resource create(ResourceType type, Path root, String fileDefinition, FileStructure structure, Optional<Locale> locale) 
-			throws IOException {
+	public static Resource create(ResourceType type, Path root, String fileDefinition, FileStructure structure, String localeString)
+			throws IOException, LocaleException {
+		Locale locale = Locales.parseLocale(localeString);
 		Path path;
 		if (structure == FileStructure.Nested) {
-			path = Paths.get(root.toString(), locale.get().toString(), getFilename(fileDefinition, locale) + type.getExtension());
+			if (locale == null) {
+				throw new LocaleException(String.format("Unknown locale specified: %s.", localeString));
+			}
+			path = Paths.get(root.toString(), localeString, getFilename(fileDefinition, Optional.of(locale)) + type.getExtension());
 		} else {
-			path = Paths.get(root.toString(), getFilename(fileDefinition, locale) + type.getExtension());
+			path = Paths.get(root.toString(), getFilename(fileDefinition, Optional.empty()) + type.getExtension());
 		}
-		Resource resource = new Resource(type, path, locale.orElse(null));
+		Resource resource = new Resource(type, path, locale);
 		write(resource, false, false);
 		return resource;
 	}
