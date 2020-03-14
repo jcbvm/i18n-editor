@@ -68,34 +68,35 @@ public final class Resources {
 	 * @return	list of found resources
 	 * @throws 	IOException if an I/O error occurs reading the directory.
 	 */
-	public static List<Resource> get(Path root, String fileDefinition, FileStructure structure, Optional<ResourceType> type) 
+	public static List<Resource> get(Path root, String fileDefinition, FileStructure structure, Optional<ResourceType> type)
 			throws IOException {
 		List<Resource> result = Lists.newLinkedList();
 		List<Path> files = Files.walk(root, 1).collect(Collectors.toList());
-		String defaultFileName = getFilename(fileDefinition, Optional.empty());
-		Pattern fileDefinitionPattern = Pattern.compile("^" + getFilenameRegex(fileDefinition) + "$");
-		
+
 		for (Path file : files) {
 			Path parent = file.getParent();
 			if (parent == null || Files.isSameFile(root, file) || !Files.isSameFile(root, parent)) {
 				continue;
 			}
-			String filename = com.google.common.io.Files.getNameWithoutExtension(file.getFileName().toString());
+
 			for (ResourceType rt : ResourceType.values()) {
 				if (!type.orElse(rt).equals(rt)) {
 					continue;
 				}
 				if (structure == FileStructure.Nested && Files.isDirectory(file)) {
-					Locale locale = Locales.parseLocale(filename);
+					Locale locale = Locales.parseLocale(file.getFileName().toString());
 					if (locale == null) {
 						continue;
 					}
-					Path rf = Paths.get(root.toString(), locale.toString(), getFilename(fileDefinition, Optional.of(locale)) + rt.getExtension());
+					Path rf = Paths.get(file.toString(), getFilename(fileDefinition, Optional.of(locale)) + rt.getExtension());
 					if (Files.isRegularFile(rf)) {
 						result.add(new Resource(rt, rf, locale));
 					}
 				}
 				if (structure == FileStructure.Flat && Files.isRegularFile(file)) {
+					String filename = com.google.common.io.Files.getNameWithoutExtension(file.getFileName().toString());
+					String defaultFileName = getFilename(fileDefinition, Optional.empty());
+					Pattern fileDefinitionPattern = Pattern.compile("^" + getFilenameRegex(fileDefinition) + "$");
 					Matcher matcher = fileDefinitionPattern.matcher(filename);
 					if (!matcher.matches() && !filename.equals(defaultFileName)) {
 						continue;
@@ -192,20 +193,23 @@ public final class Resources {
 	 * @param 	root the root directory to write the resource to.
 	 * @param	filenameDefinition the filename definition of the resource.
 	 * @param	structure the file structure to use
-	 * @param	locale the locale of the resource (optional).
+	 * @param	localeString the locale of the resource (may be null).
 	 * @return	The newly created resource.
 	 * @throws 	IOException if an I/O error occurs writing the file.
 	 */
-	public static Resource create(ResourceType type, Path root, String fileDefinition, FileStructure structure, Optional<Locale> locale) 
-			throws IOException {
-		String extension = type.getExtension();
+	public static Resource create(ResourceType type, Path root, String fileDefinition, FileStructure structure, String localeString)
+			throws IOException, LocaleException {
+		Locale locale = Locales.parseLocale(localeString);
 		Path path;
 		if (structure == FileStructure.Nested) {
-			path = Paths.get(root.toString(), locale.get().toString(), getFilename(fileDefinition, locale) + extension);			
+			if (locale == null) {
+				throw new LocaleException(String.format("Unknown locale specified: %s.", localeString));
+			}
+			path = Paths.get(root.toString(), localeString, getFilename(fileDefinition, Optional.of(locale)) + type.getExtension());
 		} else {
-			path = Paths.get(root.toString(), getFilename(fileDefinition, locale) + extension);				
+			path = Paths.get(root.toString(), getFilename(fileDefinition, Optional.empty()) + type.getExtension());
 		}
-		Resource resource = new Resource(type, path, locale.orElse(null));
+		Resource resource = new Resource(type, path, locale);
 		write(resource, false, false);
 		return resource;
 	}

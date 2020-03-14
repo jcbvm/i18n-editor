@@ -52,6 +52,7 @@ import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
 import javax.swing.tree.TreePath;
 
+import com.jvms.i18neditor.util.*;
 import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,15 +68,7 @@ import com.jvms.i18neditor.io.ChecksumException;
 import com.jvms.i18neditor.swing.JFileDrop;
 import com.jvms.i18neditor.swing.JScrollablePanel;
 import com.jvms.i18neditor.swing.util.Dialogs;
-import com.jvms.i18neditor.util.Colors;
-import com.jvms.i18neditor.util.ExtendedProperties;
-import com.jvms.i18neditor.util.GithubRepoUtil;
 import com.jvms.i18neditor.util.GithubRepoUtil.GithubRepoReleaseData;
-import com.jvms.i18neditor.util.Images;
-import com.jvms.i18neditor.util.Locales;
-import com.jvms.i18neditor.util.MessageBundle;
-import com.jvms.i18neditor.util.ResourceKeys;
-import com.jvms.i18neditor.util.Resources;
 
 /**
  * This class represents the main class of the editor.
@@ -143,8 +136,12 @@ public class Editor extends JFrame {
 			project.setResourceType(type);
 			
 			if (project.getResourceFileStructure() == FileStructure.Flat) {
-				Resource resource = Resources.create(type, dir, 
-						project.getResourceFileDefinition(), FileStructure.Flat, Optional.empty());
+				Resource resource;
+				try {
+					resource = Resources.create(type, dir, project.getResourceFileDefinition(), FileStructure.Flat, null);
+				} catch (LocaleException e) {
+					return;
+				}
 				setupResource(resource);
 				project.addResource(resource);
 			}
@@ -276,17 +273,19 @@ public class Editor extends JFrame {
 			showError(MessageBundle.get("dialogs.locale.add.error.invalid"));
 			return false;
 		}
+		Resource resource;
 		try {
-			Resource resource = Resources.create(project.getResourceType(), project.getPath(), 
-					project.getResourceFileDefinition(), project.getResourceFileStructure(), Optional.of(locale));
-			addResource(resource);
-			requestFocusInFirstResourceField();
-			return true;
-		} catch (IOException e) {
+			resource = Resources.create(project.getResourceType(), project.getPath(),
+					project.getResourceFileDefinition(), project.getResourceFileStructure(), localeString);
+		}
+		catch(LocaleException | IOException e) {
 			log.error("Error creating new locale", e);
 			showError(MessageBundle.get("dialogs.locale.add.error.create"));
 			return false;
 		}
+		addResource(resource);
+		requestFocusInFirstResourceField();
+		return true;
 	}
 	
 	public boolean addTranslation(String key) {
