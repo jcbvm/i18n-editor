@@ -24,6 +24,8 @@ import com.jvms.i18neditor.editor.menu.CopyTranslationKeyToClipboardMenuItem;
 import com.jvms.i18neditor.editor.menu.DuplicateTranslationMenuItem;
 import com.jvms.i18neditor.editor.menu.ExpandTranslationsMenuItem;
 import com.jvms.i18neditor.editor.menu.FindTranslationMenuItem;
+import com.jvms.i18neditor.editor.menu.NextTranslationErrorMenuItem;
+import com.jvms.i18neditor.editor.menu.PreviousTranslationErrorMenuItem;
 import com.jvms.i18neditor.editor.menu.RemoveTranslationMenuItem;
 import com.jvms.i18neditor.editor.menu.RenameTranslationMenuItem;
 import com.jvms.i18neditor.swing.util.Dialogs;
@@ -195,6 +197,9 @@ public class EditorMenuBar extends JMenuBar {
         viewMenu.setMnemonic(MessageBundle.getMnemonic("menu.view.vk"));
         viewMenu.add(new ExpandTranslationsMenuItem(tree));
         viewMenu.add(new CollapseTranslationsMenuItem(tree));
+        viewMenu.addSeparator();
+        viewMenu.add(new PreviousTranslationErrorMenuItem(tree));
+        viewMenu.add(new NextTranslationErrorMenuItem(tree));
         
         // Settings menu
         settingsMenu = new JMenu(MessageBundle.get("menu.settings.title"));
