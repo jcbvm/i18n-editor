@@ -47,6 +47,32 @@ public class TranslationTree extends JTree {
 		}
 	}
 	
+	public void gotoPreviousError() {
+		TranslationTreeNode node = getSelectionNode();
+		do {
+			node = (TranslationTreeNode)node.getPreviousNode();
+			if (node != null) {
+				if (node.hasError()) {
+					setSelectionNode(node);
+					break;
+				}
+			}
+		} while (node != null);
+	}
+	
+	public void gotoNextError() {
+		TranslationTreeNode node = getSelectionNode();
+		do {
+			node = (TranslationTreeNode)node.getNextNode();
+			if (node != null) {
+				if (node.hasError()) {
+					setSelectionNode(node);
+					break;
+				}
+			}
+		} while (node != null);		
+	}
+	
 	public void expand(List<TranslationTreeNode> nodes) {
 		nodes.forEach(n -> expandPath(new TreePath(n.getPath())));
 	}
