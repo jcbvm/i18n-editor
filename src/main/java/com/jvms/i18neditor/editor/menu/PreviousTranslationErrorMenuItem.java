@@ -15,11 +15,11 @@ import com.jvms.i18neditor.util.MessageBundle;
  * @author Frédéric Courchesne
  */
 public class PreviousTranslationErrorMenuItem extends JMenuItem {
-	//private final static long serialVersionUID = 7316102121075733726L;
+	private static final long serialVersionUID = 1605393223084076564L;
 
 	public PreviousTranslationErrorMenuItem(TranslationTree tree) {
-        super(MessageBundle.get("menu.view.previouserror.title"));
-        setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-     	addActionListener(e -> tree.gotoPreviousError());
+		super(MessageBundle.get("menu.view.previouserror.title"));
+		setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		addActionListener(e -> tree.gotoPreviousError());
 	}
 }
