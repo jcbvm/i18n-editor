@@ -8,6 +8,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -24,6 +26,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
@@ -249,6 +252,12 @@ public final class Resources {
 				String newKey = key == null ? entry.getKey() : ResourceKeys.create(key, entry.getKey());
 				fromJson(newKey, entry.getValue(), content);
 			});
+		} else if (elem.isJsonArray()) {
+			List<String> stringList = new ArrayList<>(elem.getAsJsonArray().size());
+			for (Iterator<JsonElement> iterator = elem.getAsJsonArray().iterator(); iterator.hasNext();) {
+				stringList.add(iterator.next().getAsString());
+			}
+			content.put(key, String.join("\n", stringList));
 		} else if (elem.isJsonPrimitive()) {
 			content.put(key, StringEscapeUtils.unescapeJava(elem.getAsString()));
 		} else if (elem.isJsonNull()) {
@@ -296,7 +305,16 @@ public final class Resources {
 		if (Strings.isNullOrEmpty(translations.get(key))) {
 			return JsonNull.INSTANCE;
 		}
-		return new JsonPrimitive(translations.get(key));
+		String value = translations.get(key);
+		String[] parts = value.split("\n");
+		if (parts.length > 1) {
+			JsonArray array = new JsonArray();
+			for (String part : parts) {
+				array.add(part);
+			}
+			return array;
+		}
+		return new JsonPrimitive(value);
 	}
 	
 	private static String es6ToJson(String content) {
